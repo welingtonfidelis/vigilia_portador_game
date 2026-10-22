@@ -210,6 +210,16 @@ export const PACKS: PackEntry[] = [
     ],
   })),
   {
+    // Quaternius Ultimate Monsters (CC0), os monstros do Jardim de Fungos (M3.3). Baixados um a um do
+    // poly.pizza, publicados pela conta do Quaternius, porque o Drive do pack estava sem cota.
+    out: 'quaternius',
+    dir: 'quaternius-monsters',
+    root: 'poly-pizza',
+    groups: [
+      { path: '.', ext: '.glb', files: ['Mushnub', 'Mushnub_Evolved', 'GreenBlob', 'GreenSpikyBlob', 'PinkSlime', 'MushroomKing'] },
+    ],
+  },
+  {
     out: 'dungeon',
     dir: 'dungeon',
     root: 'KayKit_Dungeon_Pack_1.1_FREE',

@@ -9,6 +9,7 @@ const HAS_PARAM: Record<CondId, { min: number; max: number; unit: string } | nul
   fundo_min: { min: 1, max: 4, unit: '' },
   alvo_elite: null,
   alvo_couraca: null,
+  envenenado: { min: 1, max: 5, unit: 'doses' },
   pocoes_max: { min: 0, max: 7, unit: '' },
   sempre: null,
 };

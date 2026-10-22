@@ -1,4 +1,4 @@
-import { actTwoRules } from './rules.ts';
+import { actThreeRules, actTwoRules } from './rules.ts';
 import type { World } from './types.ts';
 import { SAVE_VERSION } from './world.ts';
 
@@ -65,7 +65,37 @@ const MIGRATIONS: Record<number, Migration> = {
     const rules = (w.rules as { combat: { skill: string | null }[] }).combat;
     for (const r of actTwoRules()) if (!rules.some((x) => x.skill === r.skill)) rules.push(r);
   },
+  // v3 → v4 (M3.3, o Ato III): esporos, veneno e raiz no herói, veneno nos inimigos e as regras de
+  // fábrica do Ato III (no fim da lista).
+  3: (w) => {
+    eachMats(w, (mats) => (mats.esporos ??= 0));
+    const room = w.room as { enemies: Record<string, unknown>[] } | null;
+    for (const e of room?.enemies ?? []) {
+      e.venom ??= 0;
+      e.venomUntil ??= 0;
+    }
+    const hero = w.hero as Record<string, unknown>;
+    hero.poison ??= [];
+    hero.rootUntil ??= 0;
+    const rules = (w.rules as { combat: { skill: string | null }[] }).combat;
+    for (const r of actThreeRules()) if (!rules.some((x) => x.skill === r.skill)) rules.push(r);
+  },
 };
+
+type Mats = Record<string, number>;
+
+/** Todo lugar do save que guarda materiais: a vila, a mochila, os restos e o último relatório. */
+function eachMats(w: Record<string, unknown>, f: (mats: Mats) => void): void {
+  const all: (Mats | undefined)[] = [
+    (w.village as { mats: Mats }).mats,
+    (w.exp as { bag: { mats: Mats } } | null)?.bag.mats,
+    ...((w.remains as { loot: { mats: Mats } }[]) ?? []).map((r) => r.loot.mats),
+    (w.report as { brought?: { mats: Mats } } | null)?.brought?.mats,
+    (w.report as { lost?: { mats: Mats } | null } | null)?.lost?.mats,
+    (w.pending as { brought?: { mats: Mats } } | null)?.brought?.mats,
+  ];
+  for (const m of all) if (m) f(m);
+}
 
 export function deserialize(text: string): World {
   const wrap = JSON.parse(text) as { v: number; sum: string; body: string };

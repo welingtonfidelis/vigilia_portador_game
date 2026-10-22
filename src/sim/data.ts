@@ -79,6 +79,8 @@ export interface AffixDef {
   /** Adjetivo: [m, f, m pl, f pl]. */
   adj: [string, string, string, string];
   value: number;
+  /** Afixo de um ato: só sai sorteado em peças deste tier em diante (Perfurante no 6, Imune no 11). */
+  minTier?: number;
   desc: (v: number) => string;
 }
 
@@ -93,12 +95,13 @@ export const AFFIXES: Record<AffixId, AffixDef> = {
   sanguessuga: { id: 'sanguessuga', name: 'Sanguessuga', mat: 'ambos', adj: ['sanguessuga', 'sanguessuga', 'sanguessugas', 'sanguessugas'], value: 0.03, desc: (v) => `cura ${pct(v)} do dano causado` },
   afortunado: { id: 'afortunado', name: 'Afortunado', mat: 'ferro', adj: ['afortunado', 'afortunada', 'afortunados', 'afortunadas'], value: 5, desc: (v) => `+${Math.round(v)} de sorte` },
   sereno: { id: 'sereno', name: 'Sereno', mat: 'ossos', adj: ['sereno', 'serena', 'serenos', 'serenas'], value: 0.15, desc: (v) => `+${pct(v)} de cura das poções` },
-  perfurante: { id: 'perfurante', name: 'Perfurante', mat: 'ferro_negro', adj: ['perfurante', 'perfurante', 'perfurantes', 'perfurantes'], value: 0.08, desc: (v) => `+${pct(v)} de perfuração` },
+  perfurante: { id: 'perfurante', name: 'Perfurante', mat: 'ferro_negro', adj: ['perfurante', 'perfurante', 'perfurantes', 'perfurantes'], value: 0.08, minTier: 6, desc: (v) => `+${pct(v)} de perfuração` },
+  imune: { id: 'imune', name: 'Imune', mat: 'esporos', adj: ['imune', 'imune', 'imunes', 'imunes'], value: 0.15, minTier: 11, desc: (v) => `−${pct(v)} na duração do veneno` },
 };
 
 /** Materiais, na ordem em que aparecem na tela. */
-export const MATERIALS: Material[] = ['ossos', 'ferro', 'ferro_negro'];
-export const MATERIAL_NAMES: Record<Material, string> = { ossos: 'ossos', ferro: 'ferro', ferro_negro: 'ferro-negro' };
+export const MATERIALS: Material[] = ['ossos', 'ferro', 'ferro_negro', 'esporos'];
+export const MATERIAL_NAMES: Record<Material, string> = { ossos: 'ossos', ferro: 'ferro', ferro_negro: 'ferro-negro', esporos: 'esporos' };
 
 export const AFFIX_IDS = Object.keys(AFFIXES) as AffixId[];
 
@@ -116,6 +119,8 @@ export const LEGENDS: Record<string, LegendDef> = {
   juramento_ferro: { id: 'juramento_ferro', name: 'Juramento de Ferro', base: 'couraca_placas', affixes: ['robusto', 'guardiao', 'sereno'], effect: 'Abaixo de 30% de vida, +40% de armadura.' },
   picareta_capataz: { id: 'picareta_capataz', name: 'Picareta do Capataz', base: 'martelo', affixes: ['brutal', 'perfurante', 'robusto'], effect: 'Cada golpe atordoa o alvo por 0,5 s.' },
   ancora_partida: { id: 'ancora_partida', name: 'Âncora Partida', base: 'alabarda', affixes: ['brutal', 'perfurante', 'afiado'], effect: 'A cada quarto golpe, ignora toda a couraça.' },
+  coroa_micelio: { id: 'coroa_micelio', name: 'Coroa de Micélio', base: 'elmo_placas', affixes: ['robusto', 'imune', 'sereno'], effect: 'Cada abate cura 2% da vida.' },
+  ferrao_mae: { id: 'ferrao_mae', name: 'Ferrão da Mãe', base: 'adaga', affixes: ['brutal', 'veloz', 'afiado'], effect: 'O golpe envenena o alvo: mais 48% do dano ao longo de 4 s.' },
 };
 
 export const RARITY_NAMES: Record<Rarity, string> = { comum: 'Comum', rara: 'Rara', epica: 'Épica', lendaria: 'Lendária' };
@@ -161,6 +166,16 @@ export interface EnemyDef {
   aura?: number;
   /** Material que pode deixar ao morrer: [material, mínimo, máximo, chance]. */
   drops?: [Material, number, number, number];
+  /** Doses de veneno que cada golpe deixa no herói (Ato III). */
+  poison?: number;
+  /** Ao morrer no anel, solta uma nuvem com estas doses (o brotado). */
+  cloud?: number;
+  /** O golpe prende o herói: sem Investida por 3 s (a aranha-de-micélio). */
+  roots?: boolean;
+  /** Pula no anel: chega mais depressa (a aranha-de-micélio). */
+  leaps?: boolean;
+  /** Golpe especial que cura os outros nesta fração da vida (o Guardião de Micélio). */
+  heals?: number;
 }
 
 export const ENEMIES: Record<EnemyKind, EnemyDef> = {
@@ -183,12 +198,25 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
     bones: [8, 12], specialEvery: 140, armor: 24, drops: ['ferro_negro', 8, 12, 1],
   },
   couraca: {
-    kind: 'couraca', name: 'A Couraça Submersa', hp: 850, dmg: 14, interval: 26, ranged: false, size: 2, block: 0, xp: 380, gold: 260,
-    bones: [6, 10], specialEvery: 160, armor: 24, drops: ['ferro_negro', 15, 20, 1], phase2: { dmg: 15, interval: 24, specialEvery: 140 },
+    kind: 'couraca', name: 'A Couraça Submersa', hp: 1650, dmg: 12, interval: 26, ranged: false, size: 2, block: 0, xp: 380, gold: 260,
+    bones: [6, 10], specialEvery: 160, armor: 24, drops: ['ferro_negro', 15, 20, 1], phase2: { dmg: 13, interval: 24, specialEvery: 140 },
+  },
+  // Ato III: o Jardim de Fungos (docs §14.4).
+  esporento: { kind: 'esporento', name: 'Esporento', hp: 46, dmg: 4, interval: 18, ranged: false, size: 1, block: 0, xp: 8, gold: 5, bones: [0, 1], poison: 1, drops: ['esporos', 1, 2, 0.3] },
+  brotado: { kind: 'brotado', name: 'Brotado', hp: 18, dmg: 3, interval: 12, ranged: false, size: 1, block: 0, xp: 4, gold: 2, bones: [0, 1], cloud: 1, drops: ['esporos', 1, 1, 0.12] },
+  aranha: { kind: 'aranha', name: 'Aranha-de-Micélio', hp: 36, dmg: 4, interval: 11, ranged: false, size: 1, block: 0, xp: 8, gold: 5, bones: [1, 1], roots: true, leaps: true },
+  cuspidor: { kind: 'cuspidor', name: 'Bolor Cuspidor', hp: 30, dmg: 5, interval: 26, ranged: true, size: 1, block: 0, xp: 9, gold: 6, bones: [0, 1], poison: 1, drops: ['esporos', 1, 2, 0.25] },
+  guardiao: {
+    kind: 'guardiao', name: 'O Guardião de Micélio', hp: 900, dmg: 15, interval: 24, ranged: false, size: 2, block: 0.1, xp: 300, gold: 220,
+    bones: [4, 8], specialEvery: 100, heals: 0.3, drops: ['esporos', 10, 14, 1],
+  },
+  mae: {
+    kind: 'mae', name: 'A Mãe-Bolor', hp: 850, dmg: 13, interval: 26, ranged: false, size: 2, block: 0, xp: 500, gold: 380,
+    bones: [4, 8], specialEvery: 150, poison: 1, drops: ['esporos', 18, 24, 1], phase2: { dmg: 14, interval: 24, specialEvery: 120 },
   },
 };
 
-const BOSSES: EnemyKind[] = ['capitao', 'senhor', 'capataz', 'couraca'];
+const BOSSES: EnemyKind[] = ['capitao', 'senhor', 'capataz', 'couraca', 'guardiao', 'mae'];
 
 export function isBoss(kind: EnemyKind): boolean {
   return BOSSES.includes(kind);
@@ -218,6 +246,10 @@ export const SKILLS: Record<SkillId, SkillDef> = {
   quebra_couraca: { id: 'quebra_couraca', name: 'Quebra-Couraça', passive: false, act: 2, cooldown: 90, windup: 6, total: 12, desc: 'O alvo perde metade da couraça por 6 s; 100% do dano.' },
   mao_pesada: { id: 'mao_pesada', name: 'Mão Pesada', passive: true, act: 2, cooldown: 0, windup: 0, total: 0, desc: '+15% de perfuração.' },
   pele_umida: { id: 'pele_umida', name: 'Pele Úmida', passive: true, act: 2, cooldown: 0, windup: 0, total: 0, desc: 'A lentidão dos afogados dura metade.' },
+  purificar: { id: 'purificar', name: 'Purificar', passive: false, act: 3, cooldown: 150, windup: 4, total: 8, desc: 'Tira todo o veneno e cura 10% da vida.' },
+  golpe_giratorio: { id: 'golpe_giratorio', name: 'Golpe Giratório', passive: false, act: 3, cooldown: 110, windup: 8, total: 16, desc: '60% do dano em todos do anel, duas vezes.' },
+  sangue_amargo: { id: 'sangue_amargo', name: 'Sangue Amargo', passive: true, act: 3, cooldown: 0, windup: 0, total: 0, desc: 'O veneno faz metade do dano.' },
+  folego_mineiro: { id: 'folego_mineiro', name: 'Fôlego de Mineiro', passive: true, act: 3, cooldown: 0, windup: 0, total: 0, desc: '+1 poção.' },
 };
 
 export const SKILL_IDS = Object.keys(SKILLS) as SkillId[];
@@ -240,20 +272,33 @@ export interface BuildingDef {
 
 export const BUILDINGS: Record<BuildingId, BuildingDef> = {
   ferreiro: {
-    id: 'ferreiro', name: 'Ferreiro', max: 5, start: 1,
-    cost: (n) => ({ gold: 150 * n * n, mats: { ferro: 15 * n }, people: n + 1 }),
+    // Os níveis de cada ato pedem o material dele: ferro até o 3 (tier 6, o Ato I), ferro-negro no 4 e
+    // no 5 (até o tier 10, as Minas) e ferro-negro e esporos do 6 ao 8 (até o 16, os Fungos). O ferro
+    // dos níveis altos é pouco: nas Minas e nos Fungos ele só vem de baús e chefes.
+    id: 'ferreiro', name: 'Ferreiro', max: 8, start: 1,
+    cost: (n) => ({
+      gold: 150 * n * n,
+      mats: n <= 3 ? { ferro: 15 * n } : { ferro: 20, ferro_negro: 12 * n, ...(n >= 6 ? { esporos: 8 * n } : {}) },
+      people: n + 1,
+    }),
     effect: (n) => `Forja até o tier ${2 * n} (limitado pelo andar mais fundo)${n >= 4 ? '; forja rara e épica; reforja' : n >= 3 ? '; forja rara; reforja' : n >= 2 ? '; forja rara' : ''}`,
   },
   treinador: {
     id: 'treinador', name: 'Treinador', max: 6, start: 0,
-    // Do nível 2 em diante, o material do ato (o ferro-negro, que só existe nas Minas).
-    cost: (n) => ({ gold: 200 * n * n, mats: n >= 2 ? { ossos: 30 * n, ferro_negro: 15 * n } : { ossos: 30 * n }, people: 2 * n - 2 }),
+    // Cada nível pede o material do ato que ele abre: o 2, ferro-negro (das Minas); do 3 em diante,
+    // esporos (dos Fungos). Assim o ferro-negro que acaba nos Fungos não trava as habilidades do ato.
+    cost: (n) => ({
+      gold: 200 * n * n,
+      mats: { ossos: 30 * n, ...(n === 2 ? { ferro_negro: 30 } : n >= 3 ? { esporos: 10 * n } : {}) },
+      people: 2 * n - 2,
+    }),
     effect: (n) => (n === 0 ? 'Não ensina nada ainda' : `Ensina as habilidades até o Ato ${n}`),
   },
   alquimista: {
-    id: 'alquimista', name: 'Alquimista', max: 4, start: 0,
-    cost: (n) => ({ gold: 100 * n * n, mats: { ossos: 15 * n }, people: n }),
-    effect: (n) => `${3 + n} poções; cada uma cura ${40 + 5 * n}%`,
+    // O nível 5 (esporos) faz as poções curarem o veneno também.
+    id: 'alquimista', name: 'Alquimista', max: 5, start: 0,
+    cost: (n) => ({ gold: 100 * n * n, mats: { ossos: 15 * n, ...(n >= 5 ? { esporos: 30 } : {}) }, people: n }),
+    effect: (n) => `${3 + n} poções; cada uma cura ${40 + 5 * n}%${n >= 5 ? ' e tira o veneno' : ''}`,
   },
   carroceiro: {
     id: 'carroceiro', name: 'Carroceiro de resgate', max: 3, start: 0,
@@ -266,8 +311,9 @@ export const BUILDINGS: Record<BuildingId, BuildingDef> = {
     effect: (n) => `Ferimento sara ${25 * n}% mais rápido`,
   },
   taticas: {
-    id: 'taticas', name: 'Salão de Táticas', max: 4, start: 0,
-    cost: (n) => ({ gold: 150 * n * n, mats: {}, people: 2 * n }),
+    // Os níveis 5 e 6 (esporos) abrem vaga para as regras do Ato III.
+    id: 'taticas', name: 'Salão de Táticas', max: 6, start: 0,
+    cost: (n) => ({ gold: 150 * n * n, mats: n >= 5 ? { esporos: 20 * n } : {}, people: 2 * n }),
     effect: (n) => `${4 + n} regras de combate${n >= 2 ? '; condição composta' : ''}`,
   },
 };

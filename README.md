@@ -22,4 +22,4 @@ Stack: TypeScript, Vite, Three.js e Preact. A simulação (`src/sim`) é pura, d
 
 ## Créditos
 
-Arte 3D: **KayKit**, de Kay Lousberg (www.kaylousberg.com), sob CC0 1.0. A estrutura do jogo nasceu do [Vigília](../vigilia).
+Arte 3D: **KayKit**, de Kay Lousberg (www.kaylousberg.com); a vila, do **Kenney** (www.kenney.nl); os monstros dos Fungos, do **Quaternius** (quaternius.com). Tudo sob CC0 1.0 (detalhes em [`LICENSES.md`](LICENSES.md)). A estrutura do jogo nasceu do [Vigília](../vigilia).

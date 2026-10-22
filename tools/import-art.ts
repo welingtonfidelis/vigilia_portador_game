@@ -109,7 +109,7 @@ for (const pack of PACKS) {
 }
 
 const total = copied.reduce((s, c) => s + c.bytes, 0);
-writeFileSync(join(OUT, 'manifest.json'), JSON.stringify({ source: 'KayKit (Kay Lousberg), CC0 1.0 — ver LICENSES.md', files: copied }, null, 2));
+writeFileSync(join(OUT, 'manifest.json'), JSON.stringify({ source: 'KayKit (Kay Lousberg), Kenney e Quaternius, CC0 1.0 — ver LICENSES.md', files: copied }, null, 2));
 console.log(`${copied.length} arquivos, ${(total / 1024 / 1024).toFixed(2)} MB em ${OUT}`);
 if (errors.length) {
   console.error(`\n${errors.length} problema(s):\n  ` + errors.join('\n  '));

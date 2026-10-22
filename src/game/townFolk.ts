@@ -101,6 +101,8 @@ export interface LifeMarks {
   bandeirolas: boolean;
   /** Ato II vencido (a Couraça Submersa): o carrinho de mina com ferro-negro na frente do ferreiro. */
   carrinho: boolean;
+  /** Ato III vencido (a Mãe-Bolor): a horta de cogumelos na porta do alquimista. */
+  horta: boolean;
 }
 
 export function lifeMarks(w: World): LifeMarks {
@@ -118,6 +120,7 @@ export function lifeMarks(w: World): LifeMarks {
     festa: first !== undefined && w.tick - first < BALANCE.dayTicks,
     bandeirolas: senhor,
     carrinho: w.bossesBeaten.includes(20),
+    horta: w.bossesBeaten.includes(30),
   };
 }
 
@@ -178,6 +181,14 @@ export const BENCHES = [
 export const DEPOT = { x: 19.2, z: 4.6 };
 /** O carrinho de mina do Ato II vencido: na rua do ferreiro, atrás dele, ao lado do beco. */
 export const MINE_CART = { x: -16.4, z: 9.3, rot: 0.25 };
+/**
+ * A horta de cogumelos do Ato III vencido: ao lado da porta do alquimista, do lado da rua (o único
+ * pedaço da frente dele que a câmera da vila vê; o resto fica atrás das casas).
+ */
+export const MUSHROOM_GARDEN = (() => {
+  const f = lotFront(LOTS.find((l) => l.kind === 'alquimista')!);
+  return { x: f.x + f.along[0] * 2.2 + f.out[0] * 0.5, z: f.z + f.along[1] * 2.2 + f.out[1] * 0.5 };
+})();
 
 const behind = (s: { x: number; z: number }, d: number): Spot => {
   const dx = s.x - PLAZA.x, dz = s.z - PLAZA.z, len = Math.hypot(dx, dz);

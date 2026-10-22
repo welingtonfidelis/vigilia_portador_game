@@ -49,6 +49,8 @@ function condHolds(w: World, s: HeroStats, cond: CondId, param: number): boolean
       const t = pickTarget(inReach(w), w.rules.descent.target);
       return !!t && t.armor > 0 && t.armorBreakUntil <= w.tick;
     }
+    case 'envenenado':
+      return h.poison.filter((t) => t > w.tick).length >= Math.max(1, param);
     case 'pocoes_max':
       return h.potions <= param;
     case 'sempre':
@@ -62,11 +64,14 @@ export function skillReady(w: World, s: HeroStats, id: SkillId): boolean {
   if (def.passive || !h.learned.includes(id) || !h.bar.includes(id)) return false;
   if ((h.cooldowns[id] ?? 0) > w.tick) return false;
   if (id === 'golpe_amplo' || id === 'grito') return inReach(w).length > 0;
-  if (id === 'investida') return inBack(w).length > 0;
+  // Presa pela aranha-de-micélio, o herói não investe.
+  if (id === 'investida') return inBack(w).length > 0 && h.rootUntil <= w.tick;
   if (id === 'segundo_folego') return h.hp < s.maxHp;
   // Golpe de Escudo pede escudo e alguém no anel; Quebra-Couraça, alguém de couraça inteira.
   if (id === 'golpe_escudo') return !!h.equip.secundaria && inReach(w).length > 0;
   if (id === 'quebra_couraca') return inReach(w).some((e) => e.armor > 0 && e.armorBreakUntil <= w.tick);
+  if (id === 'purificar') return h.poison.some((t) => t > w.tick);
+  if (id === 'golpe_giratorio') return inReach(w).length > 0;
   return true;
 }
 
@@ -100,6 +105,7 @@ export function defaultCombatRules(): Rule[] {
     { on: true, cond: 'vida_abaixo', param: 50, cond2: null, param2: 0, action: 'habilidade', skill: 'segundo_folego' },
     { on: true, cond: 'anel_min', param: 3, cond2: null, param2: 0, action: 'habilidade', skill: 'grito' },
     ...actTwoRules(),
+    ...actThreeRules(),
   ];
 }
 
@@ -108,6 +114,14 @@ export function actTwoRules(): Rule[] {
   return [
     { on: true, cond: 'alvo_couraca', param: 0, cond2: null, param2: 0, action: 'habilidade', skill: 'quebra_couraca' },
     { on: true, cond: 'anel_min', param: 3, cond2: null, param2: 0, action: 'habilidade', skill: 'golpe_escudo' },
+  ];
+}
+
+/** As regras de fábrica do Ato III (valem com o Salão de Táticas nos níveis 5 e 6). */
+export function actThreeRules(): Rule[] {
+  return [
+    { on: true, cond: 'envenenado', param: 3, cond2: null, param2: 0, action: 'habilidade', skill: 'purificar' },
+    { on: true, cond: 'anel_min', param: 2, cond2: null, param2: 0, action: 'habilidade', skill: 'golpe_giratorio' },
   ];
 }
 
@@ -131,6 +145,7 @@ export const COND_NAMES: Record<CondId, string> = {
   fundo_min: 'Inimigos no fundo, pelo menos',
   alvo_elite: 'Alvo é elite ou chefe',
   alvo_couraca: 'Alvo com couraça inteira',
+  envenenado: 'Doses de veneno, pelo menos',
   pocoes_max: 'Poções restantes, no máximo',
   sempre: 'Sempre',
 };

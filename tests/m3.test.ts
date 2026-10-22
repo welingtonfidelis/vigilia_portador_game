@@ -8,7 +8,7 @@ import { BALANCE, actOf, floorInAct, floorTier, groupSize, roomsOnFloor } from '
 import { startDescent } from '../src/sim/expedition.ts';
 import { dropItem, emptyLoot, makeItem } from '../src/sim/items.ts';
 import { chooseAction, defaultCombatRules } from '../src/sim/rules.ts';
-import { checksum, commands, createWorld, deserialize, heroStats, nextCost, serialize, step } from '../src/sim/index.ts';
+import { SAVE_VERSION, checksum, commands, createWorld, deserialize, heroStats, nextCost, serialize, step } from '../src/sim/index.ts';
 import type { Enemy, EnemyKind, SimEvent, World } from '../src/sim/index.ts';
 
 /** Uma sala das Minas montada à mão, com os inimigos dados e o herói firme. */
@@ -18,7 +18,7 @@ function mineRoom(kinds: EnemyKind[], floor = 14, seed = 3): World {
   w.hero.deepest = floor;
   w.hero.level = 30;
   w.hero.hp = 1e6;
-  w.exp = { floor, room: 1, bag: { gold: 0, mats: { ossos: 0, ferro: 0, ferro_negro: 0 }, items: [], people: 0 }, started: 0, recall: false, leaving: null, kills: 0 };
+  w.exp = { floor, room: 1, bag: { gold: 0, mats: { ossos: 0, ferro: 0, ferro_negro: 0, esporos: 0 }, items: [], people: 0 }, started: 0, recall: false, leaving: null, kills: 0 };
   w.room = {
     floor, index: 1, kind: 'combate', enemies: kinds.map((k) => makeEnemy(w, k, floor, null, 0)), phase: 'luta', phaseEnd: 0, look: 1,
     fightStart: w.tick, fearUntil: 0, hpAtStart: w.hero.hp, phase2At: 0,
@@ -42,7 +42,7 @@ describe('Ato II: estrutura dos andares', () => {
     expect(floorInAct(15)).toBe(5);
     expect([11, 15, 20].map(roomsOnFloor)).toEqual([6, 7, 9]);
     expect([11, 12, 20].map(floorTier)).toEqual([6, 6, 10]);
-    expect(BALANCE.maxFloor).toBe(20);
+    expect(BALANCE.maxFloor).toBe(30);
   });
 
   it('os grupos das Minas vêm do Ato II, e os chefes são o Capataz e a Couraça Submersa', () => {
@@ -171,7 +171,7 @@ describe('Ato II: os inimigos', () => {
     const ev: SimEvent[] = [];
     let guard = 0;
     while (boss.phase === 1 && guard++ < 2000) fight(w, 1, ev);
-    expect(boss.armor).toBeCloseTo(armor * 1.3);
+    expect(boss.armor).toBeCloseTo(armor * BALANCE.couracaHarden);
     expect(ev.some((e) => e.t === 'fase')).toBe(true);
     const hits: number[] = [];
     for (let i = 0; i < 300; i++) {
@@ -237,22 +237,20 @@ describe('Ato II: regras, habilidades e vila', () => {
     expect(strong.exp!.floor).toBe(15);
   });
 
-  it('migra um save v2 para a v3 (ferro-negro, couraça e as regras do Ato II)', () => {
+  it('migra um save v2 até a versão atual (ferro-negro, couraça e as regras do Ato II)', () => {
     const w = mineRoom(['mineiro']);
     const v2 = JSON.parse(JSON.stringify(w)) as Record<string, any>;
     v2.version = 2;
-    delete v2.village.mats.ferro_negro;
-    delete v2.exp.bag.mats.ferro_negro;
-    for (const e of v2.room.enemies) {
-      delete e.armor;
-      delete e.armorBreakUntil;
-      delete e.comboAt;
+    for (const m of [v2.village.mats, v2.exp.bag.mats]) {
+      delete m.ferro_negro;
+      delete m.esporos;
     }
-    for (const k of ['slowUntil', 'stunUntil', 'swings']) delete v2.hero[k];
+    for (const e of v2.room.enemies) for (const k of ['armor', 'armorBreakUntil', 'comboAt', 'venom', 'venomUntil']) delete e[k];
+    for (const k of ['slowUntil', 'stunUntil', 'swings', 'poison', 'rootUntil']) delete v2.hero[k];
     v2.rules.combat = v2.rules.combat.slice(0, 6);
     const body = JSON.stringify(v2);
     const back = deserialize(JSON.stringify({ v: 2, sum: checksum(body), body }));
-    expect(back.version).toBe(3);
+    expect(back.version).toBe(SAVE_VERSION);
     expect(back.village.mats.ferro_negro).toBe(0);
     expect(back.exp!.bag.mats.ferro_negro).toBe(0);
     expect(back.room!.enemies[0]!.armor).toBe(0);

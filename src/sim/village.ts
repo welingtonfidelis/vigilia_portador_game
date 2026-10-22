@@ -1,11 +1,11 @@
 /** Vila: obras, forja, imposto dos moradores, descanso e ferimento (docs/VIGILIA-PORTADOR.md §2.9). */
 import { chronicle, dayOf } from './chronicle.ts';
 import { BALANCE } from './config.ts';
-import { AFFIXES, AFFIX_IDS, BASES, BUILDINGS, MATERIAL_NAMES } from './data.ts';
+import { AFFIXES, BASES, BUILDINGS, MATERIAL_NAMES } from './data.ts';
 import type { Cost } from './data.ts';
 import { startDescent } from './expedition.ts';
 import { heroStats } from './hero.ts';
-import { forgeCap, itemName, makeItem } from './items.ts';
+import { affixPool, forgeCap, itemName, makeItem } from './items.ts';
 import { pick } from './rng.ts';
 import type { AffixId, BuildingId, Item, Material, SimEvent, World } from './types.ts';
 
@@ -83,6 +83,7 @@ export function forge(w: World, baseId: string, rarity: ForgeRarity, affix: Affi
   if (rarity === 'comum' && baseId === 'amuleto') return 'o amuleto só tem afixos: forje raro';
   if (rarity !== 'comum' && !affix) return 'escolha o afixo';
   const tier = forgeCap(w);
+  if (affix && !affixPool(tier).includes(affix)) return `${AFFIXES[affix].name} só vai em peças do tier ${AFFIXES[affix].minTier} em diante`;
   const c = forgeCost(tier, rarity, affix);
   const why = lacking(w, c);
   if (why) return why;
@@ -148,7 +149,7 @@ function finishForge(w: World, ev: SimEvent[]): void {
     if (src && idx < src.affixes.length) {
       const before = itemName(src);
       const out = src.affixes[idx]!;
-      const options = AFFIX_IDS.filter((a) => !src.affixes.includes(a));
+      const options = affixPool(src.tier).filter((a) => !src.affixes.includes(a));
       src.affixes[idx] = pick(w, options);
       w.stats.forged++;
       chronicle(w, `O ferreiro reforjou ${before}: saiu ${AFFIXES[out].name}, entrou ${AFFIXES[src.affixes[idx]!].name}.`, 'bom', ev);

@@ -19,7 +19,38 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 ## 1. Estado, como jogar e arquitetura
 
-**Estado atual: M3.2, a cara do Ato II, pronta** (seção 14.4). Ela vem sobre o núcleo do Ato II (M3.1), a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+**Estado atual: M3.3, o Ato III, pronta** (seção 14.4), com os monstros do Quaternius nos Fungos. Ela vem sobre o Ato II (M3.1 e M3.2), a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+
+**M3.3 (o Jardim de Fungos, o Ato III), em 2026-10-22:**
+
+- **Andares 21 a 30:**
+  - inimigos: esporentos, brotados, aranhas-de-micélio e bolores cuspidores;
+  - no andar 25, o Guardião de Micélio, que cura os outros;
+  - no 30, a Mãe-Bolor, que na fase 2 faz brotar brotados e acelera o veneno.
+- **O veneno:** cada dose tira vida por 6 s, e as doses se somam até 5. A resposta é preparada na vila:
+  - Purificar e Sangue Amargo, do treinador nível 3;
+  - o afixo Imune;
+  - o alquimista nível 5, que faz a poção também tirar o veneno.
+
+  A Força da tela de equipamento conta o veneno.
+- **Esporos,** o material do ato. Os níveis novos dos prédios pedem esporos:
+  - ferreiro até o 8 (tier 16);
+  - treinador 3, alquimista 5 e Salão de Táticas 5 e 6 (10 regras).
+
+  A primeira vitória sobre a Couraça traz os primeiros 30.
+- **O cenário:**
+  - pedra violeta;
+  - cogumelos gigantes com pintas que brilham (feitos em código);
+  - névoa no chão e esporos no ar.
+
+  Na vila, a horta de cogumelos do alquimista aparece depois do ato.
+- **Os monstros** são do Quaternius (Ultimate Monsters, CC0), com as animações deles:
+  - cogumelos andantes (esporento);
+  - bolhas verdes (brotado e aranha);
+  - bolhas rosas (cuspidor);
+  - o cogumelo grande de chapéu com espinhos (Guardião);
+  - o rei-cogumelo (Mãe-Bolor).
+- **Save v4,** com migração. 92 testes, e o balanceador passa as 34 metas nas duas faixas de sementes.
 
 **M3.2 (a cara do Ato II), em 2026-10-22:**
 
@@ -33,7 +64,7 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
   Na sala da Couraça Submersa, a poça é grande.
 - **A arma muda de cara com o tier:** do tier 6 em diante, espada, espadão, machado, adaga e os escudos usam as malhas do Fantasy Weapons Bits. A cor do metal segue o ato: ferro, aço e bronze no Ato I; ferro-negro no Ato II; ouro a partir do tier 11.
 - **O carrinho de mina** com ferro-negro aparece na rua do ferreiro depois da vitória sobre a Couraça.
-- 72 testes passam e o build sai sem erro. As salas, o carrinho e as armas foram conferidos no navegador embutido.
+- 72 testes passavam (na M3.2), e o build saía sem erro. As salas, o carrinho e as armas foram conferidos no navegador embutido.
 
 **M3.1 (o núcleo do Ato II), em 2026-10-22:**
 
@@ -81,7 +112,7 @@ O M0 já trazia:
 - telas de equipamento, habilidades, regras e vila;
 - a regra de morte funcionando, com rolagem, restos, recuperação e ferimento.
 
-Os andares vão de 1 a 20, com chefes nos andares 5, 10, 15 e 20. O Ato III e o resto do GDD ainda são proposta.
+Os andares vão de 1 a 30, com chefes a cada 5 andares. Os Atos IV a VI e o resto do GDD ainda são proposta.
 
 **Verificado em 2026-10-22 (M1):**
 
@@ -541,7 +572,7 @@ Resumo da proposta da seção 3.3:
 
 ### 8. O abismo
 
-- **Atos:** são 6, de 10 andares cada. O chefe do ato fica no andar 10, e há um chefe menor no andar 5. O Ato I, a Cripta, usa o KayKit Dungeon e o Skeletons. O Ato II, as Minas Inundadas, usa as mesmas peças recoloridas e escoradas (14.4). Os outros atos são temas a definir, como no Vigília: Fungos, Cidade Afogada, Forja e Coração.
+- **Atos:** são 6, de 10 andares cada. O chefe do ato fica no andar 10, e há um chefe menor no andar 5. O Ato I, a Cripta, usa o KayKit Dungeon e o Skeletons. O Ato II, as Minas Inundadas, usa as mesmas peças recoloridas e escoradas, e o Ato III, o Jardim de Fungos, as mesmas peças tomadas por cogumelos (14.4). Os outros atos são temas a definir, como no Vigília: Cidade Afogada, Forja e Coração.
 - **Salas:**
 
 | Sala | Chance | O que tem |
@@ -668,19 +699,28 @@ Exemplos, sem sorte e sem carroceiro:
 
 ### 12. Balanceamento: metas que o balanceador confere
 
-`npm run balance -- --seeds 20` roda o jogador automático (`bot.ts`) por 7 h de jogo em cada semente, o Ato I e o Ato II. Ele se comporta como um jogador médio:
+`npm run balance -- --seeds 20` roda o jogador automático (`bot.ts`) por 12 h de jogo em cada semente, os três atos. Ele se comporta como um jogador médio:
 
 - usa as regras de fábrica;
 - veste a melhor peça do baú;
-- aprende as habilidades assim que dá;
+- aprende as habilidades assim que dá e põe na barra as três ativas do ato em que está (M3.3):
+  - Golpe Amplo, Investida e Segundo Fôlego no Ato I;
+  - Quebra-Couraça, Golpe Amplo e Investida no II;
+  - Purificar, Golpe Giratório e Investida no III.
+
+  Nos Fungos, sobe as regras de Purificar e do Golpe Giratório para logo depois da poção e da fuga.
 - a cada visita à vila, segue esta ordem:
-  1. sobe o ferreiro, se der;
-  2. forja a peça rara (com o afixo escolhido) que aumenta a Força em pelo menos 3%;
-  3. reforja o afixo fraco da arma;
-  4. constrói o prédio mais barato;
-  5. aprimora a peça de tier menor;
+  1. do Ato II em diante, o treinador do ato, guardando para ele o material do ato;
+  2. o ferreiro, se der;
+  3. a peça rara (com o afixo escolhido) que aumenta a Força em pelo menos 3%;
+  4. reforja o afixo fraco da arma;
+  5. constrói o prédio mais barato;
+  6. aprimora a peça vestida de tier menor;
 - desce até o andar mais fundo em que a "Força" da tela de equipamento chega a 1, e volta um andar depois de morrer. Com a morte cara, descer onde a Força ainda é 0,9 fazia uma semente empacar 53 min;
-- diante de um chefe ainda não vencido com a Força abaixo de 0,8, vai só até o andar de cima e treina ali (M3.1).
+- não passa de um andar em que a Força cai abaixo de 0,6, e só enfrenta um chefe ainda não vencido com a Força em 0,95 (M3.3);
+- saindo do andar mais fundo, segue com a mochila cheia (a pior peça derrete): voltar a cada 10 peças podia nunca deixar o herói terminar um andar de 8 salas (M3.3).
+
+Algumas sementes jogam de novo sem perfuração (no Ato II) e sem resposta ao veneno (no Ato III), para medir o peso de cada resposta.
 
 O balanceador sai com código ≠ 0 se alguma meta falhar.
 
@@ -746,7 +786,7 @@ As metas do Ato II e o resultado da M3.1 estão em 14.4.
 | **M0: protótipo vertical** (concluído) | Herói por partes, animações com crossfade, troca de arma e de armadura ao vivo, uma sala com esqueletos, combate pela simulação, telas de equipamento, habilidades e regras, regra de morte, testes e medição no celular |
 | **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
 | **M2: a vila viva** (pronto, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
-| **M3: Atos II e III** (M3.1 e M3.2 prontas, 14.4) | As Minas Inundadas (couraça e perfuração) e o Jardim de Fungos (veneno), com inimigos, chefes, habilidades, armas do Fantasy Weapons Bits e materiais novos |
+| **M3: Atos II e III** (M3.1 a M3.3 prontas; falta a M3.4, o polimento dos três atos; 14.4) | As Minas Inundadas (couraça e perfuração) e o Jardim de Fungos (veneno), com inimigos, chefes, habilidades, armas do Fantasy Weapons Bits e materiais novos |
 | M4: polimento | Som, interface de celular, acessibilidade e eventos |
 | M5: Atos IV a VI e as profundezas | Conteúdo e Eras |
 
@@ -1435,6 +1475,119 @@ As 18 metas do Ato I continuam passando nas duas faixas. O Senhor sai aos 72,3 e
 - **Os inimigos montados** (capacete, picareta e recolor) já tinham entrado na M3.1. Aqui, o golem e a Couraça ficaram mais claros.
 - **Poças:** as poças imitam o reflexo com material quase espelhado e luz fria. Não é um reflexo de verdade, que custaria uma renderização a mais por quadro no celular.
 
+**Como ficou a M3.3 (2026-10-22): o Jardim de Fungos**
+
+| | |
+|---|---|
+| ![Luta nos Fungos, andar 24: Mushnubs, bolhas verdes e rosas, cogumelos gigantes e o herói em ouro](img/m3-fungos-luta.jpg) | ![O Guardião de Micélio, no andar 25](img/m3-fungos-guardiao.jpg) |
+| ![A Mãe-Bolor (o rei-cogumelo do Quaternius), no andar 30](img/m3-fungos-mae.jpg) | ![A horta de cogumelos na porta do alquimista, depois do Ato III](img/m3-vila-horta.jpg) |
+
+- **Andares 21 a 30** (`config.ts`):
+  - tier `⌈n/2⌉ + 10`, de 11 a 15;
+  - `4 + ⌊n/3⌋ + 5` salas, de 9 a 12;
+  - o grupo é o de sempre.
+  - Além de P(andar), os inimigos têm 5× a vida e 0,21 do dano. Sem couraça, eles pesam pelo veneno.
+- **O veneno** (`combat.ts`):
+  - Cada dose tira 2,5% da vida máxima por segundo, por 6 s.
+  - As doses se somam até 5, e a quinta renova a mais velha. Elas correm também no saque e na passagem entre as salas.
+  - Sangue Amargo corta o dano pela metade.
+  - O Imune corta a duração (15% por afixo no tier 1, até 60%).
+  - Com a Mãe-Bolor na fase 2, o veneno corre 1,5× mais rápido.
+  - Tiram o veneno: Purificar e a poção com o alquimista no nível 5.
+- **Inimigos** (vida, dano e intervalo na base):
+
+| Inimigo | Vida | Dano | Golpe | O que faz |
+|---|---|---|---|---|
+| Esporento | 46 | 4 | 1,8 s | 1 dose por golpe; 30% de chance de deixar 1 a 2 esporos |
+| Brotado | 18 | 3 | 1,2 s | Bando; morto no anel, solta uma nuvem com 1 dose |
+| Aranha-de-Micélio | 36 | 4 | 1,1 s | Pula no anel (chega em 0,3 s); o golpe prende o herói, sem Investida por 3 s |
+| Bolor Cuspidor | 30 | 5 | 2,6 s | De longe; 1 dose por cuspida |
+| O Guardião de Micélio (25) | 900 | 15 | 2,4 s | 10% de bloqueio; a cada 10 s, cura os outros em 30% da vida e chama 2 brotados, se a escolta estiver abaixo de 3 |
+| A Mãe-Bolor (30) | 850 | 13 | 2,6 s | 1 dose por golpe. Na metade da vida, faz brotar 2 brotados (e mais 2 a cada golpe especial), bate 14 a cada 2,4 s e acelera o veneno |
+
+- **Habilidades** (treinador 3):
+  - Purificar: recarga de 15 s, tira todo o veneno e cura 10%.
+  - Golpe Giratório: recarga de 11 s, 60% do dano no anel, duas vezes.
+  - Sangue Amargo: o veneno faz metade do dano.
+  - Fôlego de Mineiro: +1 poção.
+- **Regras:** a condição nova é "Doses de veneno, pelo menos N". As regras de fábrica do ato ("envenenado 3 → Purificar" e "2 no anel → Golpe Giratório") ficam no fim da lista e só valem com o Salão de Táticas 5 e 6, ou se o jogador as subir.
+- **Lendárias:**
+  - Coroa de Micélio: elmo de placas Robusto, Imune e Sereno; cada abate cura 2% da vida.
+  - Ferrão da Mãe: adaga Brutal, Veloz e Afiada; o golpe envenena o alvo, que perde mais 12% do dano do golpe por segundo, por 4 s.
+- **Vila** (o material de cada ato nos níveis dele):
+
+| Prédio | Níveis novos | Pedem |
+|---|---|---|
+| Ferreiro | até o 8 (tier 16) | até o 3, ferro; 4 e 5, 20 de ferro e ferro-negro; 6 a 8, também esporos |
+| Treinador | o 3 | o 2, 30 de ferro-negro; do 3 em diante, esporos |
+| Alquimista | o 5 | 30 esporos; a poção passa a tirar o veneno |
+| Salão de Táticas | o 5 e o 6 | esporos; 9 e 10 regras |
+
+- **Esporos:** caem dos fungos (de 12% a 30% de chance), dos baús do ato (3 a 6) e dos chefes (10 a 24). A primeira vitória sobre a Couraça traz 30, o bastante para o treinador 3.
+- **Afixos do ato:** o Perfurante só sai sorteado (e só se forja) em peças do tier 6 em diante; o Imune, do 11.
+- **A Força** desconta a parte do dano que vem do veneno (40% nos Fungos), e o Imune e o Sangue Amargo cortam essa parte. Por isso o Imune sobe a Força na tela de equipamento. A Força do ato pede 1,4× o grupo médio.
+- **No 3D** (`dungeon.ts`, `mushrooms.ts`):
+  - a mesma planta, com o atlas recolorido para violeta e musgo e as paredes quebradas;
+  - cogumelos gigantes no fundo e tufos junto das paredes, com pintas que brilham e dão a luz da sala;
+  - névoa violeta no chão e esporos subindo devagar.
+
+- **Os monstros** (`actors.ts`):
+  - São do Quaternius: Mushnub (esporento), Green Blob (brotado), Green Spiky Blob (aranha), Pink Slime (cuspidor), Mushnub Evolved (Guardião) e Mushroom King (Mãe-Bolor).
+  - Cada um traz as próprias animações (parado, andar, mordida ou soco, acerto e morte). O visual de cada inimigo diz o clipe de cada papel, e a escala sai da medida do modelo, para a altura pedida (de 0,9 m a 3,6 m).
+  - As cores do arquivo vinham escuras e com 40% de metal, que sem mapa de ambiente sai preto. Agora cada material ganha a cor pelo nome, na paleta dos Fungos, e o metal vai a zero. O chapéu do rei-cogumelo ficou violeta.
+  - O Drive do pack estava sem cota; os modelos vieram do poly.pizza, publicados pela conta do Quaternius (ver `LICENSES.md`).
+- **Vila:** com a Mãe-Bolor vencida, o marco `horta` põe um canteiro de cogumelos ao lado da porta do alquimista. A mesa dele passou para o outro lado da porta, porque o resto da frente fica atrás das casas para a câmera da vila.
+- **Save v4:** a migração põe os esporos em todo lugar que guarda material, o veneno e a raiz no herói, o veneno nos inimigos e as duas regras do ato.
+- **Testes:** 19 novos em `tests/m3-fungos.test.ts`, mais o marco da horta, 92 no total. Dois deles conferem que os arquivos dos monstros estão no manifesto e que cada clipe pedido existe no arquivo.
+
+**O que mudou em relação ao especificado:**
+
+- **O antídoto não é um item:** com o alquimista 5, a própria poção tira o veneno.
+- **Números do veneno:**
+  - 2,5% por segundo, em vez de 2%;
+  - 1,5× mais rápido na fase 2 da Mãe-Bolor, em vez de 2×. Com o dobro, ela matava em 6 s com 5 doses.
+- **O Salão de Táticas ganhou os níveis 5 e 6:** as regras de fábrica já ocupavam as 8 vagas, e as do Ato III nunca valeriam.
+- **A meta "sem resposta ao veneno"** compara as mortes no ato inteiro (≥ 2×), não por hora: sem resposta, o ato também dura mais.
+- **A parede do Ato III** olha a mediana (≤ 70 min) e o pior caso (≤ 135 min), a proporção do Ato II num ato uma vez e meia mais longo.
+- **O que o balanceador mostrou e mudou:**
+  - **Ferro:** ele só cai no Ato I, e os níveis altos do ferreiro pediam 15 por nível. O ferreiro ficava parado horas enquanto o ouro passava de 400 mil. Agora os níveis 4 a 8 pedem o material dos atos.
+  - **Treinador 3:** pedia ferro-negro, que acaba nos Fungos. Agora pede só esporos.
+  - **Os primeiros esporos:** sem Purificar, os primeiros andares dos Fungos matavam sem parar, e os esporos para o treinador se perdiam a cada morte. Daí a Couraça trazer os primeiros 30.
+  - **A Força conta o veneno:** sem isso, o bot forjava peitorais Imunes que a Força dizia não valer nada, deixava no baú e repetia a cada visita.
+- **Bugs do bot achados no caminho** (e o que eles escondiam no Ato II):
+  - **A barra nunca mudava:** Quebra-Couraça, Golpe de Escudo, Purificar e Golpe Giratório nunca eram usados. O Ato II da M3.1 foi balanceado sem as habilidades dele.
+  - **A mochila cheia:** voltar a cada 10 peças impedia algumas sementes de terminar um andar de 8 salas. Uma ficava 100 min no andar 18.
+  - **A pressa:** uma expedição de sorte abria seis andares de uma vez, com a Força caindo a 0,34, e o herói passava horas alcançando.
+  - **A medida da luta com os chefes de ato** misturava as revanches, quando o bot volta ao andar. Agora conta a primeira vitória.
+  - **Os "impasses"** contavam a sala antiga durante a volta para a vila.
+- **O Ato II, revisto com o bot novo:**
+  - os inimigos voltaram para 100% da vida;
+  - a Couraça tem 1650 de vida e bate 12 (13 na fase 2), e endurece 20%, não 30%;
+  - o pior caso de parede passou para ≤ 100 min, e é sempre na Couraça, a trava do fim do ato.
+
+**Resultado em 2026-10-22, com a M3.3** (12 h por semente; 20 sementes a partir de 1000 · 30 a partir de 7000; as 34 metas passam nas duas faixas):
+
+| Meta | Alvo | Faixa 1000 | Faixa 7000 |
+|---|---|---|---|
+| Ato I · Senhor (andar 10) | 60–100 min | 75,9 min | 75,0 min |
+| Ato II · Capataz depois do Senhor | 45–100 min | 57,4 min | 57,0 min |
+| Ato II · Couraça depois do Senhor | 2–3 h | 2,5 h | 2,4 h |
+| Ato II · mortes por hora | 0,5–2,5 | 1,5 | 1,5 |
+| Ato II · luta com a Couraça (primeira vitória) | 60–150 s | 73,8 s | 62,2 s |
+| Ato II · sem perfuração, as salas levam | ≥ 1,15× | 1,25× | 1,22× |
+| Ato II · parede (mediana · pior) | ≤ 45 · ≤ 100 min | 36,6 · 96,2 min | 37,2 · 95,8 min |
+| Ato III · Guardião depois da Couraça | 70–150 min | 88,1 min | 85,5 min |
+| Ato III · Mãe-Bolor depois da Couraça | 3–4 h | 3,5 h | 3,4 h |
+| Ato III · sementes que vencem o andar 30 em 12 h | ≥ 80% | 20/20 | 30/30 |
+| Ato III · mortes por hora | 0,5–2,5 | 1,1 | 1,0 |
+| Ato III · luta média por sala | 10–35 s | 22,4 s | 23,0 s |
+| Ato III · luta com a Mãe-Bolor (primeira vitória) | 60–150 s | 101,4 s | 102,9 s |
+| Ato III · sem resposta ao veneno, mortes no ato | ≥ 2× | 3,5× | 14,2× |
+| Ato III · parede (mediana · pior) | ≤ 70 · ≤ 135 min | 62,6 · 130,7 min | 59,0 · 91,7 min |
+
+As 18 metas do Ato I também passam nas duas faixas. Uma semente em cada faixa chegou a 96 min parada na Couraça; as outras ficaram abaixo de 90.
+
+
 ### 15. Decisões em aberto
 
 1. **Regra de morte** (2.10): validar os números e a ideia de que a gente resgatada sempre volta.
@@ -1459,7 +1612,7 @@ As 18 metas do Ato I continuam passando nas duas faixas. O Senhor sai aos 72,3 e
 
 Personagens, monstros, animações, masmorra e enfeites vêm do **KayKit (Kay Lousberg)**. É uma família coesa: o mesmo atlas de gradiente de 1024 × 1024, o mesmo traço low-poly e o mesmo esqueleto nos personagens.
 
-**Exceção:** os prédios da vila (M2) vêm do **Kenney Fantasy Town Kit 2.0** (CC0), por decisão do usuário em 2026-10-22, depois de um teste lado a lado. As peças do Kenney ficam em escala de gente: o grid de 1 m dele, ampliado 4×, bate com o grid de 4 m da masmorra, e a paleta conversa com a do KayKit. Os prédios em miniatura do Medieval Hexagon ampliados pareciam maquete ao lado dos moradores. O Kenney usa uma textura de cores numa subpasta (`Textures/colormap.png`), que o importador aceita só para esse pack.
+**Exceções:** os monstros do Jardim de Fungos (M3.3) vêm do **Quaternius Ultimate Monsters** (CC0), escolhidos pelo usuário em vez do recolor dos esqueletos. Eles trazem as próprias animações. Os prédios da vila (M2) vêm do **Kenney Fantasy Town Kit 2.0** (CC0), por decisão do usuário em 2026-10-22, depois de um teste lado a lado. As peças do Kenney ficam em escala de gente: o grid de 1 m dele, ampliado 4×, bate com o grid de 4 m da masmorra, e a paleta conversa com a do KayKit. Os prédios em miniatura do Medieval Hexagon ampliados pareciam maquete ao lado dos moradores. O Kenney usa uma textura de cores numa subpasta (`Textures/colormap.png`), que o importador aceita só para esse pack.
 
 As versões, os tamanhos e o SHA-256 de cada download estão em `LICENSES.md`.
 
@@ -1474,6 +1627,7 @@ As versões, os tamanhos e o SHA-256 de cada download estão em `LICENSES.md`.
 | Vila em diorama (M2) | Kenney Graveyard Kit 5.0, Castle Kit 2.0 e Survival Kit 2.0 | A capela da Cripta, lápides, a cerca de ferro e os pinheiros; a torre do Salão de Táticas, a balista e os estandartes; as tendas do carroceiro, a fogueira, a bancada da forja e o mato |
 | Treinador (M2) | KayKit Medieval Hexagon Pack 1.0 | Só o alvo e o suporte de armas, ampliados. Os prédios em miniatura sobre hexágonos ficaram como opção descartada no teste lado a lado |
 | Armas de outros atos | KayKit Fantasy Weapons Bits 1.0 | 31 armas e escudos |
+| Monstros dos Fungos (M3.3) | Quaternius Ultimate Monsters (6 dos 50, pelo poly.pizza) | Mushnub, Mushnub Evolved, Green Blob, Green Spiky Blob, Pink Slime e Mushroom King, animados |
 
 Não há outro pack de inimigos humanoides grátis do KayKit além do Skeletons. Os "Mystery Monthly Series" são pagos e não foram baixados. Os atos seguintes vão pedir recolor dos esqueletos, o EXTRA (Golem e Necromante) ou um pack novo do autor.
 
@@ -1660,6 +1814,16 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - as faixas de cor por ato;
     - o carrinho de mina na vila depois do Ato II;
     - 72 testes.
+  - **M3.3, o Ato III no jogo:**
+    - andares 21 a 30, com veneno, esporos, quatro fungos, o Guardião de Micélio e a Mãe-Bolor;
+    - Purificar, Golpe Giratório, Sangue Amargo e Fôlego de Mineiro; o afixo Imune; a poção que tira o veneno no alquimista 5;
+    - ferreiro até o 8 e o Salão de Táticas até o 6, com o material de cada ato;
+    - a Força que conta o veneno;
+    - o cenário dos fungos e a horta do alquimista;
+    - save v4;
+    - o balanceador com 12 h e 34 metas; o bot corrigido (barra por ato, mochila, pressa e chefes);
+    - os monstros do Quaternius (baixados do poly.pizza, porque o Drive do pack estava sem cota);
+    - 92 testes.
   - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
     - a vila é uma cena separada;
     - os moradores são aventureiros com roupa simples de cor variável;

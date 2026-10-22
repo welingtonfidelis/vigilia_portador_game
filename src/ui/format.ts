@@ -44,6 +44,7 @@ export function lootText(l: Loot): string {
   if (l.mats.ossos) parts.push(`${nf(l.mats.ossos)} ossos`);
   if (l.mats.ferro) parts.push(`${nf(l.mats.ferro)} de ferro`);
   if (l.mats.ferro_negro) parts.push(`${nf(l.mats.ferro_negro)} de ferro-negro`);
+  if (l.mats.esporos) parts.push(`${nf(l.mats.esporos)} ${l.mats.esporos === 1 ? 'esporo' : 'esporos'}`);
   if (l.people) parts.push(`${l.people} ${l.people === 1 ? 'pessoa' : 'pessoas'}`);
   if (l.items.length) parts.push(`${l.items.length} ${l.items.length === 1 ? 'peça' : 'peças'}`);
   return parts.length ? parts.join(', ') : 'nada';

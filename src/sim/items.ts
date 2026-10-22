@@ -20,11 +20,17 @@ export function affixValue(id: AffixId, tier: number): number {
   return AFFIXES[id].value * (1 + 0.1 * (tier - 1));
 }
 
+/** Afixos que podem sair sorteados numa peça deste tier (os de cada ato, só nas peças do ato). */
+export function affixPool(tier: number): AffixId[] {
+  return AFFIX_IDS.filter((a) => tier >= (AFFIXES[a].minTier ?? 1));
+}
+
 export function makeItem(w: World, baseId: string, tier: number, rarity: Rarity, origin: string, affixes?: AffixId[]): Item {
   const n = RARITY_AFFIXES[rarity];
   const list: AffixId[] = affixes ? [...affixes] : [];
+  const pool = affixPool(tier);
   while (list.length < n) {
-    const a = pick(w, AFFIX_IDS);
+    const a = pick(w, pool);
     if (!list.includes(a)) list.push(a);
   }
   return { id: w.nextId++, base: baseId, tier, rarity, affixes: list, origin };
@@ -79,7 +85,7 @@ export function dropItem(w: World, floor: number, minimum: Rarity, luck: number)
 export const ACT_PLACES = ['da Cripta', 'das Minas', 'dos Fungos'];
 
 /** Valor de cada material em ouro (para o "valor da mochila"). */
-const MAT_VALUE: Record<string, number> = { ossos: 3, ferro: 5, ferro_negro: 12 };
+const MAT_VALUE: Record<string, number> = { ossos: 3, ferro: 5, ferro_negro: 12, esporos: 12 };
 
 /** Valor em ouro de uma peça (venda, derretimento e o "valor da mochila" do balanceador). */
 export function itemValue(item: Item): number {

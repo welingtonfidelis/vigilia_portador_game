@@ -12,7 +12,7 @@ import {
   daylight, heightAt, lotBox, lotFront, lotKey, lotView, townHour, townStage,
 } from '../game/townPlan.ts';
 import type { Lot, LotView, Side, TownStage } from '../game/townPlan.ts';
-import { BENCHES, DEPOT, FOLK_CAP, MARKET, MINE_CART, SPOTS, WOODPILE, lifeMarks } from '../game/townFolk.ts';
+import { BENCHES, DEPOT, FOLK_CAP, MARKET, MINE_CART, MUSHROOM_GARDEN, SPOTS, WOODPILE, lifeMarks } from '../game/townFolk.ts';
 import type { LifeMarks } from '../game/townFolk.ts';
 import type { World } from '../sim/index.ts';
 import { load } from './assets.ts';
@@ -20,6 +20,7 @@ import { Birds } from './birds.ts';
 import { FOLK_FILES, Folk } from './folk.ts';
 import { mergeStatic } from './dungeon.ts';
 import { mineCart, rails } from './minecart.ts';
+import { mushroom } from './mushrooms.ts';
 import { paletteMaterial } from './palette.ts';
 import type { PaletteSpec } from './palette.ts';
 
@@ -560,8 +561,9 @@ function props(tasks: Promise<unknown>[], group: THREE.Group, lot: Lot, r: () =>
       if (big) add('hexagon/target.gltf', 0.4, 3.6, { rot: face - 0.4, scale: 6 });
       break;
     case 'alquimista':
-      add('furniture/table_medium.gltf', 2.4, 0.4, { scale: 1.1 });
-      add('dungeon/bottle_A_green.gltf', 2.2, 0.4, { scale: 1.6, y: 1.1 });
+      // A mesa fica do lado de cá da porta; do outro lado, o lugar da horta de cogumelos (Ato III).
+      add('furniture/table_medium.gltf', -1.5, 0.4, { scale: 1.1 });
+      add('dungeon/bottle_A_green.gltf', -1.7, 0.4, { scale: 1.6, y: 1.1 });
       add('kenney-survival/barrel.glb', -2.6, -0.4, { scale: 3.6 });
       add('mixed/flax_flower_A.gltf', -4, 0.8, { scale: 2.4 });
       add('mixed/flax_flower_B.gltf', -4.8, 1.6, { rot: face + 1, scale: 2.4 });
@@ -664,7 +666,7 @@ function nearPath(x: number, z: number, m: number): boolean {
 
 /** Assinatura dos enfeites: o estágio e os marcos de vida que põem coisas na vila. */
 function decorKey(stage: TownStage, m: LifeMarks): string {
-  return `${stage}:${m.stalls}:${m.lenhador}:${m.carregador}:${m.festa}:${m.bandeirolas}:${m.carrinho}`;
+  return `${stage}:${m.stalls}:${m.lenhador}:${m.carregador}:${m.festa}:${m.bandeirolas}:${m.carrinho}:${m.horta}`;
 }
 
 /** Bandeirolas: cordões caídos entre postes, com bandeirinhas de quatro cores (uma malha só). */
@@ -797,6 +799,21 @@ async function buildDecor(stage: TownStage, marks: LifeMarks): Promise<{ group: 
     cart.rotation.y = c.rot;
     cart.scale.setScalar(1.15);
     g.add(cart);
+  }
+  if (marks.horta) {
+    // A horta de cogumelos do alquimista (Ato III vencido): um canteiro de terra com cogumelos que brilham.
+    const c = MUSHROOM_GARDEN;
+    const bed = new THREE.Mesh(new THREE.CircleGeometry(0.7, 18), new THREE.MeshStandardMaterial({ color: 0x4a3626, roughness: 1 }));
+    bed.rotation.x = -Math.PI / 2;
+    bed.position.set(c.x, heightAt(c.x, c.z) + 0.04, c.z);
+    bed.receiveShadow = true;
+    bed.userData.floor = true;
+    g.add(bed);
+    for (const [k, [dx, dz, h]] of ([[-0.3, -0.2, 0.9], [0.25, -0.3, 0.7], [0.05, 0.3, 1.1], [-0.35, 0.35, 0.55], [0.4, 0.2, 0.5]] as const).entries()) {
+      const m = mushroom(h, 300 + k * 17);
+      m.position.set(c.x + dx, heightAt(c.x, c.z), c.z + dz);
+      g.add(m);
+    }
   }
   if (stage >= 2) {
     for (const [x, z] of [[-4.5, 1], [5.5, 9.5], [-4, 16], [9, -6.5]] as const) {

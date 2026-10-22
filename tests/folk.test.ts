@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BENCHES, DEPOT, MARKET, NODES, SPOTS, WOODPILE,
-  CHICK_YARD, MINE_CART, activeJob, catNap, doing, lifeMarks, petDoing, pets, resident, residentLabel, residents, route, strollPoint,
+  CHICK_YARD, MINE_CART, MUSHROOM_GARDEN, activeJob, catNap, doing, lifeMarks, petDoing, pets, resident, residentLabel, residents, route, strollPoint,
 } from '../src/game/townFolk.ts';
 import { ISLAND, LOTS, PATHS, PLAZA, heightAt, inBox, lotBox } from '../src/game/townPlan.ts';
 import { BALANCE, createWorld, serialize } from '../src/sim/index.ts';
@@ -161,6 +161,19 @@ describe('moradores da vila', () => {
     expect(inLot(MINE_CART.x, MINE_CART.z, -1.5)).toBe(false);
     expect(nearPath(MINE_CART.x, MINE_CART.z, 1)).toBe(false);
     expect(heightAt(MINE_CART.x, MINE_CART.z)).toBe(0);
+  });
+
+  it('a horta de cogumelos chega com a Mãe-Bolor vencida, rente ao chão e sem invadir a rua', () => {
+    const w = createWorld(33);
+    expect(lifeMarks(w).horta).toBe(false);
+    w.bossesBeaten.push(20, 25);
+    expect(lifeMarks(w).horta).toBe(false);
+    w.bossesBeaten.push(30);
+    expect(lifeMarks(w).horta).toBe(true);
+    // O canteiro tem 0,7 m de raio.
+    expect(nearPath(MUSHROOM_GARDEN.x, MUSHROOM_GARDEN.z, 0.7)).toBe(false);
+    expect(inLot(MUSHROOM_GARDEN.x, MUSHROOM_GARDEN.z)).toBe(false);
+    expect(heightAt(MUSHROOM_GARDEN.x, MUSHROOM_GARDEN.z)).toBe(0);
   });
 
   it('nada dos moradores entra no save', () => {

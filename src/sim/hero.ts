@@ -23,6 +23,12 @@ export interface HeroStats {
   woundFrac: number;
   /** Perfuração: fração da couraça dos inimigos que os golpes ignoram (Ato II). */
   pierce: number;
+  /** Corte na duração do veneno (afixo Imune, Ato III). */
+  imune: number;
+  /** A poção também tira o veneno (alquimista nível 5). */
+  antidote: boolean;
+  /** Quanto do veneno ainda pega (1 = todo): Imune corta a duração, Sangue Amargo corta o dano. */
+  venomTaken: number;
 }
 
 export function hasLegend(equip: Partial<Record<Slot, Item>>, id: string): boolean {
@@ -32,7 +38,7 @@ export function hasLegend(equip: Partial<Record<Slot, Item>>, id: string): boole
 export function heroStats(w: World, equip: Partial<Record<Slot, Item>> = w.hero.equip): HeroStats {
   const h = w.hero;
   let hpPct = 0, dmgPct = 0, speedPct = 0, crit = BALANCE.baseCrit, armor = 0, block = 0, thorns = 0;
-  let lifesteal = 0, luck = 0, potionPct = 0, heavy = 0, pierce = 0;
+  let lifesteal = 0, luck = 0, potionPct = 0, heavy = 0, pierce = 0, imune = 0;
   let weaponDmg = 5, weaponAps = 1, twoHanded = false;
   for (const item of Object.values(equip)) {
     if (!item) continue;
@@ -64,6 +70,7 @@ export function heroStats(w: World, equip: Partial<Record<Slot, Item>> = w.hero.
       else if (a === 'afortunado') luck += v;
       else if (a === 'sereno') potionPct += v;
       else if (a === 'perfurante') pierce += v;
+      else if (a === 'imune') imune += v;
     }
   }
   if (h.learned.includes('pele_de_ferro')) armor *= 1.2;
@@ -88,11 +95,14 @@ export function heroStats(w: World, equip: Partial<Record<Slot, Item>> = w.hero.
     lifesteal,
     luck,
     potionHeal: (BALANCE.potionHeal + BALANCE.potionHealPerAlchemist * alch) * (1 + potionPct),
-    potionsMax: BALANCE.potionBase + alch,
+    potionsMax: BALANCE.potionBase + alch + (h.learned.includes('folego_mineiro') ? 1 : 0),
     heavy,
     twoHanded,
     woundFrac,
     pierce: Math.min(BALANCE.pierceMax, pierce),
+    imune: Math.min(BALANCE.imuneMax, imune),
+    antidote: alch >= 5,
+    venomTaken: (1 - Math.min(BALANCE.imuneMax, imune)) * (h.learned.includes('sangue_amargo') ? 0.5 : 1),
   };
 }
 
@@ -106,7 +116,10 @@ export function heroPower(s: HeroStats, floor: number): number {
   // A couraça média do ato corta o dano; a perfuração devolve parte.
   const c = (BALANCE.actArmor[actOf(floor) - 1] ?? BALANCE.actArmor[BALANCE.actArmor.length - 1]!) * (1 - s.pierce);
   const dps = s.dmg * s.aps * (1 + s.crit * (BALANCE.critMult - 1)) * (1 - c / (c + BALANCE.couracaK));
-  const ehp = (s.maxHp / (1 - red) / (1 - s.block * BALANCE.blockReduce)) * (1 + s.potionsMax * s.potionHeal * 0.5);
+  // O veneno do ato é parte do dano que chega; Imune e Sangue Amargo cortam essa parte.
+  const venom = BALANCE.actVenom[actOf(floor) - 1] ?? 0;
+  const taken = 1 - venom + venom * s.venomTaken;
+  const ehp = (s.maxHp / (1 - red) / (1 - s.block * BALANCE.blockReduce) / taken) * (1 + s.potionsMax * s.potionHeal * 0.5);
   return Math.sqrt(dps * ehp);
 }
 

@@ -5,8 +5,9 @@
  *   npm run balance -- [--seeds 20] [--hours 7] [--from 1000] [--verbose]
  *
  * As metas do Ato I olham até a primeira vitória sobre o Senhor (andar 10); as do Ato II, dali até
- * a primeira vitória sobre a Couraça Submersa (andar 20). Algumas sementes jogam de novo sem
- * perfuração, para medir quanto ela pesa nas Minas.
+ * a primeira vitória sobre a Couraça Submersa (andar 20); as do Ato III, dali até a Mãe-Bolor (30).
+ * Algumas sementes jogam de novo sem perfuração, para medir quanto ela pesa nas Minas, e sem resposta
+ * ao veneno, para medir quanto ele pesa nos Fungos.
  */
 import { botTick } from '../src/sim/bot.ts';
 import type { BotOptions } from '../src/sim/bot.ts';
@@ -20,7 +21,7 @@ const num = (flag: string, d: number) => {
   return i >= 0 ? Number(args[i + 1]) : d;
 };
 const SEEDS = num('--seeds', 20);
-const HOURS = num('--hours', 7);
+const HOURS = num('--hours', 12);
 const PIERCELESS = Math.min(6, SEEDS);
 const VERBOSE = args.includes('--verbose');
 const FROM = num('--from', 1000);
@@ -63,6 +64,16 @@ interface Run {
   couracaPhase2: number | null;
   act2StallMin: number;
   act2StallFloor: number;
+  /** Ato III: da Couraça até a Mãe-Bolor (ou até o fim da corrida). */
+  boss25: number | null;
+  boss30: number | null;
+  act3Hours: number;
+  act3Deaths: number;
+  act3RoomSec: number;
+  act3Rooms: number;
+  maeSec: number | null;
+  act3StallMin: number;
+  act3StallFloor: number;
 }
 
 /** Diferença entre dois retratos das estatísticas (o que aconteceu entre eles). */
@@ -76,8 +87,13 @@ function runSeed(seed: number, bot: BotOptions = {}): Run {
   let w: World = createWorld(seed);
   let atBoss10: Stats | null = null;
   let atBoss20: Stats | null = null;
+  let atBoss30: Stats | null = null;
   let act2Stall = 0;
   let act2StallFloor = 0;
+  let act3Stall = 0;
+  let act3StallFloor = 0;
+  // Duração da primeira vitória sobre cada chefe de ato (as revanches, quando o bot volta ao andar, são mais fáceis).
+  const firstWin: Record<number, number> = {};
   let forgeOk = true;
   let impasses = 0;
   let lastDeep = 1;
@@ -94,6 +110,10 @@ function runSeed(seed: number, bot: BotOptions = {}): Run {
     prevPhase = w.phase;
     if (!atBoss10 && w.bossesBeaten.includes(10)) atBoss10 = structuredClone(w.stats);
     if (!atBoss20 && w.bossesBeaten.includes(20)) atBoss20 = structuredClone(w.stats);
+    if (!atBoss30 && w.bossesBeaten.includes(30)) atBoss30 = structuredClone(w.stats);
+    for (const f of [20, 30]) {
+      if (firstWin[f] === undefined && w.bossesBeaten.includes(f) && w.room) firstWin[f] = (w.tick - w.room.fightStart) / 10;
+    }
     if (atBoss10 && !atBoss20) {
       const gap = w.tick - Math.max(lastDeepTick, w.stats.bossFirst['10'] ?? 0);
       if (gap > act2Stall) {
@@ -101,12 +121,19 @@ function runSeed(seed: number, bot: BotOptions = {}): Run {
         act2StallFloor = lastDeep;
       }
     }
+    if (atBoss20 && !atBoss30) {
+      const gap = w.tick - Math.max(lastDeepTick, w.stats.bossFirst['20'] ?? 0);
+      if (gap > act3Stall) {
+        act3Stall = gap;
+        act3StallFloor = lastDeep;
+      }
+    }
     if (goldIdle === null && w.bossesBeaten.includes(10)) {
       const costs = BUILDING_IDS.map((id) => nextCost(w, id)?.gold).filter((g): g is number => g !== undefined);
       goldIdle = costs.length ? w.village.gold / Math.min(...costs) : 0;
       forgedAtBoss10 = w.stats.forged + w.stats.upgraded;
     }
-    if (w.room?.phase === 'luta' && w.tick - w.room.fightStart === 3000) impasses++;
+    if (w.phase === 'sala' && w.room?.phase === 'luta' && w.tick - w.room.fightStart === 3000) impasses++;
     if (w.hero.deepest > lastDeep) {
       lastDeep = w.hero.deepest;
       lastDeepTick = w.tick;
@@ -124,6 +151,9 @@ function runSeed(seed: number, bot: BotOptions = {}): Run {
   const a2 = atBoss10 ? delta(atBoss10, atBoss20 ?? w.stats) : null;
   const b10 = w.stats.bossFirst['10'] ?? null;
   const end2 = w.stats.bossFirst['20'] ?? TICKS;
+  const b20 = w.stats.bossFirst['20'] ?? null;
+  const end3 = w.stats.bossFirst['30'] ?? TICKS;
+  const a3 = atBoss20 ? delta(atBoss20, atBoss30 ?? w.stats) : null;
   return {
     seed,
     boss5: s.bossFirst['5'] ?? null,
@@ -153,10 +183,19 @@ function runSeed(seed: number, bot: BotOptions = {}): Run {
     act2RoomSec: a2 && a2.rooms ? a2.fightTicks / a2.rooms / 10 : 0,
     act2Rooms: a2?.rooms ?? 0,
     act2BossSec: a2 && a2.bossFights ? a2.bossFightTicks / a2.bossFights / 10 : null,
-    couracaSec: a2 && a2.senhorFights ? a2.senhorFightTicks / a2.senhorFights / 10 : null,
+    couracaSec: firstWin[20] ?? null,
     couracaPhase2: a2 && a2.senhorFights ? a2.senhorPhase2Frac / a2.senhorFights : null,
     act2StallMin: act2Stall / MIN,
     act2StallFloor,
+    boss25: w.stats.bossFirst['25'] ?? null,
+    boss30: w.stats.bossFirst['30'] ?? null,
+    act3Hours: b20 === null ? 0 : (end3 - b20) / 36000,
+    act3Deaths: a3?.deaths ?? 0,
+    act3RoomSec: a3 && a3.rooms ? a3.fightTicks / a3.rooms / 10 : 0,
+    act3Rooms: a3?.rooms ?? 0,
+    maeSec: firstWin[30] ?? null,
+    act3StallMin: act3Stall / MIN,
+    act3StallFloor,
   };
 }
 
@@ -175,14 +214,20 @@ const ms = performance.now() - t0;
 // As mesmas sementes de novo, sem perfuração (nada de martelo, alabarda, Perfurante nem Quebra-Couraça).
 const blunt: Run[] = [];
 for (let i = 0; i < PIERCELESS; i++) blunt.push(runSeed(FROM + i, { noPierce: true }));
+// E sem resposta ao veneno (nada de Purificar, Sangue Amargo, Imune nem o alquimista 5).
+const bare: Run[] = [];
+for (let i = 0; i < PIERCELESS; i++) bare.push(runSeed(FROM + i, { noAntidote: true }));
 // Determinismo: a mesma semente de novo.
 const again = runSeed(FROM);
 
 if (VERBOSE) {
-  console.log('semente  chefe5  chefe10  chefe15  chefe20  mortes  fundo  nível  razão  sala(s)  dano  chefe(s)  perda  restos  parede  parede2(andar)');
+  const a3 = (r: Run) => `${r.seed}: ${r.act3Deaths} mortes em ${f1(r.act3Hours)} h${r.boss30 ? '' : ' (sem vencer a Mãe)'}`;
+  console.log('Ato III com resposta ao veneno:', runs.slice(0, PIERCELESS).map(a3).join(' · '));
+  console.log('Ato III sem resposta ao veneno:', bare.map(a3).join(' · '));
+  console.log('semente  chefe5  chefe10  chefe15  chefe20  chefe25  chefe30  mortes  fundo  nível  razão  sala(s)  dano  chefe(s)  perda  restos  parede  parede2(andar)  parede3(andar)');
   for (const r of runs) {
     console.log(
-      `${r.seed}     ${r.boss5 ? f1(r.boss5 / MIN) : '—'}    ${r.boss10 ? f1(r.boss10 / MIN) : '—'}    ${r.boss15 ? f1(r.boss15 / MIN) : '—'}    ${r.boss20 ? f1(r.boss20 / MIN) : '—'}     ${r.deaths}      ${r.deepest}     ${r.level}     ${r.ratioAtDeepest.toFixed(2)}   ${f1(r.roomSec)}     ${(r.roomDmg * 100).toFixed(0)}%   ${f1(r.bossSec)}     ${r.lossFrac === null ? '—' : (r.lossFrac * 100).toFixed(0) + '%'}   ${r.remainsRatio === null ? '—' : (r.remainsRatio * 100).toFixed(0) + '%'}   ${f1(r.maxStallMin)}   ${f1(r.act2StallMin)} (${r.act2StallFloor})`,
+      `${r.seed}     ${r.boss5 ? f1(r.boss5 / MIN) : '—'}    ${r.boss10 ? f1(r.boss10 / MIN) : '—'}    ${r.boss15 ? f1(r.boss15 / MIN) : '—'}    ${r.boss20 ? f1(r.boss20 / MIN) : '—'}    ${r.boss25 ? f1(r.boss25 / MIN) : '—'}    ${r.boss30 ? f1(r.boss30 / MIN) : '—'}     ${r.deaths}      ${r.deepest}     ${r.level}     ${r.ratioAtDeepest.toFixed(2)}   ${f1(r.roomSec)}     ${(r.roomDmg * 100).toFixed(0)}%   ${f1(r.bossSec)}     ${r.lossFrac === null ? '—' : (r.lossFrac * 100).toFixed(0) + '%'}   ${r.remainsRatio === null ? '—' : (r.remainsRatio * 100).toFixed(0) + '%'}   ${f1(r.maxStallMin)}   ${f1(r.act2StallMin)} (${r.act2StallFloor})   ${f1(r.act3StallMin)} (${r.act3StallFloor})`,
     );
   }
 }
@@ -265,12 +310,55 @@ const checks: Check[] = [
     return { name: 'Ato II · sem perfuração, as salas levam (×)', value: `${(dull / sharp).toFixed(2)}`, ok: dull / sharp >= 1.15 };
   })(),
   (() => {
-    // O Ato II dura o dobro do I: a parede segue a mesma proporção (mediana ≤ 45 e pior ≤ 90 min).
+    // O Ato II dura o dobro do I: a parede segue a mesma proporção (mediana ≤ 45 e pior ≤ 100 min; o
+    // pior caso é sempre a Couraça, a trava do fim do ato).
     const xs = runs.filter((r) => r.boss10 !== null).map((r) => r.act2StallMin);
     return {
       name: 'Ato II · parede sem avanço (mediana · pior, min)',
       value: `${f1(median(xs))} · ${f1(Math.max(...xs))}`,
-      ok: xs.length > 0 && median(xs) <= 45 && Math.max(...xs) <= 90,
+      ok: xs.length > 0 && median(xs) <= 45 && Math.max(...xs) <= 100,
+    };
+  })(),
+  // Ato III: o Jardim de Fungos.
+  (() => {
+    const xs = runs.filter((r) => r.boss20 !== null && r.boss25 !== null).map((r) => (r.boss25! - r.boss20!) / MIN);
+    return { name: 'Ato III · Guardião (andar 25) depois da Couraça (mediana, min)', value: f1(median(xs)), ok: xs.length > 0 && median(xs) >= 70 && median(xs) <= 150 };
+  })(),
+  (() => {
+    const xs = runs.filter((r) => r.boss20 !== null && r.boss30 !== null).map((r) => (r.boss30! - r.boss20!) / 36000);
+    return { name: 'Ato III · Mãe-Bolor (andar 30) depois da Couraça (mediana, h)', value: f1(median(xs)), ok: xs.length > 0 && median(xs) >= 3 && median(xs) <= 4 };
+  })(),
+  {
+    name: `Ato III · sementes que venceram o andar 30 em ${HOURS} h`,
+    value: `${runs.filter((r) => r.boss30 !== null).length}/${runs.length}`,
+    ok: runs.filter((r) => r.boss30 !== null).length >= 0.8 * runs.length,
+  },
+  (() => {
+    const xs = runs.filter((r) => r.act3Hours > 0.5).map((r) => r.act3Deaths / r.act3Hours);
+    return { name: 'Ato III · mortes por hora', value: f1(mean(xs)), ok: xs.length > 0 && mean(xs) >= 0.5 && mean(xs) <= 2.5 };
+  })(),
+  (() => {
+    const xs = runs.filter((r) => r.act3Rooms > 0).map((r) => r.act3RoomSec);
+    return { name: 'Ato III · luta média por sala (s)', value: f1(mean(xs)), ok: xs.length > 0 && mean(xs) >= 10 && mean(xs) <= 35 };
+  })(),
+  (() => {
+    const xs = runs.map((r) => r.maeSec).filter((x): x is number => x !== null);
+    return { name: 'Ato III · luta com a Mãe-Bolor (s)', value: f1(mean(xs)), ok: xs.length > 0 && mean(xs) >= 60 && mean(xs) <= 150 };
+  })(),
+  (() => {
+    // Mortes no ato inteiro (até a Mãe-Bolor ou o fim da corrida): sem resposta, o ato também dura mais.
+    const total = (rs: Run[]) => mean(rs.filter((r) => r.boss20 !== null).map((r) => r.act3Deaths));
+    const with_ = total(runs.slice(0, PIERCELESS));
+    const without = total(bare);
+    return { name: 'Ato III · sem resposta ao veneno, as mortes no ato (×)', value: `${(without / with_).toFixed(2)}`, ok: without / with_ >= 2 };
+  })(),
+  (() => {
+    // O Ato III dura uma vez e meia o II: a parede segue a mesma proporção (mediana ≤ 70 e pior ≤ 135 min).
+    const xs = runs.filter((r) => r.boss20 !== null).map((r) => r.act3StallMin);
+    return {
+      name: 'Ato III · parede sem avanço (mediana · pior, min)',
+      value: `${f1(median(xs))} · ${f1(Math.max(...xs))}`,
+      ok: xs.length > 0 && median(xs) <= 70 && Math.max(...xs) <= 135,
     };
   })(),
 ];

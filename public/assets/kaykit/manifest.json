@@ -1,5 +1,5 @@
 {
-  "source": "KayKit (Kay Lousberg), CC0 1.0 — ver LICENSES.md",
+  "source": "KayKit (Kay Lousberg), Kenney e Quaternius, CC0 1.0 — ver LICENSES.md",
   "files": [
     {
       "path": "adventurers/Barbarian.glb",
@@ -1860,6 +1860,36 @@
       "path": "kenney-cube-pets/Textures/colormap.png",
       "bytes": 10915,
       "sha256": "2f6d0032e51c2d49b13b8e689d59eb39aa3ee6c32f2a1851213e11fc7593177d"
+    },
+    {
+      "path": "quaternius/Mushnub.glb",
+      "bytes": 67900,
+      "sha256": "04614a9d0db2a00d17cd85f4ef9c54e19cd3692530c0724b46809aa928e161e9"
+    },
+    {
+      "path": "quaternius/Mushnub_Evolved.glb",
+      "bytes": 149516,
+      "sha256": "fe364b07af250c48073c319c0b4460239ca39daab37269a4e23217be46a3331c"
+    },
+    {
+      "path": "quaternius/GreenBlob.glb",
+      "bytes": 74812,
+      "sha256": "31c46edd6306e4ab21bec4608b41003baa74f430f27d357b90c9b6401d88a584"
+    },
+    {
+      "path": "quaternius/GreenSpikyBlob.glb",
+      "bytes": 185820,
+      "sha256": "ad5e8b1cdf8c0d328b4b44537d3da8fa98119a9a99fb6163e2f325dbb8bbecc1"
+    },
+    {
+      "path": "quaternius/PinkSlime.glb",
+      "bytes": 62652,
+      "sha256": "34bb111a7931bb957f992e127d71fac321aaeea1bdcc7da56fa5aba55c83d783"
+    },
+    {
+      "path": "quaternius/MushroomKing.glb",
+      "bytes": 444228,
+      "sha256": "45bbb9d659697d0127be159af0a58fae3fe8eef430adacaf994efcf0769b2e09"
     },
     {
       "path": "dungeon/stairs.gltf",

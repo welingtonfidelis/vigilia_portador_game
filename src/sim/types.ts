@@ -2,16 +2,18 @@
 
 export type Slot = 'arma' | 'secundaria' | 'elmo' | 'peitoral' | 'perneiras' | 'capa' | 'amuleto';
 export type Rarity = 'comum' | 'rara' | 'epica' | 'lendaria';
-export type AffixId = 'afiado' | 'brutal' | 'veloz' | 'robusto' | 'guardiao' | 'sanguessuga' | 'afortunado' | 'sereno' | 'perfurante';
+export type AffixId = 'afiado' | 'brutal' | 'veloz' | 'robusto' | 'guardiao' | 'sanguessuga' | 'afortunado' | 'sereno' | 'perfurante' | 'imune';
 export type Weight = 'leve' | 'medio' | 'pesado' | 'nenhum';
-export type Material = 'ossos' | 'ferro' | 'ferro_negro';
+export type Material = 'ossos' | 'ferro' | 'ferro_negro' | 'esporos';
 export type SkillId =
   | 'golpe_amplo' | 'investida' | 'segundo_folego' | 'grito' | 'pele_de_ferro' | 'sede_de_sangue'
-  | 'golpe_escudo' | 'quebra_couraca' | 'mao_pesada' | 'pele_umida';
+  | 'golpe_escudo' | 'quebra_couraca' | 'mao_pesada' | 'pele_umida'
+  | 'purificar' | 'golpe_giratorio' | 'sangue_amargo' | 'folego_mineiro';
 export type BuildingId = 'ferreiro' | 'treinador' | 'alquimista' | 'carroceiro' | 'curandeira' | 'taticas';
 export type EnemyKind =
   | 'lacaio' | 'guerreiro' | 'ladino' | 'mago' | 'capitao' | 'senhor'
-  | 'mineiro' | 'afogado' | 'golem' | 'lanterneiro' | 'capataz' | 'couraca';
+  | 'mineiro' | 'afogado' | 'golem' | 'lanterneiro' | 'capataz' | 'couraca'
+  | 'esporento' | 'brotado' | 'aranha' | 'cuspidor' | 'guardiao' | 'mae';
 export type EliteAffix = 'blindado' | 'vampirico' | 'furioso' | 'veloz';
 export type RoomKind = 'combate' | 'elite' | 'bau' | 'prisioneiro' | 'santuario' | 'chefe';
 export type HeadId = 'Knight' | 'Barbarian' | 'Mage' | 'Ranger' | 'Rogue' | 'Rogue_Hooded';
@@ -68,6 +70,9 @@ export interface Enemy {
   armorBreakUntil: number;
   /** A Couraça Submersa na fase 2 bate duas vezes seguidas: o segundo impacto, se houver. */
   comboAt: number;
+  /** Veneno no inimigo (o Ferrão da Mãe): dano por segundo até `venomUntil`. */
+  venom: number;
+  venomUntil: number;
 }
 
 export type HeroActionKind = 'golpe' | 'habilidade' | 'pocao' | 'fuga';
@@ -103,7 +108,7 @@ export interface Room {
   exitTo?: 'fundo' | 'volta';
 }
 
-export type CondId = 'vida_abaixo' | 'anel_min' | 'fundo_min' | 'alvo_elite' | 'alvo_couraca' | 'pocoes_max' | 'sempre';
+export type CondId = 'vida_abaixo' | 'anel_min' | 'fundo_min' | 'alvo_elite' | 'alvo_couraca' | 'envenenado' | 'pocoes_max' | 'sempre';
 export type RuleAction = 'pocao' | 'habilidade' | 'recuar';
 
 export interface Rule {
@@ -158,6 +163,10 @@ export interface Hero {
   stunUntil: number;
   /** Golpes dados (a Âncora Partida ignora a couraça a cada quarto). */
   swings: number;
+  /** Veneno (Ato III): o tick em que cada dose acaba (até 5 doses). */
+  poison: number[];
+  /** Preso pela aranha-de-micélio: sem Investida até este tick. */
+  rootUntil: number;
   action: HeroAction | null;
   /** Andar mais fundo alcançado. */
   deepest: number;

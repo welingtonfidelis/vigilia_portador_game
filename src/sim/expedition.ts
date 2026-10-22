@@ -1,15 +1,20 @@
 /** Descida, salas, saque, volta, morte, rolagem do que volta e restos (docs/VIGILIA-PORTADOR.md §2.1 e §2.10). */
 import { chronicle } from './chronicle.ts';
 import { BALANCE, actOf, floorPower, isBossFloor, roomsOnFloor } from './config.ts';
-import { spawnGroup, stepFight } from './combat.ts';
+import { poisonTick, spawnGroup, stepFight } from './combat.ts';
 import { ENEMIES, MATERIALS, isBoss } from './data.ts';
-import { gainXp, heroStats, powerRatio } from './hero.ts';
+import { gainXp, hasLegend, heroStats, powerRatio } from './hero.ts';
 import { addLoot, dropItem, emptyLoot, itemName, itemValue, jitter, lootValue, makeLegend } from './items.ts';
 import { chance, int, rand, weighted } from './rng.ts';
 import type { Enemy, Item, Loot, Rarity, ReturnReport, RoomKind, SimEvent, World } from './types.ts';
 
 /** A primeira vitória em cada chefe deixa a lendária dele: o elmo do Capitão, a espada do Senhor. */
-const LEGEND_BY_BOSS_FLOOR: Record<number, string> = { 5: 'coroa_capitao', 10: 'vigia_partida', 15: 'picareta_capataz', 20: 'ancora_partida' };
+const LEGEND_BY_BOSS_FLOOR: Record<number, string> = {
+  5: 'coroa_capitao', 10: 'vigia_partida', 15: 'picareta_capataz', 20: 'ancora_partida', 25: 'coroa_micelio', 30: 'ferrao_mae',
+};
+
+/** Do que é feito o chefe, para a crônica ("Nos ossos dele, …"). */
+const BOSS_REMAINS = ['Nos ossos dele', 'Na ferrugem dele', 'No bolor dele'];
 
 export function roomKind(w: World, floor: number, index: number): RoomKind {
   if (index === roomsOnFloor(floor) - 1 && isBossFloor(floor)) return 'chefe';
@@ -55,6 +60,8 @@ function onKill(w: World, e: Enemy, ev: SimEvent[]): void {
   if (gainXp(w, Math.round(d.xp * Math.pow(p, 0.8) * (e.elite ? 2.5 : 1)))) {
     chronicle(w, `${w.hero.name} chegou ao nível ${w.hero.level}.`, 'bom', ev);
   }
+  // Coroa de Micélio: cada abate cura 2% da vida.
+  if (hasLegend(w.hero.equip, 'coroa_micelio')) w.hero.hp = Math.min(s.maxHp, w.hero.hp + s.maxHp * 0.02);
   if (isBoss(e.kind)) {
     exp.bag.mats.ferro += 10;
     if (d.drops) exp.bag.mats[d.drops[0]] += int(w, d.drops[1], d.drops[2]);
@@ -63,11 +70,17 @@ function onKill(w: World, e: Enemy, ev: SimEvent[]): void {
     if (first) {
       w.bossesBeaten.push(floor);
       w.stats.bossFirst[String(floor)] = w.tick;
+      // O fundo das Minas encosta nos Fungos: a Couraça traz presos os primeiros esporos, o bastante
+      // para o treinador ensinar as habilidades do Ato III.
+      if (e.kind === 'couraca') {
+        exp.bag.mats.esporos += BALANCE.couracaSpores;
+        chronicle(w, `Na couraça vencida, ${BALANCE.couracaSpores} esporos de um jardim lá embaixo.`, 'bom', ev);
+      }
       const legend = LEGEND_BY_BOSS_FLOOR[floor];
       if (legend) {
         const item = makeLegend(w, legend, Math.ceil(floor / 2), `${d.name}, andar ${floor}`);
         bagItem(w, item, ev);
-        chronicle(w, `${d.name} caiu no andar ${floor}. ${actOf(floor) === 1 ? 'Nos ossos dele' : 'Na ferrugem dele'}, ${itemName(item)}.`, 'lenda', ev);
+        chronicle(w, `${d.name} caiu no andar ${floor}. ${BOSS_REMAINS[actOf(floor) - 1] ?? BOSS_REMAINS[0]}, ${itemName(item)}.`, 'lenda', ev);
       }
     }
     bagItem(w, dropItem(w, floor, 'epica', s.luck), ev);
@@ -129,6 +142,7 @@ function newReport(w: World, died: boolean, reason: string): ReturnReport {
 export function leave(w: World, reason: string, ev: SimEvent[]): void {
   const exp = w.exp!;
   exp.leaving = reason;
+  w.hero.poison = [];
   w.pending = { ...newReport(w, false, reason), recovered: w.pending?.recovered ?? 0 };
   w.phase = 'voltando';
   w.carried = false;
@@ -199,6 +213,7 @@ function die(w: World, ev: SimEvent[]): void {
   report.woundTicks = total;
   h.hp = 0;
   h.action = null;
+  h.poison = [];
   w.stats.deaths++;
   w.stats.bagValueAtDeath += before;
   w.stats.lostValueAtDeath += lootValue(lost);
@@ -276,7 +291,7 @@ function roomCleared(w: World, ev: SimEvent[]): void {
     if (room.kind === 'chefe') {
       w.stats.bossFightTicks += ticks;
       w.stats.bossFights++;
-      if (room.enemies.some((e) => e.kind === 'senhor' || e.kind === 'couraca')) {
+      if (room.enemies.some((e) => e.kind === 'senhor' || e.kind === 'couraca' || e.kind === 'mae')) {
         w.stats.senhorFights++;
         w.stats.senhorFightTicks += ticks;
         w.stats.senhorPhase2Frac += room.phase2At && ticks > 0 ? (room.phase2At - room.fightStart) / ticks : 1;
@@ -289,7 +304,8 @@ function roomCleared(w: World, ev: SimEvent[]): void {
   if (room.kind === 'bau') {
     exp.bag.gold += jitter(w, 20 * floorPower(room.floor));
     exp.bag.mats.ferro += int(w, 3, 6);
-    if (actOf(room.floor) >= 2) exp.bag.mats.ferro_negro += int(w, 2, 4);
+    if (actOf(room.floor) === 2) exp.bag.mats.ferro_negro += int(w, 2, 4);
+    if (actOf(room.floor) >= 3) exp.bag.mats.esporos += int(w, 3, 6);
     const legendary = room.floor >= 6 && chance(w, 0.03) && !hasItemAnywhere(w, 'juramento_ferro');
     bagItem(w, legendary ? makeLegend(w, 'juramento_ferro', Math.ceil(room.floor / 2), `Baú do andar ${room.floor}`) : dropItem(w, room.floor, 'rara', s.luck), ev);
   }
@@ -376,6 +392,11 @@ export function stepExpedition(w: World, ev: SimEvent[]): void {
       roomCleared(w, ev);
     }
     return;
+  }
+  // O veneno segue fora da luta (no saque e na passagem entre as salas).
+  if (room.phase !== 'luta' && w.hero.poison.length > 0) {
+    poisonTick(w, heroStats(w));
+    if (w.hero.hp <= 0) return die(w, ev);
   }
   if (room.phase === 'luta') {
     const res = stepFight(w, ev, onKill);

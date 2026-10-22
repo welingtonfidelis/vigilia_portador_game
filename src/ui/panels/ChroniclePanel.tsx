@@ -11,7 +11,7 @@ export function ChroniclePanel({ w }: { w: World }) {
           </li>
         ))}
       </ol>
-      <p class="muted small">Arte: KayKit, de Kay Lousberg (www.kaylousberg.com), CC0.</p>
+      <p class="muted small">Arte: KayKit, de Kay Lousberg (www.kaylousberg.com); Kenney (www.kenney.nl); Quaternius (quaternius.com). Tudo CC0.</p>
     </div>
   );
 }

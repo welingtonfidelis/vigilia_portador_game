@@ -76,7 +76,8 @@ export function Credits({ onClose }: { onClose: () => void }) {
     <div class="modal-back" onClick={onClose}>
       <div class="modal" onClick={(e) => e.stopPropagation()}>
         <h2>Vigília: O Portador da Chama</h2>
-        <p>Arte 3D: <b>KayKit</b>, de Kay Lousberg (www.kaylousberg.com), sob CC0 1.0: Adventurers, Skeletons, Character Animations e Dungeon Pack.</p>
+        <p>Arte 3D: <b>KayKit</b>, de Kay Lousberg (www.kaylousberg.com), sob CC0 1.0: personagens, esqueletos, animações, masmorra, armas e objetos.</p>
+        <p>A vila: <b>Kenney</b> (www.kenney.nl), CC0 1.0. Os monstros do Jardim de Fungos: <b>Quaternius</b> (quaternius.com), CC0 1.0.</p>
         <p>Feito com TypeScript, Three.js e Preact. A estrutura nasceu do Vigília.</p>
         <button onClick={onClose}>Fechar</button>
       </div>

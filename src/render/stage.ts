@@ -50,6 +50,8 @@ const NIGHT_SKY = new THREE.Color(0x141d29);
 const CRYPT_SKY = new THREE.Color(0x0a0c11);
 /** As Minas Inundadas (Ato II): o escuro puxa para o verde-água, e o céu refletido é mais frio. */
 const MINE_SKY = new THREE.Color(0x071113);
+/** O Jardim de Fungos (Ato III): o escuro puxa para o violeta. */
+const FUNGUS_SKY = new THREE.Color(0x0c0814);
 const BACK_SPOTS = [new THREE.Vector3(-5, 0, -4.4), new THREE.Vector3(5.4, 0, -3), new THREE.Vector3(-5.6, 0, 0.6), new THREE.Vector3(5.8, 0, 1.2)];
 
 export interface Quality {
@@ -423,16 +425,17 @@ export class Stage {
   }
 
   private lightCrypt(): void {
-    const mine = this.roomAct >= 2;
-    (this.scene.background as THREE.Color).copy(mine ? MINE_SKY : CRYPT_SKY);
+    const act = Math.min(this.roomAct, 3) - 1;
+    const sky = [CRYPT_SKY, MINE_SKY, FUNGUS_SKY][act]!;
+    (this.scene.background as THREE.Color).copy(sky);
     const fog = this.scene.fog as THREE.Fog;
-    fog.color.copy(mine ? MINE_SKY : CRYPT_SKY);
+    fog.color.copy(sky);
     fog.near = 20;
     fog.far = 44;
-    this.sun.intensity = mine ? 1.35 : 1.6;
-    this.sun.color.set(mine ? 0xb2dde6 : 0xc8d6ff);
-    this.hemi.intensity = mine ? 1.2 : 1.1;
-    this.hemi.color.set(mine ? 0x7fb0b4 : 0x8a9cc4);
+    this.sun.intensity = [1.6, 1.35, 1.3][act]!;
+    this.sun.color.set([0xc8d6ff, 0xb2dde6, 0xcabaff][act]!);
+    this.hemi.intensity = [1.1, 1.2, 1.15][act]!;
+    this.hemi.color.set([0x8a9cc4, 0x7fb0b4, 0xa08cd0][act]!);
     const sc = this.sun.shadow.camera;
     if (sc.right !== 13) {
       sc.left = sc.bottom = -13;
@@ -714,7 +717,7 @@ export class Stage {
           const prev = a.pos.clone();
           a.pos.lerp(goal, 1 - Math.exp(-dt * 5 * Math.max(1, speed * 0.7)));
           const walking = prev.distanceTo(a.pos) / Math.max(dt, 1e-3) > 0.5;
-          a.animator.loop(walking ? 'Skeletons_Walking' : 'Skeletons_Idle', walking ? 1.3 : 1);
+          a.move(walking, walking ? 1.3 : 1);
           const look = this.heroPos.clone().sub(a.pos);
           if (look.lengthSq() > 1e-3) a.root.rotation.y = Math.atan2(look.x, look.z);
         }

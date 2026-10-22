@@ -26,21 +26,35 @@ export const BALANCE = {
   /** Couraça dos inimigos do Ato II: corta o dano do herói por C / (C + couracaK), depois da perfuração. */
   couracaK: 18,
   /** Couraça média de um grupo de cada ato (para a "Força" da tela de equipamento). */
-  actArmor: [0, 17],
-  /** O que cada ato pede a mais além de P(andar) na "Força" (lentidão, aura e chefes com truques). */
-  actDemand: [1, 1],
-  /** Vida e dano dos inimigos de cada ato, além de P(andar): o Ato II já pesa pela couraça e pelos truques. */
-  actEnemyHp: [1, 0.92],
-  actEnemyDmg: [1, 0.74],
+  actArmor: [0, 17, 0],
+  /** Parte do dano recebido que vem do veneno em cada ato (para a "Força": Imune e Sangue Amargo cortam essa parte). */
+  actVenom: [0, 0, 0.4],
+  /** O que cada ato pede a mais além de P(andar) na "Força" (lentidão, aura, veneno e chefes com truques). */
+  actDemand: [1, 1, 1.4],
+  /** Vida e dano dos inimigos de cada ato, além de P(andar): os Atos II e III já pesam pelos truques. */
+  actEnemyHp: [1, 1, 5],
+  actEnemyDmg: [1, 0.74, 0.21],
   pierceMax: 0.8,
+  /** Veneno (Ato III): cada dose tira esta fração da vida máxima por segundo, por `poisonTicks`. */
+  poisonDose: 0.025,
+  poisonTicks: 60,
+  poisonMaxDoses: 5,
+  /** A Couraça Submersa na fase 2: a couraça dela cresce este tanto. */
+  couracaHarden: 1.2,
+  /** Esporos que a primeira vitória sobre a Couraça Submersa traz (o treinador 3 pede 30). */
+  couracaSpores: 30,
+  /** Com a Mãe-Bolor na fase 2, o veneno corre este tanto mais rápido. */
+  poisonBloom: 1.5,
+  /** O afixo Imune corta a duração do veneno, até este teto. */
+  imuneMax: 0.6,
   /** Buscar os restos só desce até eles com a Força do andar pelo menos nisto ("fundo demais" abaixo). */
   fetchMinRatio: 0.8,
 
   // Abismo
   floorPowerBase: 1.16,
   floorsPerAct: 10,
-  /** Fundo do abismo por enquanto: o fim do Ato II (M3.1). */
-  maxFloor: 20,
+  /** Fundo do abismo por enquanto: o fim do Ato III (M3.3). */
+  maxFloor: 30,
   roomsBase: 4,
   groupBase: 3,
   groupMax: 8,
@@ -59,7 +73,10 @@ export const BALANCE = {
   stashSize: 24,
 
   // Saque
-  itemChance: { lacaio: 0.06, guerreiro: 0.06, ladino: 0.06, mago: 0.06, mineiro: 0.06, afogado: 0.06, lanterneiro: 0.06, golem: 0.1, capitao: 1 } as Record<string, number>,
+  itemChance: {
+    lacaio: 0.06, guerreiro: 0.06, ladino: 0.06, mago: 0.06, mineiro: 0.06, afogado: 0.06, lanterneiro: 0.06, golem: 0.1,
+    esporento: 0.06, brotado: 0.03, aranha: 0.06, cuspidor: 0.06, capitao: 1,
+  } as Record<string, number>,
   eliteItemChance: 0.4,
   tierDownChance: 0.2,
   luckItemChance: 0.01,
@@ -115,10 +132,10 @@ export function floorTier(floor: number): number {
   return Math.ceil(floorInAct(floor) / 2) + 5 * (actOf(floor) - 1);
 }
 
-/** Salas por andar: 4 + ⌊andar no ato / 3⌋ (cada ato recomeça a conta); depois do primeiro ato, mais 1, e mais 1 na segunda metade. */
+/** Salas por andar: 4 + ⌊andar no ato / 3⌋ (cada ato recomeça a conta), mais 2 no Ato II e 4 do III em diante. */
 export function roomsOnFloor(floor: number): number {
   const n = floorInAct(floor);
-  const extra = actOf(floor) >= 2 ? 2 : 0;
+  const extra = Math.min(5, actOf(floor) * 2 - 2 + (actOf(floor) >= 3 ? 1 : 0));
   return BALANCE.roomsBase + Math.floor(n / 3) + extra;
 }
 

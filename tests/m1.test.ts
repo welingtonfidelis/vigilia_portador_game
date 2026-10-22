@@ -18,7 +18,7 @@ function senhorRoom(seed = 5): World {
   w.hero.deepest = 10;
   w.hero.level = 40;
   w.hero.hp = 1e5;
-  w.exp = { floor: 10, room: 6, bag: { gold: 0, mats: { ossos: 0, ferro: 0, ferro_negro: 0 }, items: [], people: 0 }, started: 0, recall: false, leaving: null, kills: 0 };
+  w.exp = { floor: 10, room: 6, bag: { gold: 0, mats: { ossos: 0, ferro: 0, ferro_negro: 0, esporos: 0 }, items: [], people: 0 }, started: 0, recall: false, leaving: null, kills: 0 };
   w.room = {
     floor: 10, index: 6, kind: 'chefe', enemies: spawnGroup(w, 10, 'chefe', 0), phase: 'luta', phaseEnd: 0, look: 1,
     fightStart: w.tick, fearUntil: 0, hpAtStart: w.hero.hp, phase2At: 0,

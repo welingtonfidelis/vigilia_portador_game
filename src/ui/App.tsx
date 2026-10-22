@@ -91,6 +91,7 @@ function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World;
   const h = w.hero;
   const s = heroStats(w);
   const hpPct = Math.max(0, Math.min(1, h.hp / s.maxHp));
+  const venom = h.poison.filter((t) => t > w.tick).length;
   const xpPct = h.xp / xpToNext(h.level);
   const v = w.village;
   const alive = w.room?.enemies.filter((e) => e.state !== 'morto') ?? [];
@@ -110,6 +111,7 @@ function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World;
         <div class="hud-row">
           <span title="Poções">{'⚗'.repeat(h.potions)}<span class="muted">{'⚗'.repeat(Math.max(0, s.potionsMax - h.potions))}</span></span>
           {h.wound && <span class="wound" title="Ferido: −vida e −dano até sarar na vila">✚ ferido {duration(h.wound.left)}</span>}
+          {venom > 0 && <span class="venom" title="Veneno: cada dose tira vida por 6 s; Purificar e o antídoto tiram">☣ {venom}</span>}
         </div>
       </div>
       <div class="hud-where">
@@ -136,6 +138,7 @@ function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World;
           <span title="Ossos">🦴 {nf(v.mats.ossos)}</span>
           <span title="Ferro">⛓ {nf(v.mats.ferro)}</span>
           {(v.mats.ferro_negro > 0 || w.hero.deepest >= 11) && <span title="Ferro-negro">◆ {nf(v.mats.ferro_negro ?? 0)}</span>}
+          {(v.mats.esporos > 0 || w.hero.deepest >= 21) && <span title="Esporos">✻ {nf(v.mats.esporos ?? 0)}</span>}
           <span title="Moradores">☺ {v.people}</span>
         </div>
         <div class="speed">

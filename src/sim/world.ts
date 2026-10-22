@@ -5,7 +5,7 @@ import { makeItem } from './items.ts';
 import { defaultCombatRules, defaultDescentRules } from './rules.ts';
 import type { BuildingId, HeadId, World } from './types.ts';
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export function createWorld(seed: number, head: HeadId = 'Knight', name?: string): World {
   const buildings = Object.fromEntries(BUILDING_IDS.map((id) => [id, BUILDINGS[id].start])) as Record<BuildingId, number>;
@@ -33,6 +33,8 @@ export function createWorld(seed: number, head: HeadId = 'Knight', name?: string
       slowUntil: 0,
       stunUntil: 0,
       swings: 0,
+      poison: [],
+      rootUntil: 0,
       action: null,
       deepest: 1,
     },
@@ -44,7 +46,7 @@ export function createWorld(seed: number, head: HeadId = 'Knight', name?: string
     room: null,
     village: {
       gold: 60,
-      mats: { ossos: 0, ferro: 0, ferro_negro: 0 },
+      mats: { ossos: 0, ferro: 0, ferro_negro: 0, esporos: 0 },
       people: 0,
       buildings,
       construction: null,

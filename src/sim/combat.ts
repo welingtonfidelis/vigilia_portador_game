@@ -42,12 +42,23 @@ export function makeEnemy(w: World, kind: EnemyKind, floor: number, elite: Elite
     armor: d.armor ?? 0,
     armorBreakUntil: 0,
     comboAt: 0,
+    venom: 0,
+    venomUntil: 0,
   };
 }
 
 /** Quem vem nos grupos de cada ato, conforme o andar dentro do ato. */
 function groupTable(floor: number): EnemyKind[] {
   const n = floorInAct(floor);
+  if (actOf(floor) >= 3) {
+    const t: EnemyKind[] = ['esporento', 'esporento', 'brotado', 'brotado'];
+    if (n >= 2) t.push('cuspidor');
+    if (n >= 3) t.push('aranha');
+    if (n >= 4) t.push('brotado', 'esporento');
+    if (n >= 6) t.push('cuspidor');
+    if (n >= 7) t.push('aranha');
+    return t;
+  }
   if (actOf(floor) >= 2) {
     const t: EnemyKind[] = ['mineiro', 'mineiro', 'mineiro', 'afogado'];
     if (n >= 2) t.push('afogado');
@@ -64,7 +75,8 @@ function groupTable(floor: number): EnemyKind[] {
 
 /** O bando que o chefe chama quando sobra pouca escolta. */
 function minionOf(floor: number): EnemyKind {
-  return actOf(floor) >= 2 ? 'mineiro' : 'lacaio';
+  const act = actOf(floor);
+  return act >= 3 ? 'brotado' : act >= 2 ? 'mineiro' : 'lacaio';
 }
 
 /** Grupo da sala: cresce com o andar; elite e chefe entram no começo da fila. */
@@ -74,15 +86,16 @@ export function spawnGroup(w: World, floor: number, kind: RoomKind, delay: numbe
   const n = kind === 'bau' ? 2 + Math.floor(floorInAct(floor) / 4) + (act - 1) : groupSize(floor);
   const table = groupTable(floor);
   const list: Enemy[] = [];
-  // O andar 10 de cada ato é do chefe do ato (Senhor da Cripta, Couraça Submersa); o 5, do menor.
+  // O andar 10 de cada ato é do chefe do ato (Senhor da Cripta, Couraça Submersa, Mãe-Bolor); o 5, do menor.
   if (kind === 'chefe') {
     const last = floorInAct(floor) === 10;
-    const boss: EnemyKind = act >= 2 ? (last ? 'couraca' : 'capataz') : last ? 'senhor' : 'capitao';
-    list.push(makeEnemy(w, boss, floor, null, delay));
+    const bosses: [EnemyKind, EnemyKind][] = [['capitao', 'senhor'], ['capataz', 'couraca'], ['guardiao', 'mae']];
+    const pair = bosses[Math.min(act, bosses.length) - 1]!;
+    list.push(makeEnemy(w, last ? pair[1] : pair[0], floor, null, delay));
   }
   if (kind === 'elite') {
     const affix = pick(w, ['blindado', 'vampirico', 'furioso', 'veloz'] as const);
-    const elites: readonly EnemyKind[] = act >= 2 ? ['mineiro', 'afogado'] : ['guerreiro', 'ladino'];
+    const elites: readonly EnemyKind[] = act >= 3 ? ['esporento', 'aranha'] : act >= 2 ? ['mineiro', 'afogado'] : ['guerreiro', 'ladino'];
     list.push(makeEnemy(w, pick(w, elites), floor, affix, delay));
   }
   const count = kind === 'chefe' ? Math.max(2, n - 2) : n;
@@ -118,7 +131,8 @@ function fillRing(w: World, room: Room): void {
     if (s < 0) break;
     e.state = 'chegando';
     e.slot = s;
-    e.arriveAt = w.tick + BALANCE.approachTicks;
+    // A aranha-de-micélio pula no anel.
+    e.arriveAt = w.tick + (ENEMIES[e.kind].leaps ? 3 : BALANCE.approachTicks);
     used[s] = true;
     if (size === 2) used[s + 1] = true;
   }
@@ -173,7 +187,34 @@ function hitHero(w: World, room: Room, e: Enemy, s: HeroStats, special: boolean,
     h.stunUntil = w.tick + 10;
     if (h.action && !h.action.applied) h.action = null;
   }
+  // Fungos: o golpe deixa veneno; a aranha prende o herói (sem Investida por 3 s).
+  if (d.poison) addPoison(w, s, d.poison);
+  if (d.roots) h.rootUntil = Math.max(h.rootUntil, w.tick + 30);
   ev.push({ t: 'heroiAcertado', tick: w.tick, enemy: e.id, dmg: Math.round(dmg), blocked });
+}
+
+/** Doses de veneno no herói: cada uma dura 6 s (menos com Imune); até 5, renovando a mais velha. */
+export function addPoison(w: World, s: HeroStats, doses: number): void {
+  const h = w.hero;
+  const end = w.tick + Math.round(BALANCE.poisonTicks * (1 - s.imune));
+  for (let i = 0; i < doses; i++) {
+    if (h.poison.length >= BALANCE.poisonMaxDoses) h.poison.splice(h.poison.indexOf(Math.min(...h.poison)), 1);
+    h.poison.push(end);
+  }
+}
+
+/**
+ * Um tick de veneno: cada dose tira 2% da vida máxima por segundo (metade com Sangue Amargo; 1,5×
+ * com a Mãe-Bolor na fase 2). As doses vencidas saem.
+ */
+export function poisonTick(w: World, s: HeroStats): void {
+  const h = w.hero;
+  if (h.poison.length === 0) return;
+  h.poison = h.poison.filter((t) => t > w.tick);
+  if (h.poison.length === 0) return;
+  const fast = w.room?.enemies.some((e) => e.kind === 'mae' && e.phase === 2 && e.state !== 'morto') ? BALANCE.poisonBloom : 1;
+  const bitter = h.learned.includes('sangue_amargo') ? 0.5 : 1;
+  h.hp -= (s.maxHp * BALANCE.poisonDose * h.poison.length * fast * bitter) / BALANCE.ticksPerSecond;
 }
 
 function enemiesAct(w: World, room: Room, s: HeroStats, ev: SimEvent[]): void {
@@ -192,6 +233,7 @@ function enemiesAct(w: World, room: Room, s: HeroStats, ev: SimEvent[]): void {
     if (e.windup) {
       if (w.tick >= e.windup.impact) {
         if (!e.windup.cast) hitHero(w, room, e, s, e.windup.special, ev);
+        else if (ENEMIES[e.kind].heals) healAllies(w, room, e, ev);
         if (!e.windup.cast && !e.windup.special && e.kind === 'couraca' && e.phase === 2) e.comboAt = w.tick + 4;
         e.windup = null;
         if (w.hero.hp <= 0) return;
@@ -199,15 +241,16 @@ function enemiesAct(w: World, room: Room, s: HeroStats, ev: SimEvent[]): void {
       continue;
     }
     const d = ENEMIES[e.kind];
-    const conjurer = e.kind === 'senhor' && e.phase === 1;
+    // Senhor na fase 1: conjura reforço; Guardião de Micélio: cura os outros. Os dois sem precisar do anel.
+    const conjurer = (e.kind === 'senhor' && e.phase === 1) || !!d.heals;
     if (d.specialEvery && w.tick >= e.nextSpecial && (e.state === 'anel' || conjurer)) {
-      // Capitão e Senhor na fase 2: golpe com o dobro do dano. Senhor na fase 1: conjura reforço, sem dano.
+      // Os outros chefes: golpe com o dobro do dano.
       e.windup = { impact: w.tick + 15, special: true, cast: conjurer };
       e.nextSpecial = w.tick + (e.phase === 2 && d.phase2 ? d.phase2.specialEvery : d.specialEvery);
       e.nextAttack = w.tick + e.interval;
       ev.push({ t: 'inimigoGolpe', tick: w.tick, enemy: e.id, special: true });
-      // Reforço (2 do bando do ato) quando sobra pouca escolta.
-      if (e.kind === 'capitao' || e.kind === 'capataz' || conjurer) {
+      // Reforço (2 do bando do ato) quando sobra pouca escolta; a Mãe-Bolor só na fase 2.
+      if (e.kind === 'capitao' || e.kind === 'capataz' || conjurer || (e.kind === 'mae' && e.phase === 2)) {
         const escort = room.enemies.filter((x) => x.state !== 'morto' && !isBoss(x.kind)).length;
         if (escort < 3) for (let i = 0; i < 2; i++) room.enemies.push(makeEnemy(w, minionOf(room.floor), room.floor, null, 10));
       }
@@ -219,6 +262,37 @@ function enemiesAct(w: World, room: Room, s: HeroStats, ev: SimEvent[]): void {
       ev.push({ t: 'inimigoGolpe', tick: w.tick, enemy: e.id, special: false });
     }
   }
+}
+
+/** O Guardião de Micélio cura os outros (não os chefes) em 30% da vida máxima de cada um. */
+function healAllies(w: World, room: Room, e: Enemy, ev: SimEvent[]): void {
+  const frac = ENEMIES[e.kind].heals ?? 0;
+  let n = 0;
+  for (const x of room.enemies) {
+    if (x === e || x.state === 'morto' || isBoss(x.kind) || x.hp >= x.maxHp) continue;
+    x.hp = Math.min(x.maxHp, x.hp + x.maxHp * frac);
+    n++;
+  }
+  if (n > 0) ev.push({ t: 'aviso', tick: w.tick, text: `O Guardião de Micélio cura ${n === 1 ? 'um aliado' : `${n} aliados`}.`, tone: 'ruim' });
+}
+
+/**
+ * A Mãe-Bolor abaixo de metade da vida: o veneno passa a correr 1,5× mais rápido, ela bate mais forte e
+ * faz brotar dois brotados (e mais dois a cada golpe especial, com pouca escolta).
+ */
+function bloom(w: World, room: Room, e: Enemy, ev: SimEvent[]): void {
+  const p2 = ENEMIES.mae.phase2!;
+  e.phase = 2;
+  e.dmg = p2.dmg * floorPower(room.floor) * (BALANCE.actEnemyDmg[actOf(room.floor) - 1] ?? 1);
+  e.interval = p2.interval;
+  e.windup = null;
+  e.stunUntil = w.tick + 15;
+  e.nextAttack = w.tick + 15 + e.interval;
+  e.nextSpecial = w.tick + 15 + p2.specialEvery;
+  room.phase2At = w.tick;
+  for (let i = 0; i < 2; i++) room.enemies.push(makeEnemy(w, 'brotado', room.floor, null, 10));
+  ev.push({ t: 'fase', tick: w.tick, enemy: e.id });
+  ev.push({ t: 'aviso', tick: w.tick, text: 'A Mãe-Bolor se abre: o veneno corre mais rápido!', tone: 'ruim' });
 }
 
 /**
@@ -259,13 +333,13 @@ function enterPhase2(w: World, room: Room, e: Enemy, ev: SimEvent[]): void {
 }
 
 /**
- * A Couraça Submersa abaixo de metade da vida: endurece (+30% de couraça), bate mais forte e passa a
+ * A Couraça Submersa abaixo de metade da vida: endurece (+20% de couraça), bate mais forte e passa a
  * bater duas vezes seguidas.
  */
 function harden(w: World, room: Room, e: Enemy, ev: SimEvent[]): void {
   const p2 = ENEMIES.couraca.phase2!;
   e.phase = 2;
-  e.armor *= 1.3;
+  e.armor *= BALANCE.couracaHarden;
   e.dmg = p2.dmg * floorPower(room.floor) * (BALANCE.actEnemyDmg[actOf(room.floor) - 1] ?? 1);
   e.interval = p2.interval;
   e.windup = null;
@@ -284,6 +358,19 @@ export function couracaCut(w: World, e: Enemy, pierce: number): number {
   return c / (c + BALANCE.couracaK);
 }
 
+/** O inimigo morre: sai do anel e o expedition.ts cuida do saque. O brotado morto no anel solta a nuvem. */
+function killEnemy(w: World, e: Enemy, s: HeroStats, ev: SimEvent[], kill: KillHook): void {
+  const cloud = ENEMIES[e.kind].cloud;
+  if (cloud && e.state === 'anel') addPoison(w, s, cloud);
+  e.hp = 0;
+  e.state = 'morto';
+  e.slot = -1;
+  e.windup = null;
+  e.diedAt = w.tick;
+  ev.push({ t: 'inimigoMorre', tick: w.tick, enemy: e.id });
+  kill(w, e, ev);
+}
+
 function damageEnemy(w: World, e: Enemy, raw: number, s: HeroStats, ev: SimEvent[], kill: KillHook, ignoreArmor = false): void {
   if (e.state === 'morto') return;
   let dmg = raw;
@@ -299,17 +386,10 @@ function damageEnemy(w: World, e: Enemy, raw: number, s: HeroStats, ev: SimEvent
   e.hp -= dmg;
   if (e.kind === 'senhor' && e.phase === 1 && e.hp > 0 && e.hp <= e.maxHp / 2) enterPhase2(w, w.room!, e, ev);
   if (e.kind === 'couraca' && e.phase === 1 && e.hp > 0 && e.hp <= e.maxHp / 2) harden(w, w.room!, e, ev);
+  if (e.kind === 'mae' && e.phase === 1 && e.hp > 0 && e.hp <= e.maxHp / 2) bloom(w, w.room!, e, ev);
   if (s.lifesteal > 0) w.hero.hp = Math.min(s.maxHp, w.hero.hp + dmg * s.lifesteal);
   ev.push({ t: 'acerto', tick: w.tick, target: e.id, dmg: Math.round(dmg), crit, blocked });
-  if (e.hp <= 0) {
-    e.hp = 0;
-    e.state = 'morto';
-    e.slot = -1;
-    e.windup = null;
-    e.diedAt = w.tick;
-    ev.push({ t: 'inimigoMorre', tick: w.tick, enemy: e.id });
-    kill(w, e, ev);
-  }
+  if (e.hp <= 0) killEnemy(w, e, s, ev, kill);
 }
 
 function applyAction(w: World, room: Room, s: HeroStats, ev: SimEvent[], kill: KillHook): void {
@@ -323,11 +403,18 @@ function applyAction(w: World, room: Room, s: HeroStats, ev: SimEvent[], kill: K
       // Âncora Partida: o quarto golpe ignora a couraça. Picareta do Capataz: cada golpe atordoa 0,5 s.
       const anchor = hasLegend(h.equip, 'ancora_partida') && h.swings % 4 === 0;
       if (hasLegend(h.equip, 'picareta_capataz')) t.stunUntil = Math.max(t.stunUntil, w.tick + 5);
+      // Ferrão da Mãe: o golpe envenena o alvo (12% do dano por segundo, por 4 s).
+      if (hasLegend(h.equip, 'ferrao_mae')) {
+        t.venom = s.dmg * 0.12;
+        t.venomUntil = w.tick + 40;
+      }
       damageEnemy(w, t, s.dmg, s, ev, kill, anchor);
     }
   } else if (a.kind === 'pocao') {
     const heal = s.maxHp * s.potionHeal;
     h.hp = Math.min(s.maxHp, h.hp + heal);
+    // Com o alquimista no nível 5, a poção também tira o veneno.
+    if (s.antidote) h.poison = [];
     ev.push({ t: 'cura', tick: w.tick, amount: Math.round(heal) });
   } else if (a.kind === 'habilidade' && a.skill) {
     if (a.skill === 'golpe_amplo') {
@@ -364,6 +451,13 @@ function applyAction(w: World, room: Room, s: HeroStats, ev: SimEvent[], kill: K
         t.armorBreakUntil = w.tick + 60;
         damageEnemy(w, t, s.dmg, s, ev, kill);
       }
+    } else if (a.skill === 'purificar') {
+      h.poison = [];
+      const heal = s.maxHp * 0.1;
+      h.hp = Math.min(s.maxHp, h.hp + heal);
+      ev.push({ t: 'cura', tick: w.tick, amount: Math.round(heal) });
+    } else if (a.skill === 'golpe_giratorio') {
+      for (let k = 0; k < 2; k++) for (const t of inReach(w)) damageEnemy(w, t, s.dmg * 0.6, s, ev, kill);
     }
   }
 }
@@ -403,6 +497,13 @@ export function stepFight(w: World, ev: SimEvent[], kill: KillHook): FightResult
   const h = w.hero;
   const s = heroStats(w);
   fillRing(w, room);
+  poisonTick(w, s);
+  // O veneno do Ferrão da Mãe nos inimigos.
+  for (const e of room.enemies) {
+    if (e.state === 'morto' || e.venomUntil <= w.tick) continue;
+    e.hp -= e.venom / BALANCE.ticksPerSecond;
+    if (e.hp <= 0) killEnemy(w, e, s, ev, kill);
+  }
   enemiesAct(w, room, s, ev);
   if (h.hp <= 0) {
     h.hp = 0;

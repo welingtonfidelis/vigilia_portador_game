@@ -1,6 +1,6 @@
 # Licenças da arte
 
-A arte 3D do Vigília: O Portador da Chama vem da família **KayKit**, de **Kay Lousberg** (https://kaylousberg.com, https://kaylousberg.itch.io). A exceção é a vila do M2, que vem de cinco kits do **Kenney** (https://kenney.nl): Fantasy Town, Graveyard, Castle, Survival e Cube Pets, por decisão do usuário em 2026-10-22. Todos os packs usados estão sob **Creative Commons Zero v1.0 Universal (CC0 1.0)**: domínio público, uso livre (inclusive comercial) e sem crédito obrigatório. Mesmo assim, o jogo credita "Kay Lousberg, www.kaylousberg.com" e "Kenney, www.kenney.nl" no menu e no README.
+A arte 3D do Vigília: O Portador da Chama vem da família **KayKit**, de **Kay Lousberg** (https://kaylousberg.com, https://kaylousberg.itch.io). As exceções são a vila do M2, que vem de cinco kits do **Kenney** (https://kenney.nl): Fantasy Town, Graveyard, Castle, Survival e Cube Pets, e os monstros do Jardim de Fungos (M3.3), do pack Ultimate Monsters do **Quaternius** (https://quaternius.com). As duas foram decisões do usuário em 2026-10-22. Todos os packs usados estão sob **Creative Commons Zero v1.0 Universal (CC0 1.0)**: domínio público, uso livre (inclusive comercial) e sem crédito obrigatório. Mesmo assim, o jogo credita "Kay Lousberg, www.kaylousberg.com", "Kenney, www.kenney.nl" e "Quaternius, quaternius.com" no menu e no README.
 
 O autor também pede que não se revendam cópias sem modificação nem se apresentem os modelos como próprios. Isso é um pedido, não uma condição da licença, e o projeto segue o pedido.
 
@@ -58,6 +58,21 @@ A lista exata, com o tamanho e o SHA-256 de cada arquivo copiado, é gerada por 
 | Character Animations 1.1 (M2) | Mais os conjuntos `Rig_Medium_Simulation` (sentar, acenar, comemorar) e `Rig_Medium_Tools` (martelar, rachar lenha, segurar) |
 | Adventurers 2.0 (M2.2) | Os moradores usam o corpo do Ranger e do Rogue, com a roupa recolorida no jogo, e as cabeças dos cinco rostos |
 | Fantasy Weapons Bits 1.0 | `hammer_A` a `C`, `spear_A` e `halberd`: o martelo, a lança e a alabarda do Ato II, e os martelos do golem e do Capataz (M3.1). `sword_B`, `C` e `E`, `axe_A` a `C`, `dagger_A` e `B` e `shield_B` e `C`: as armas e os escudos do Ato I a partir do tier 6 (M3.2). |
+
+## Quaternius: Ultimate Monsters (M3.3)
+
+O pack oficial fica num Drive público ligado à página https://quaternius.com/packs/ultimatemonsters.html (CC0). Em 2026-10-22 o Drive recusou o download sem conta ("Quota exceeded"). Com autorização do usuário, os seis modelos foram baixados um a um do **poly.pizza**, onde foram publicados pela conta do Quaternius, cada um marcado "Public Domain (CC0)". Cada GLB traz as cores e as animações no próprio arquivo. Eles ficam em `~/Downloads/vigilia-portador-kaykit/packs/quaternius-monsters/poly-pizza/`.
+
+| Modelo (nome no pack) | Página no poly.pizza | Licença na página | Tamanho | SHA-256 | Uso |
+|---|---|---|---|---|---|
+| Mushnub | https://poly.pizza/m/LWKmS30Xxl | Public Domain (CC0) | 67 900 B | `04614a9d0db2a00d17cd85f4ef9c54e19cd3692530c0724b46809aa928e161e9` | esporento |
+| Mushnub Evolved | https://poly.pizza/m/0SZyA6MV51 | Public Domain (CC0) | 149 516 B | `fe364b07af250c48073c319c0b4460239ca39daab37269a4e23217be46a3331c` | Guardião de Micélio |
+| Green Blob | https://poly.pizza/m/y4kJh8EeYS | Public Domain (CC0) | 74 812 B | `31c46edd6306e4ab21bec4608b41003baa74f430f27d357b90c9b6401d88a584` | brotado |
+| Green Spiky Blob | https://poly.pizza/m/IoWG5F9WUc | Public Domain (CC0) | 185 820 B | `ad5e8b1cdf8c0d328b4b44537d3da8fa98119a9a99fb6163e2f325dbb8bbecc1` | aranha-de-micélio |
+| Pink Slime (PinkBlob no pack) | https://poly.pizza/m/AyP8sQmDLh | Public Domain (CC0) | 62 652 B | `34bb111a7931bb957f992e127d71fac321aaeea1bdcc7da56fa5aba55c83d783` | bolor cuspidor |
+| Mushroom King | https://poly.pizza/m/grnFTziU8u | Public Domain (CC0) | 444 228 B | `45bbb9d659697d0127be159af0a58fae3fe8eef430adacaf994efcf0769b2e09` | Mãe-Bolor |
+
+No jogo, as cores de cada material são trocadas pelo nome, na paleta dos Fungos, e o metal vai a zero (`src/render/actors.ts`).
 
 ## Fora da família (nenhum por enquanto)
 

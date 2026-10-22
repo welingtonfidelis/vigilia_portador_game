@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import type { Session } from '../../game/session.ts';
-import { AFFIXES, AFFIX_IDS, BALANCE, BASES, BUILDINGS, BUILDING_IDS, MATERIAL_NAMES, SLOT_NAMES, commands, floorTier, forgeCap, forgeCost, lacking, nextCost, reforgeCost } from '../../sim/index.ts';
+import { AFFIXES, BALANCE, BASES, BUILDINGS, BUILDING_IDS, MATERIAL_NAMES, SLOT_NAMES, affixPool, commands, floorTier, forgeCap, forgeCost, lacking, nextCost, reforgeCost } from '../../sim/index.ts';
 import type { AffixId, Cost, ForgeRarity, World } from '../../sim/index.ts';
 import { RARITY_CLASS, duration, itemTitle, nf } from '../format.ts';
 
@@ -93,7 +93,7 @@ export function VillagePanel({ session, w }: { session: Session; w: World }) {
           </select>
           {rarity !== 'comum' && (
             <select value={affix} onChange={(e) => setAffix((e.target as HTMLSelectElement).value as AffixId)} title="O afixo escolhe o material gasto">
-              {AFFIX_IDS.map((a) => <option key={a} value={a}>{AFFIXES[a].name} ({matName[AFFIXES[a].mat]})</option>)}
+              {affixPool(cap).map((a) => <option key={a} value={a}>{AFFIXES[a].name} ({matName[AFFIXES[a].mat]})</option>)}
             </select>
           )}
         </label>

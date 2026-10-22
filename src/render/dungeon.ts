@@ -6,6 +6,9 @@
  * No Ato II (M3.2), a mesma sala vira as Minas Inundadas: a pedra recolorida para azul-petróleo, as
  * paredes escoradas, chão de terra, lanternas no lugar das tochas, trilhos com carrinho, minério de
  * ferro-negro e poças de água com luz fria.
+ *
+ * No Ato III (M3.3), o Jardim de Fungos: a pedra violeta e verde doente, paredes quebradas, cogumelos
+ * gigantes com pintas que brilham (a luz da sala vem deles), névoa no chão e esporos no ar.
  */
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -13,6 +16,7 @@ import { actOf } from '../sim/index.ts';
 import type { RoomKind } from '../sim/index.ts';
 import { load } from './assets.ts';
 import { blackIronPile, mineCart, rails } from './minecart.ts';
+import { glowColor, mushroom } from './mushrooms.ts';
 import { paletteMaterial } from './palette.ts';
 import type { PaletteSpec } from './palette.ts';
 
@@ -56,15 +60,30 @@ const MINE_PALETTE: PaletteSpec = {
   },
 };
 
-/** Nome solto é peça do KayKit Dungeon; com barra, é o arquivo de outro pack. */
-async function piece(name: string, mine: boolean): Promise<THREE.Object3D> {
+/** Peças dos Fungos: a pedra vira violeta, o chão, musgo, e a madeira apodrece. */
+const FUNGUS_PALETTE: PaletteSpec = {
+  grid: [8, 4],
+  remap: {
+    '0:0': 0x3a3049,
+    '0:1': 0x6f6887,
+    '0:5': 0x5c6650,
+    '0:7': 0x4a4236,
+    '0:2': 0x6a5638,
+    '0:4': 0x4c3c29,
+  },
+};
+
+const PALETTES: Record<string, PaletteSpec> = { minas: MINE_PALETTE, fungos: FUNGUS_PALETTE };
+
+/** Nome solto é peça do KayKit Dungeon; com barra, é o arquivo de outro pack. `pal` recolore as do Dungeon. */
+async function piece(name: string, pal: keyof typeof PALETTES | null): Promise<THREE.Object3D> {
   const dungeon = !name.includes('/');
   const g = await load(dungeon ? `dungeon/${name}.gltf` : name);
   const o = g.scene.clone();
-  if (mine && dungeon) {
+  if (pal && dungeon) {
     o.traverse((c) => {
       const m = c as THREE.Mesh;
-      if (m.isMesh) m.material = paletteMaterial(m.material as THREE.MeshStandardMaterial, 'minas', MINE_PALETTE);
+      if (m.isMesh) m.material = paletteMaterial(m.material as THREE.MeshStandardMaterial, pal, PALETTES[pal]!);
     });
   }
   return o;
@@ -100,12 +119,13 @@ function torchLight(x: number, y: number, z: number): THREE.PointLight {
  * o andar escolhe o ato (Cripta ou Minas). A vila é outra cena (town.ts).
  */
 export async function buildRoom(look: number, kind: RoomKind, remains: boolean, floor = 1): Promise<BuiltRoom> {
+  if (actOf(floor) >= 3) return buildFungus(look, kind, remains, floor);
   if (actOf(floor) >= 2) return buildMine(look, kind, remains, floor);
   const group = new THREE.Group();
   const torches: THREE.PointLight[] = [];
   const r = rng(look);
   const put = async (name: string, x: number, z: number, rotY = 0, y = 0, scale = 1) => {
-    const o = await piece(name, false);
+    const o = await piece(name, null);
     o.userData.floor = name.startsWith('floor_');
     o.position.set(x, y, z);
     o.rotation.y = rotY;
@@ -191,7 +211,7 @@ async function buildMine(look: number, kind: RoomKind, remains: boolean, floor: 
     group.add(o);
   };
   const put = (name: string, x: number, z: number, rotY = 0, y = 0, scale = 1) => {
-    tasks.push(piece(name, true).then((o) => place(o, x, z, rotY, y, scale, name.startsWith('floor_'))));
+    tasks.push(piece(name, 'minas').then((o) => place(o, x, z, rotY, y, scale, name.startsWith('floor_'))));
   };
   // Chão de terra, às vezes com pedras.
   for (const x of [-6, -2, 2, 6]) {
@@ -279,6 +299,139 @@ async function buildMine(look: number, kind: RoomKind, remains: boolean, floor: 
     c.matrixAutoUpdate = false;
   }
   return { group: mergeStatic(group), torches, remainsSpot };
+}
+
+const mistTex = (() => {
+  if (typeof document === 'undefined') return null;
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d')!;
+  const grad = g.createRadialGradient(64, 64, 4, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+const mistMat = new THREE.MeshBasicMaterial({ color: 0x9a7ad0, map: mistTex, transparent: true, opacity: 0.32, depthWrite: false });
+
+/** Esporos no ar: pontinhos que sobem devagar, balançando (mexem sozinhos, a cada quadro). */
+function spores(seed: number): THREE.Points {
+  const n = 54;
+  const base = new Float32Array(n * 3);
+  const r = rng(seed);
+  for (let i = 0; i < n; i++) base.set([-7 + r() * 14, r() * 4, -7 + r() * 11], i * 3);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(base.slice(), 3));
+  const mat = new THREE.PointsMaterial({ color: 0xd8ff9a, size: 0.09, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending });
+  const pts = new THREE.Points(geo, mat);
+  pts.frustumCulled = false;
+  pts.onBeforeRender = () => {
+    const t = performance.now() / 1000;
+    const pos = geo.attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i < n; i++) {
+      const y = (base[i * 3 + 1]! + t * 0.18) % 4;
+      pos.setXYZ(i, base[i * 3]! + Math.sin(t * 0.6 + i) * 0.3, 0.3 + y, base[i * 3 + 2]! + Math.cos(t * 0.5 + i * 1.7) * 0.3);
+    }
+    pos.needsUpdate = true;
+  };
+  return pts;
+}
+
+/** Sala do Jardim de Fungos (andares 21 a 30): a planta da Cripta tomada por cogumelos. */
+async function buildFungus(look: number, kind: RoomKind, remains: boolean, floor: number): Promise<BuiltRoom> {
+  const group = new THREE.Group();
+  const r = rng(look);
+  const tasks: Promise<unknown>[] = [];
+  const place = (o: THREE.Object3D, x: number, z: number, rotY: number, y: number, scale: number, flat: boolean) => {
+    o.userData.floor = flat;
+    o.position.set(x, y, z);
+    o.rotation.y = rotY;
+    if (scale !== 1) o.scale.setScalar(scale);
+    group.add(o);
+  };
+  const put = (name: string, x: number, z: number, rotY = 0, y = 0, scale = 1) => {
+    tasks.push(piece(name, 'fungos').then((o) => place(o, x, z, rotY, y, scale, name.startsWith('floor_'))));
+  };
+  for (const x of [-6, -2, 2, 6]) {
+    for (const z of [-6, -2, 2, 6]) put(r() < 0.35 ? 'floor_dirt_large_rocky' : 'floor_dirt_large', x, z, Math.floor(r() * 4) * (Math.PI / 2));
+  }
+  for (const x of [-6, -2, 2, 6]) {
+    const name = x === ENEMY_DOOR.x ? 'wall_doorway' : (['wall', 'wall_cracked', 'wall_broken', 'wall_cracked'] as const)[Math.floor(r() * 4)]!;
+    put(name, x, -8);
+  }
+  for (const z of [-6, -2, 2, 6]) put(z === HERO_DOOR.z ? 'wall_doorway' : r() < 0.5 ? 'wall_cracked' : 'wall', -8, z, Math.PI / 2);
+  put('pillar', -8, -8);
+  put('pillar', 8, -8);
+  put('pillar', -8, 8);
+  // Cogumelos gigantes nos cantos do fundo e na esquerda, e tufos pequenos junto das paredes; a luz
+  // da sala vem das pintas deles.
+  const boss = kind === 'chefe';
+  // Só no fundo e no lado do fundo: na frente da câmera, um chapéu grande tapava a luta.
+  const giants: [number, number][] = [[-6.3, -6.4], [5.9, -6.5], [-6.7, -2.6], [6.7, -3.6], ...(boss ? ([[-3.4, -6.9], [0.2, -6.9]] as [number, number][]) : [])];
+  for (const [x, z] of giants) {
+    if (!boss && r() < 0.25) continue;
+    const m = mushroom(2.2 + r() * 1.3 + (boss && floor === 30 ? 0.8 : 0), Math.floor(r() * 1e9));
+    m.position.set(x, 0, z);
+    group.add(m);
+  }
+  const lights: [number, number][] = [[-5.6, -5.6], [5.2, -5.8], [-6, 2.4]];
+  for (const [i, [x, z]] of lights.entries()) {
+    const l = new THREE.PointLight(glowColor(look + i), boss ? 12 : 9, 11, 1.7);
+    l.position.set(x, 2.2, z);
+    group.add(l);
+  }
+  for (let i = 0; i < 9; i++) {
+    const wallSide = r() < 0.5;
+    const x = wallSide ? -7 + r() * 1.4 : -6 + r() * 13;
+    const z = wallSide ? -6.5 + r() * 12 : -7.2 + r() * 1.2;
+    if (Math.abs(x - ENEMY_DOOR.x) < 1.6 && z < -6) continue;
+    if (Math.abs(z - HERO_DOOR.z) < 1.6 && x < -6) continue;
+    const m = mushroom(0.45 + r() * 0.7, Math.floor(r() * 1e9));
+    m.position.set(x, 0, z);
+    group.add(m);
+  }
+  if (r() < 0.6) put('rubble_half', -6.6, -3.4, r() * 6, 0, 0.7);
+  if (r() < 0.6) put('resource/Stone_Chunks_Small.gltf', 3.2, -6.9, r() * 6);
+  // Névoa violeta rente ao chão.
+  for (let i = 0; i < 3; i++) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mistMat);
+    m.rotation.x = -Math.PI / 2;
+    m.scale.setScalar(7 + r() * 5);
+    m.position.set(-3 + r() * 7, 0.22 + i * 0.03, -4 + r() * 6);
+    m.userData.floor = true;
+    group.add(m);
+  }
+  if (kind === 'bau') put('chest_gold', 5.8, -4.2, -0.5);
+  if (kind === 'santuario') {
+    put('pillar_decorated', 0, -5, 0, 0, 0.6);
+    put('candle_triple', -1.2, -4.6);
+    put('candle_triple', 1.2, -4.6);
+    const l = new THREE.PointLight(0x9fd8ff, 10, 9, 1.6);
+    l.position.set(0, 2.2, -4.2);
+    group.add(l);
+  }
+  if (kind === 'prisioneiro') {
+    put('keyring_hanging', -7.5, -4.6, Math.PI / 2, 2.2);
+    put('stool', -5.2, -5.4);
+  }
+  let remainsSpot: THREE.Vector3 | null = null;
+  if (remains) {
+    remainsSpot = new THREE.Vector3(-3.4, 0, -2.6);
+    put('sword_shield_broken', remainsSpot.x, remainsSpot.z, 0.7);
+    put('coin_stack_small', remainsSpot.x + 0.9, remainsSpot.z + 0.4);
+    const l = new THREE.PointLight(0xffd27a, 6, 4, 2);
+    l.position.set(remainsSpot.x, 0.8, remainsSpot.z);
+    group.add(l);
+  }
+  await Promise.all(tasks);
+  for (const c of group.children) {
+    c.updateMatrix();
+    c.matrixAutoUpdate = false;
+  }
+  const merged = mergeStatic(group);
+  merged.add(spores(look));
+  return { group: merged, torches: [], remainsSpot };
 }
 
 const KEEP_ATTRS = ['position', 'normal', 'uv'];

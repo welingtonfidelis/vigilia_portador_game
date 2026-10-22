@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BENCHES, DEPOT, MARKET, NODES, SPOTS, WOODPILE,
-  CHICK_YARD, activeJob, catNap, doing, lifeMarks, petDoing, pets, resident, residentLabel, residents, route, strollPoint,
+  CHICK_YARD, MINE_CART, activeJob, catNap, doing, lifeMarks, petDoing, pets, resident, residentLabel, residents, route, strollPoint,
 } from '../src/game/townFolk.ts';
 import { ISLAND, LOTS, PATHS, PLAZA, heightAt, inBox, lotBox } from '../src/game/townPlan.ts';
 import { BALANCE, createWorld, serialize } from '../src/sim/index.ts';
@@ -10,6 +10,15 @@ const inLot = (x: number, z: number, m = 0) => LOTS.some((l) => {
   const b = lotBox(l);
   return inBox(x, z, { x0: b.x0 + m, x1: b.x1 - m, z0: b.z0 + m, z1: b.z1 - m });
 });
+
+/** Perto de algum caminho da planta (a meia largura dele mais `m`). */
+const nearPath = (x: number, z: number, m: number) => PATHS.some((p) => p.pts.some((pt, k) => {
+  if (!k) return false;
+  const [x0, z0] = p.pts[k - 1]!, [x1, z1] = pt;
+  const dx = x1 - x0, dz = z1 - z0;
+  const t = Math.max(0, Math.min(1, ((x - x0) * dx + (z - z0) * dz) / (dx * dx + dz * dz)));
+  return Math.hypot(x - x0 - dx * t, z - z0 - dz * t) < p.width / 2 + m;
+}));
 
 describe('moradores da vila', () => {
   it('a mesma semente dá sempre o mesmo morador (nome, rosto, roupa e ofício)', () => {
@@ -81,16 +90,9 @@ describe('moradores da vila', () => {
   });
 
   it('a feira, os bancos, a lenha e as caixas ficam fora dos lotes e dos caminhos', () => {
-    const near = (x: number, z: number, m: number) => PATHS.some((p) => p.pts.some((pt, k) => {
-      if (!k) return false;
-      const [x0, z0] = p.pts[k - 1]!, [x1, z1] = pt;
-      const dx = x1 - x0, dz = z1 - z0;
-      const t = Math.max(0, Math.min(1, ((x - x0) * dx + (z - z0) * dz) / (dx * dx + dz * dz)));
-      return Math.hypot(x - x0 - dx * t, z - z0 - dz * t) < p.width / 2 + m;
-    }));
     for (const s of [...MARKET, ...BENCHES, WOODPILE, DEPOT]) {
       expect(inLot(s.x, s.z, -1.5), `${s.x},${s.z} × lote`).toBe(false);
-      expect(near(s.x, s.z, 1), `${s.x},${s.z} × caminho`).toBe(false);
+      expect(nearPath(s.x, s.z, 1), `${s.x},${s.z} × caminho`).toBe(false);
       expect(heightAt(s.x, s.z)).toBe(0);
     }
     for (const s of MARKET) expect(Math.hypot(s.x - PLAZA.x, s.z - PLAZA.z)).toBeGreaterThan(PLAZA.r - 0.5);
@@ -146,6 +148,19 @@ describe('moradores da vila', () => {
       expect(inLot(c.x, c.z, -0.5)).toBe(false);
       expect(heightAt(c.x, c.z)).toBe(0);
     }
+  });
+
+  it('o carrinho de mina chega com a Couraça Submersa vencida, fora dos lotes e dos caminhos', () => {
+    const w = createWorld(31);
+    expect(lifeMarks(w).carrinho).toBe(false);
+    w.bossesBeaten.push(15);
+    expect(lifeMarks(w).carrinho).toBe(false);
+    w.bossesBeaten.push(20);
+    expect(lifeMarks(w).carrinho).toBe(true);
+    // O carrinho tem uns 2 m de trilho: o centro fica a mais de 1,5 m dos lotes e a 1 m do beco.
+    expect(inLot(MINE_CART.x, MINE_CART.z, -1.5)).toBe(false);
+    expect(nearPath(MINE_CART.x, MINE_CART.z, 1)).toBe(false);
+    expect(heightAt(MINE_CART.x, MINE_CART.z)).toBe(0);
   });
 
   it('nada dos moradores entra no save', () => {

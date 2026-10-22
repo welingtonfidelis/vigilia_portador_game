@@ -43,7 +43,7 @@ A lista exata, com o tamanho e o SHA-256 de cada arquivo copiado, é gerada por 
 | Adventurers 2.0 | `Characters/gltf/{Barbarian,Knight,Mage,Ranger,Rogue}.glb` e as texturas; `Assets/gltf/{sword_1handed,sword_2handed,axe_1handed,axe_2handed,dagger,shield_round,shield_square,shield_spikes}` (`.gltf` + `.bin`) |
 | Skeletons 1.1 | `characters/gltf/Skeleton_{Minion,Warrior,Rogue,Mage}.glb` e a textura; `assets/gltf/Skeleton_{Blade,Axe,Staff,Shield_Small_A}` |
 | Character Animations 1.1 | `Animations/gltf/Rig_Medium/Rig_Medium_{General,MovementBasic,CombatMelee,CombatRanged,Special}.glb` (o CombatRanged entrou no M1, para o mago e o Senhor da Cripta) |
-| Dungeon 1.1 | Piso, paredes, porta, pilares, tochas, baús, barris, caixas, entulho, estandartes e moedas (lista no manifesto) |
+| Dungeon 1.1 | Piso, paredes, porta, pilares, tochas, baús, barris, caixas, entulho, estandartes e moedas (lista no manifesto); nas Minas Inundadas, o chão de terra, as paredes escoradas e a armação de escora, com o atlas recolorido no jogo (M3.2) |
 | Medieval Hexagon 1.0 | Só o alvo e o suporte de armas do treinador (`target`, `weaponrack`), ampliados. Os prédios dele foram testados lado a lado e descartados |
 | Forest Nature 1.0 | 4 árvores, 2 arbustos, 2 pedras e 2 tufos de grama, na floresta em volta da vila, nas ruínas e na fogueira |
 | Kenney Fantasy Town 2.0 | 69 peças em GLB mais `Textures/colormap.png` (lista em `tools/art-manifest.ts`): paredes (inclusive enxaimel), portas, janelas, telhados com janela de sótão, chaminé, varas, tábuas, escada, fonte, lanternas, barracas, bancos, carroça, cercas e bandeiras da vila. A paleta é recolorida no jogo (`src/render/palette.ts`) |
@@ -51,13 +51,13 @@ A lista exata, com o tamanho e o SHA-256 de cada arquivo copiado, é gerada por 
 | Kenney Castle 2.0 | 26 peças em GLB mais a paleta: a torre do Salão de Táticas, ameias, bandeiras, estandartes, a balista e pedras |
 | Kenney Survival 2.0 | 44 peças em GLB mais a paleta: tendas, a fogueira de vigília, bancadas da forja, caixas, barris, estruturas de obra e mato |
 | Kenney Cube Pets 2.0 | Só o cachorro, o gato e o pintinho (`animal-dog`, `animal-cat`, `animal-chick`) mais a paleta: os bichos de casa da vila, no máximo 3 |
-| Resource Bits 1.0 | Pilhas de madeira, pedra, ferro e tecido e a tora (obras, ferreiro, carroceiro e fogueira) |
-| RPG Tools Bits 1.0 | Bigorna, rebolo, mapa e bússola (ferreiro e Salão de Táticas); o martelo do ferreiro e o machado do lenhador (M2.2); a picareta do mineiro e a lanterna do lanterneiro (M3.1) |
+| Resource Bits 1.0 | Pilhas de madeira, pedra, ferro e tecido e a tora (obras, ferreiro, carroceiro e fogueira); as pepitas de ferro (tingidas de ferro-negro), as pedras e as tábuas das minas e o minério do carrinho (M3.2) |
+| RPG Tools Bits 1.0 | Bigorna, rebolo, mapa e bússola (ferreiro e Salão de Táticas); o martelo do ferreiro e o machado do lenhador (M2.2); a picareta do mineiro e a lanterna do lanterneiro (M3.1); as lanternas, a picareta e o balde das minas (M3.2) |
 | Furniture Bits 1.0 | Mesa, cadeira e cama (alquimista, curandeira e Salão de Táticas) |
 | Mixed Bag 1 | Flores (alquimista, curandeira e casas); o violão do músico e a tenda de circo da festa (M2.2); o capacete de mineiro (M3.1) |
 | Character Animations 1.1 (M2) | Mais os conjuntos `Rig_Medium_Simulation` (sentar, acenar, comemorar) e `Rig_Medium_Tools` (martelar, rachar lenha, segurar) |
 | Adventurers 2.0 (M2.2) | Os moradores usam o corpo do Ranger e do Rogue, com a roupa recolorida no jogo, e as cabeças dos cinco rostos |
-| Fantasy Weapons Bits 1.0 | `hammer_A` a `C`, `spear_A` e `halberd`: o martelo, a lança e a alabarda do Ato II, e os martelos do golem e do Capataz (M3.1) |
+| Fantasy Weapons Bits 1.0 | `hammer_A` a `C`, `spear_A` e `halberd`: o martelo, a lança e a alabarda do Ato II, e os martelos do golem e do Capataz (M3.1). `sword_B`, `C` e `E`, `axe_A` a `C`, `dagger_A` e `B` e `shield_B` e `C`: as armas e os escudos do Ato I a partir do tier 6 (M3.2). |
 
 ## Fora da família (nenhum por enquanto)
 

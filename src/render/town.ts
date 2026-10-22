@@ -12,13 +12,14 @@ import {
   daylight, heightAt, lotBox, lotFront, lotKey, lotView, townHour, townStage,
 } from '../game/townPlan.ts';
 import type { Lot, LotView, Side, TownStage } from '../game/townPlan.ts';
-import { BENCHES, DEPOT, FOLK_CAP, MARKET, SPOTS, WOODPILE, lifeMarks } from '../game/townFolk.ts';
+import { BENCHES, DEPOT, FOLK_CAP, MARKET, MINE_CART, SPOTS, WOODPILE, lifeMarks } from '../game/townFolk.ts';
 import type { LifeMarks } from '../game/townFolk.ts';
 import type { World } from '../sim/index.ts';
 import { load } from './assets.ts';
 import { Birds } from './birds.ts';
 import { FOLK_FILES, Folk } from './folk.ts';
 import { mergeStatic } from './dungeon.ts';
+import { mineCart, rails } from './minecart.ts';
 import { paletteMaterial } from './palette.ts';
 import type { PaletteSpec } from './palette.ts';
 
@@ -663,7 +664,7 @@ function nearPath(x: number, z: number, m: number): boolean {
 
 /** Assinatura dos enfeites: o estágio e os marcos de vida que põem coisas na vila. */
 function decorKey(stage: TownStage, m: LifeMarks): string {
-  return `${stage}:${m.stalls}:${m.lenhador}:${m.carregador}:${m.festa}:${m.bandeirolas}`;
+  return `${stage}:${m.stalls}:${m.lenhador}:${m.carregador}:${m.festa}:${m.bandeirolas}:${m.carrinho}`;
 }
 
 /** Bandeirolas: cordões caídos entre postes, com bandeirinhas de quatro cores (uma malha só). */
@@ -786,6 +787,17 @@ async function buildDecor(stage: TownStage, marks: LifeMarks): Promise<{ group: 
     add('kenney-survival/box.glb', DEPOT.x + 0.2, DEPOT.z - 0.6, { rot: 0.2, scale: 4, y: 1 });
   }
   if (marks.festa) add('mixed/circus_tent.gltf', 25.8, 18.4, { rot: -0.6, scale: 2.6 });
+  if (marks.carrinho) {
+    // O carrinho de mina cheio de ferro-negro, num pedaço de trilho (Ato II vencido).
+    const c = MINE_CART;
+    const cart = new THREE.Group();
+    cart.add(rails(-1.8, 1.8));
+    tasks.push(mineCart(true).then((m) => cart.add(m)));
+    cart.position.set(c.x, heightAt(c.x, c.z), c.z);
+    cart.rotation.y = c.rot;
+    cart.scale.setScalar(1.15);
+    g.add(cart);
+  }
   if (stage >= 2) {
     for (const [x, z] of [[-4.5, 1], [5.5, 9.5], [-4, 16], [9, -6.5]] as const) {
       add('kenney-town/lantern.glb', x, z, { scale: K * 0.75 });

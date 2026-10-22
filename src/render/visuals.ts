@@ -72,6 +72,30 @@ export const BASE_VISUALS: Record<string, Visual | null> = {
   amuleto: null,
 };
 
+/**
+ * A arma muda de cara com o tier (M3.2): do tier 6 em diante, as bases do Ato I usam as malhas do
+ * Fantasy Weapons Bits, e algumas trocam de novo no 11 (o Ato III). A cor do metal vem da faixa do tier.
+ */
+const TIER_MESHES: Record<string, [number, string][]> = {
+  espada: [[6, 'weapons/sword_B.gltf'], [11, 'weapons/sword_C.gltf']],
+  espadao: [[6, 'weapons/sword_E.gltf']],
+  machado: [[6, 'weapons/axe_A.gltf'], [11, 'weapons/axe_C.gltf']],
+  machado_grande: [[6, 'weapons/axe_B.gltf']],
+  adaga: [[6, 'weapons/dagger_A.gltf'], [11, 'weapons/dagger_B.gltf']],
+  escudo_redondo: [[6, 'weapons/shield_B.gltf']],
+  escudo_espinhos: [[6, 'weapons/shield_C.gltf']],
+};
+
+/** O visual de uma peça: o da base, com a malha do tier quando houver. */
+export function itemVisual(base: string, tier: number): Visual | null {
+  const v = BASE_VISUALS[base] ?? null;
+  const steps = TIER_MESHES[base];
+  if (!v || v.kind !== 'rigid' || !steps) return v;
+  let file = v.file;
+  for (const [t, f] of steps) if (tier >= t) file = f;
+  return file === v.file ? v : { ...v, file };
+}
+
 /** Sem peitoral ou perneiras, o corpo é o do bárbaro (peito nu, calça de pele). */
 export const BARE_TORSO = torso('Barbarian');
 export const BARE_LEGS = legs('Barbarian');
@@ -107,5 +131,6 @@ export const HELM_FIT: Record<string, Partial<Record<HeadId, HelmFit>>> = {
 export function visualFiles(): string[] {
   const files = new Set<string>(Object.values(DONOR_FILES));
   for (const v of Object.values(BASE_VISUALS)) if (v?.kind === 'rigid') files.add(v.file);
+  for (const steps of Object.values(TIER_MESHES)) for (const [, f] of steps) files.add(f);
   return [...files];
 }

@@ -312,6 +312,106 @@
       "sha256": "9a1f589764623a8b8289abcf97d242f352a134bc8274bc14ed77d984bfb04015"
     },
     {
+      "path": "weapons/sword_B.gltf",
+      "bytes": 3040,
+      "sha256": "265840768f36afc22fc75e7a5a8c98fd33d199b2b4a6b76653fd2bd37fb8093f"
+    },
+    {
+      "path": "weapons/sword_B.bin",
+      "bytes": 20232,
+      "sha256": "f076069f94986ec221cb46c71a16bc966be47ff35544db8c7f7b6623fdaf2c64"
+    },
+    {
+      "path": "weapons/sword_C.gltf",
+      "bytes": 3038,
+      "sha256": "f18406c1792f90ba214bd836d88be06b498252f6e937a3bbd5e36a0617650573"
+    },
+    {
+      "path": "weapons/sword_C.bin",
+      "bytes": 16976,
+      "sha256": "d47c90f6991c4d8bcd551afc3903d2f7404b93b0ebfd469076b6f696e3a8b6ca"
+    },
+    {
+      "path": "weapons/sword_E.gltf",
+      "bytes": 3036,
+      "sha256": "94fa216bac0984dac29cb7d0a4ebea4b1981c131624d0fc9ecec142b230ee998"
+    },
+    {
+      "path": "weapons/sword_E.bin",
+      "bytes": 29872,
+      "sha256": "01db950a538d33ae2a0bcc78ffe48a03236542b9c02c0de526eba3be1f8a590a"
+    },
+    {
+      "path": "weapons/axe_A.gltf",
+      "bytes": 3039,
+      "sha256": "94441195e9a690a58119bf78d6dabe90a313afc5d8a97d84604661d16840535c"
+    },
+    {
+      "path": "weapons/axe_A.bin",
+      "bytes": 47012,
+      "sha256": "37ee058a478aed5df61accacbb745baf7e73ebccce1f350042389bd2bedd3ba8"
+    },
+    {
+      "path": "weapons/axe_B.gltf",
+      "bytes": 3038,
+      "sha256": "675b5a1da2b2b003962ee7999ef07f4e8ff8233d085d10e023156bcae36048c6"
+    },
+    {
+      "path": "weapons/axe_B.bin",
+      "bytes": 49460,
+      "sha256": "3ef2aa6ae5777668cc22b048a50ad503ef9de87df936d501874d48b9c567fe84"
+    },
+    {
+      "path": "weapons/axe_C.gltf",
+      "bytes": 3037,
+      "sha256": "afb302b8f3dd916d98156eb940ac968de8c592642df0a32567c69f7ce02f5292"
+    },
+    {
+      "path": "weapons/axe_C.bin",
+      "bytes": 36476,
+      "sha256": "d37bd736a6ec17ac5911410f73beb06bc8f3fa0c46eb76ce5bff07ee372917a7"
+    },
+    {
+      "path": "weapons/dagger_A.gltf",
+      "bytes": 3042,
+      "sha256": "a1f98d2184ebd1d91c853173ce6f56c89787d3177ed54b50e036e8c33cbb800c"
+    },
+    {
+      "path": "weapons/dagger_A.bin",
+      "bytes": 17476,
+      "sha256": "99bb9f33a2c859fbec0056c40889eb803da3c1f64b8ca039e35c0ae2121ce750"
+    },
+    {
+      "path": "weapons/dagger_B.gltf",
+      "bytes": 3041,
+      "sha256": "38ed89d667417ef0b92c6259e0c2fa97b7f5f3b83fc18d9f3a9e8387f091a60a"
+    },
+    {
+      "path": "weapons/dagger_B.bin",
+      "bytes": 20004,
+      "sha256": "64e070a22aa1b38920815df3548baecdfd8d0d3f995777fad362dbb7eb8fdab0"
+    },
+    {
+      "path": "weapons/shield_B.gltf",
+      "bytes": 3039,
+      "sha256": "4dfe59a9d33a950cbac48cdef2c7cb09b95482949ad07e815722d7537726c6b6"
+    },
+    {
+      "path": "weapons/shield_B.bin",
+      "bytes": 15840,
+      "sha256": "16ae59caefcb170de13ee252e669deacb3a396697a4487b5e08f314b6fbdb9bb"
+    },
+    {
+      "path": "weapons/shield_C.gltf",
+      "bytes": 3040,
+      "sha256": "047cf9da3e52c8d8f38932d9a5649e86e7ee28c5e692d7efa767d67a64378d95"
+    },
+    {
+      "path": "weapons/shield_C.bin",
+      "bytes": 27888,
+      "sha256": "254470c082fc712214acdd1625195de8d907acd43eda00b0b59744c6fcdd15db"
+    },
+    {
       "path": "weapons/weapons_bits_texture.png",
       "bytes": 17508,
       "sha256": "c153429a49928594b00b53c07c4ab3d6352087b7f5df6c272d4aedfdb99a40be"
@@ -520,6 +620,56 @@
       "path": "resource/Wood_Log_A.bin",
       "bytes": 40312,
       "sha256": "cc8de89a2079438987df3b0157118b81bb506dd1a89367ec0273ab28e056e7a7"
+    },
+    {
+      "path": "resource/Iron_Nuggets.gltf",
+      "bytes": 3058,
+      "sha256": "f97ba1381e938c1d6d32736edb7a679aec6b97da250d28dc0c685a93b3e77a9b"
+    },
+    {
+      "path": "resource/Iron_Nuggets.bin",
+      "bytes": 26288,
+      "sha256": "ffd52d68279ba79f2640d59321c1e02859fe436a3c02319f041f895c938896fc"
+    },
+    {
+      "path": "resource/Iron_Nugget_Large.gltf",
+      "bytes": 3068,
+      "sha256": "5481c5575450147ad3122e9c164a67d390228c1028ee7bac5b0496e884ac2324"
+    },
+    {
+      "path": "resource/Iron_Nugget_Large.bin",
+      "bytes": 7192,
+      "sha256": "c6bfcf43407a3b9132d774a698fde6615773f63b9acc50948d3c2cedd378c885"
+    },
+    {
+      "path": "resource/Stone_Chunks_Large.gltf",
+      "bytes": 3079,
+      "sha256": "441ab568aa7f3446c6f7f650f82dd2513924bc2b01b29435ae434ae44908cbeb"
+    },
+    {
+      "path": "resource/Stone_Chunks_Large.bin",
+      "bytes": 89980,
+      "sha256": "abbcf2eb0b45b1b57b0279b288730e74ff880a547a8b7b4451fc4a9e229bd386"
+    },
+    {
+      "path": "resource/Stone_Chunks_Small.gltf",
+      "bytes": 3078,
+      "sha256": "c92409d663f1af77164d74bf8b3522207249591f1f5d4e22b0f3fb5372781094"
+    },
+    {
+      "path": "resource/Stone_Chunks_Small.bin",
+      "bytes": 32188,
+      "sha256": "58c68f4e870cac393ce76448d597707708c836f52461feccc04182ac6dcc9ef1"
+    },
+    {
+      "path": "resource/Wood_Planks_Stack_Small.gltf",
+      "bytes": 3089,
+      "sha256": "40919a583027b72239cb23b86d6560799d24ece07d988bd8c84490c3fc4be212"
+    },
+    {
+      "path": "resource/Wood_Planks_Stack_Small.bin",
+      "bytes": 15376,
+      "sha256": "e7718185294ffa144582e8df5e0c3cb0d9e23e7d175adb1c2d935e66428a728c"
     },
     {
       "path": "resource/resource_bits_texture.png",
@@ -2200,6 +2350,66 @@
       "path": "dungeon/trunk_medium_A.bin",
       "bytes": 9016,
       "sha256": "e511988146568dd74b663da2f140789e87bce63d8e2cd1feba29c3ee867b9b62"
+    },
+    {
+      "path": "dungeon/floor_dirt_large_rocky.gltf",
+      "bytes": 3084,
+      "sha256": "ae3b42f400f4a87d246138ac298aaeb3f531d233350f2c235c01898999bc3f24"
+    },
+    {
+      "path": "dungeon/floor_dirt_large_rocky.bin",
+      "bytes": 12004,
+      "sha256": "a4153e4c005989f7e7544fdcb779404e5945d91dfb7c364372f6494ac3eb6148"
+    },
+    {
+      "path": "dungeon/wall_scaffold.gltf",
+      "bytes": 2997,
+      "sha256": "43670e3bd908a75040620c9aaba8fcbeeda02a074bb366c763278275df64b1fc"
+    },
+    {
+      "path": "dungeon/wall_scaffold.bin",
+      "bytes": 41264,
+      "sha256": "102ac1f4801d1a5798ec6ead73556fb2e1e4402330c2fc9497a715558b2f1ff2"
+    },
+    {
+      "path": "dungeon/wall_doorway_scaffold.gltf",
+      "bytes": 5092,
+      "sha256": "b3fccef56061b248e226458aa965af6c10fe4f3454e03676643426944a714af6"
+    },
+    {
+      "path": "dungeon/wall_doorway_scaffold.bin",
+      "bytes": 58676,
+      "sha256": "0ab851e11cacecee772668b88f0b8d08358b425e2e3aad73d9655b7a51773968"
+    },
+    {
+      "path": "dungeon/wall_window_closed_scaffold.gltf",
+      "bytes": 3040,
+      "sha256": "f28cc89db7727f73c535a770affe9ffc8034a5cfbba0e3235a0620d00e690171"
+    },
+    {
+      "path": "dungeon/wall_window_closed_scaffold.bin",
+      "bytes": 48960,
+      "sha256": "0cd1bf6caf70e4619f842b7834a0007870be7786980d4688ba06d39d72036c28"
+    },
+    {
+      "path": "dungeon/wall_open_scaffold.gltf",
+      "bytes": 3004,
+      "sha256": "60fc3b3c5ec35cadde0697eced1ef918dfaa1dead2049842fd7b6c059f9fee81"
+    },
+    {
+      "path": "dungeon/wall_open_scaffold.bin",
+      "bytes": 12568,
+      "sha256": "e771b0b79b2d041db56580ca81b029c4eb185b9f9d1c750f616d0c720bd7dcc5"
+    },
+    {
+      "path": "dungeon/keg.gltf",
+      "bytes": 3038,
+      "sha256": "a7a442e4624edb6ef040482a74fdb50cc3d29dddf424cfc123b5d991bee23188"
+    },
+    {
+      "path": "dungeon/keg.bin",
+      "bytes": 39660,
+      "sha256": "31dc451ca13dca4e9313fd590ad64ba43a9cadaccd750cde230990ab2ed07bfe"
     },
     {
       "path": "dungeon/dungeon_texture.png",

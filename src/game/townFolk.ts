@@ -99,6 +99,8 @@ export interface LifeMarks {
   festa: boolean;
   /** As bandeirolas da festa ficam. */
   bandeirolas: boolean;
+  /** Ato II vencido (a Couraça Submersa): o carrinho de mina com ferro-negro na frente do ferreiro. */
+  carrinho: boolean;
 }
 
 export function lifeMarks(w: World): LifeMarks {
@@ -115,6 +117,7 @@ export function lifeMarks(w: World): LifeMarks {
     criancas: people >= 6,
     festa: first !== undefined && w.tick - first < BALANCE.dayTicks,
     bandeirolas: senhor,
+    carrinho: w.bossesBeaten.includes(20),
   };
 }
 
@@ -173,6 +176,8 @@ export const BENCHES = [
 ].map((s) => ({ ...s, rot: faceTo(s.x, s.z, PLAZA.x, PLAZA.z) }));
 /** As caixas que o carregador leva das tendas do carroceiro para a feira. */
 export const DEPOT = { x: 19.2, z: 4.6 };
+/** O carrinho de mina do Ato II vencido: na rua do ferreiro, atrás dele, ao lado do beco. */
+export const MINE_CART = { x: -16.4, z: 9.3, rot: 0.25 };
 
 const behind = (s: { x: number; z: number }, d: number): Spot => {
   const dx = s.x - PLAZA.x, dz = s.z - PLAZA.z, len = Math.hypot(dx, dz);

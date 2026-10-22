@@ -64,7 +64,7 @@ const BANDS: { metal: [number, number, number] | null; gain: number; leather: nu
   { metal: null, gain: 1, leather: 1 },
   { metal: [0.72, 0.84, 1.05], gain: 1.12, leather: 1 },
   { metal: [1.05, 0.7, 0.4], gain: 1.15, leather: 1 },
-  { metal: [0.36, 0.34, 0.42], gain: 1, leather: 0.62 },
+  { metal: [0.5, 0.57, 0.74], gain: 1.05, leather: 0.75 },
   { metal: [1.15, 0.9, 0.38], gain: 1.25, leather: 1 },
 ];
 

@@ -19,7 +19,21 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 ## 1. Estado, como jogar e arquitetura
 
-**Estado atual: M3.1, o núcleo do Ato II, pronta** (seção 14.4). Ela vem sobre a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+**Estado atual: M3.2, a cara do Ato II, pronta** (seção 14.4). Ela vem sobre o núcleo do Ato II (M3.1), a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+
+**M3.2 (a cara do Ato II), em 2026-10-22:**
+
+- **As salas das Minas Inundadas** (andares 11 a 20) têm cara própria:
+  - pedra azul-petróleo;
+  - paredes escoradas com madeira, chão de terra e pedra;
+  - lanternas no lugar das tochas;
+  - trilhos com carrinho de minério;
+  - pilhas de ferro-negro e poças com luz fria.
+
+  Na sala da Couraça Submersa, a poça é grande.
+- **A arma muda de cara com o tier:** do tier 6 em diante, espada, espadão, machado, adaga e os escudos usam as malhas do Fantasy Weapons Bits. A cor do metal segue o ato: ferro, aço e bronze no Ato I; ferro-negro no Ato II; ouro a partir do tier 11.
+- **O carrinho de mina** com ferro-negro aparece na rua do ferreiro depois da vitória sobre a Couraça.
+- 72 testes passam e o build sai sem erro. As salas, o carrinho e as armas foram conferidos no navegador embutido.
 
 **M3.1 (o núcleo do Ato II), em 2026-10-22:**
 
@@ -29,7 +43,6 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 - **Treinador nível 2:** Golpe de Escudo, Quebra-Couraça, Mão Pesada e Pele Úmida. As regras ganham a condição "alvo com couraça".
 - **Buscar os restos** só desce até a pilha se a Força daquele andar chegar a 0,8. Antes, quem morria no chefe voltava direto para ele e morria de novo.
 - **Save v3,** com migração.
-- As salas das minas ainda usam o cenário da Cripta, que muda na M3.2.
 
 **Verificado em 2026-10-22 (M3.1):**
 
@@ -436,7 +449,7 @@ Em todos os encaixes, o tier muda a cor do metal (3.3) e a lendária ganha brilh
 | Capa do patrulheiro | Capa | — | +3% de crítico | `Ranger_Cape` |
 | Manto | Capa | — | +12% de cura das poções | `Mage_Cape` |
 
-As armas da KayKit Fantasy Weapons Bits (espadas A–E, machados, martelos, alabarda, lança) entram como bases dos atos seguintes. Elas usam o mesmo encaixe na mão.
+As armas da KayKit Fantasy Weapons Bits usam o mesmo encaixe na mão. O martelo, a lança e a alabarda são bases do Ato II (14.4). Espadas, machados, adagas e escudos viram a malha das bases do Ato I a partir do tier 6 (7.6).
 
 #### 7.3 Tier, raridade e afixos
 
@@ -505,17 +518,30 @@ Resumo da proposta da seção 3.3:
 
 - **Arma e escudo:** a malha vai presa ao osso da mão, sem ajuste, porque a pega das armas do KayKit fica na origem.
 - **Peitoral, perneiras, elmo e capa:** são partes dos modelos de aventureiro, trocadas no mesmo esqueleto. A couraça de placas é o tronco e os braços do cavaleiro; o gibão de couro é o do patrulheiro.
-- **Tier:** muda a cor do metal e do couro. O atlas de gradiente é recolorido por faixa de tier:
+- **Tier:** muda a cor do metal e do couro. O atlas de gradiente é recolorido por faixa de tier, e a faixa segue o ato (M3.2):
   - ferro nos tiers 1–2;
   - aço nos 3–4;
-  - bronze nos 5–6;
-  - ferro-negro nos 7–8;
-  - ouro nos 9–10.
+  - bronze no 5;
+  - ferro-negro do 6 ao 10 (o Ato II);
+  - ouro do 11 em diante.
+- **Malha por tier (M3.2):** do tier 6 em diante, a arma também muda de malha (`TIER_MESHES` em `visuals.ts`):
+
+| Base | Tiers 1–5 | Tiers 6–10 | Tier 11 em diante |
+|---|---|---|---|
+| Espada | `sword_1handed` | `sword_B` | `sword_C` (curva) |
+| Espadão | `sword_2handed` | `sword_E` | `sword_E` |
+| Machado | `axe_1handed` | `axe_A` (duplo) | `axe_C` (cutelo) |
+| Machado grande | `axe_2handed` | `axe_B` | `axe_B` |
+| Adaga | `dagger` | `dagger_A` | `dagger_B` |
+| Escudo redondo | `shield_round` | `shield_B` | `shield_B` |
+| Escudo de espinhos | `shield_spikes` | `shield_C` | `shield_C` |
+
+  O escudo-torre fica com a malha dos aventureiros.
 - **Raridade:** a lendária pulsa com brilho próprio (emissivo modulado, mais uma luz pontual na arma). As outras raridades só aparecem na moldura da interface.
 
 ### 8. O abismo
 
-- **Atos:** são 6, de 10 andares cada. O chefe do ato fica no andar 10, e há um chefe menor no andar 5. O Ato I, a Cripta, usa o KayKit Dungeon e o Skeletons. Os outros atos são temas a definir, como no Vigília: Minas, Fungos, Cidade Afogada, Forja e Coração.
+- **Atos:** são 6, de 10 andares cada. O chefe do ato fica no andar 10, e há um chefe menor no andar 5. O Ato I, a Cripta, usa o KayKit Dungeon e o Skeletons. O Ato II, as Minas Inundadas, usa as mesmas peças recoloridas e escoradas (14.4). Os outros atos são temas a definir, como no Vigília: Fungos, Cidade Afogada, Forja e Coração.
 - **Salas:**
 
 | Sala | Chance | O que tem |
@@ -720,7 +746,7 @@ As metas do Ato II e o resultado da M3.1 estão em 14.4.
 | **M0: protótipo vertical** (concluído) | Herói por partes, animações com crossfade, troca de arma e de armadura ao vivo, uma sala com esqueletos, combate pela simulação, telas de equipamento, habilidades e regras, regra de morte, testes e medição no celular |
 | **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
 | **M2: a vila viva** (pronto, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
-| **M3: Atos II e III** (M3.1 pronta, 14.4) | As Minas Inundadas (couraça e perfuração) e o Jardim de Fungos (veneno), com inimigos, chefes, habilidades, armas do Fantasy Weapons Bits e materiais novos |
+| **M3: Atos II e III** (M3.1 e M3.2 prontas, 14.4) | As Minas Inundadas (couraça e perfuração) e o Jardim de Fungos (veneno), com inimigos, chefes, habilidades, armas do Fantasy Weapons Bits e materiais novos |
 | M4: polimento | Som, interface de celular, acessibilidade e eventos |
 | M5: Atos IV a VI e as profundezas | Conteúdo e Eras |
 
@@ -1367,6 +1393,48 @@ As metas do Ato I continuam valendo.
 
 As 18 metas do Ato I continuam passando nas duas faixas. O Senhor sai aos 72,3 e aos 74,7 min.
 
+**Como ficou a M3.2 (2026-10-22): a cara do Ato II**
+
+| | |
+|---|---|
+| ![Luta nas Minas Inundadas, andar 17: golem, mineiros, poças e o carrinho no trilho](img/m3-minas-luta.jpg) | ![A Couraça Submersa saindo da poça grande do andar 20](img/m3-minas-couraca.jpg) |
+| ![O carrinho de mina com ferro-negro na rua do ferreiro, depois do Ato II](img/m3-vila-carrinho.jpg) | |
+
+- **A sala das minas** (`buildMine` em `dungeon.ts`):
+  - Usa a mesma planta da Cripta: as portas no mesmo lugar e o lado da câmera aberto.
+  - O atlas do KayKit Dungeon é recolorido por faixa (grade de 8 × 4, `palette.ts`): a pedra cinza vira azul-petróleo, e a madeira escurece.
+  - As paredes alternam a parede escorada (`wall_scaffold`), a rachada e a lisa, e as portas são as escoradas.
+  - O chão é de terra, às vezes com pedras.
+  - As lanternas do RPG Tools Bits tomam o lugar das tochas, com luz mais amarela.
+- **Trilhos e carrinho** (`minecart.ts`, feitos em código, porque nenhum pack da família tem):
+  - Os trilhos correm ao longo da parede do fundo, com dormentes a cada 0,8 m.
+  - O carrinho fica parado neles, com a caçamba cheia de pepitas tingidas de ferro-negro.
+  - Os andares 15 e 20 têm um segundo carrinho.
+- **Enfeites:**
+  - pilhas de ferro-negro, pedras, tábuas, barril, tonel, balde e a picareta encostada;
+  - às vezes, uma armação de escora solta (`wall_open_scaffold`).
+- **Poças:**
+  - Cada sala tem 2 ou 3, quase espelhadas (as lanternas brilham nelas), com borda de terra molhada.
+  - Uma luz fria azul ilumina o meio da sala.
+  - Na sala da Couraça Submersa (andar 20), há uma poça grande na frente da porta dos inimigos, com luz própria.
+- **Luz do ato:** o escuro das minas puxa para o verde-água, e o céu refletido é mais frio (`lightCrypt`).
+- **Armas por tier:**
+  - A tabela está em 7.6.
+  - Com o ferro-negro cobrindo o Ato II inteiro, a cor clareou para um aço azulado escuro. Antes, as peças viravam silhueta preta.
+  - O tier 5 ficou só com o bronze.
+- **Vila:**
+  - Com a Couraça Submersa vencida, o marco `carrinho` põe o carrinho cheio de ferro-negro num pedaço de trilho, na rua do ferreiro (`MINE_CART`).
+  - O carrinho fica fora dos lotes e a 1 m dos caminhos.
+- **Testes:** 3 novos, 72 no total:
+  - as malhas e as cores por tier;
+  - toda malha do herói está no manifesto;
+  - o marco e o lugar do carrinho.
+
+**O que mudou em relação ao especificado:**
+
+- **Os inimigos montados** (capacete, picareta e recolor) já tinham entrado na M3.1. Aqui, o golem e a Couraça ficaram mais claros.
+- **Poças:** as poças imitam o reflexo com material quase espelhado e luz fria. Não é um reflexo de verdade, que custaria uma renderização a mais por quadro no celular.
+
 ### 15. Decisões em aberto
 
 1. **Regra de morte** (2.10): validar os números e a ideia de que a gente resgatada sempre volta.
@@ -1585,6 +1653,13 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - a busca dos restos só desce com a Força em 0,8 ou mais;
     - save v3;
     - 8 metas do Ato II no balanceador e 16 testes (69 no total).
+  - **M3.2 pronta, a cara do Ato II:**
+    - salas das minas recoloridas e escoradas, com lanternas, trilhos, carrinho, ferro-negro e poças;
+    - a poça grande da Couraça;
+    - as armas do Ato I com as malhas do Fantasy Weapons Bits a partir do tier 6;
+    - as faixas de cor por ato;
+    - o carrinho de mina na vila depois do Ato II;
+    - 72 testes.
   - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
     - a vila é uma cena separada;
     - os moradores são aventureiros com roupa simples de cor variável;

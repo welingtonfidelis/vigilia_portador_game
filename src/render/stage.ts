@@ -2,7 +2,7 @@
  * Cena 3D: só lê o estado e os eventos da simulação e anima. Nada aqui decide a luta.
  */
 import * as THREE from 'three';
-import { BALANCE, BASES, isBoss } from '../sim/index.ts';
+import { BALANCE, BASES, actOf, isBoss } from '../sim/index.ts';
 import type { Enemy, HeadId, SimEvent, World } from '../sim/index.ts';
 import { EnemyActor, enemyFiles } from './actors.ts';
 import { clips, load, pulseLegendary } from './assets.ts';
@@ -48,6 +48,8 @@ const DAY_SKY = new THREE.Color(0x87a5a1);
 const DUSK_SKY = new THREE.Color(0xc79a7d);
 const NIGHT_SKY = new THREE.Color(0x141d29);
 const CRYPT_SKY = new THREE.Color(0x0a0c11);
+/** As Minas Inundadas (Ato II): o escuro puxa para o verde-água, e o céu refletido é mais frio. */
+const MINE_SKY = new THREE.Color(0x071113);
 const BACK_SPOTS = [new THREE.Vector3(-5, 0, -4.4), new THREE.Vector3(5.4, 0, -3), new THREE.Vector3(-5.6, 0, 0.6), new THREE.Vector3(5.8, 0, 1.2)];
 
 export interface Quality {
@@ -89,6 +91,8 @@ export class Stage {
   private swing = 0;
   private sun: THREE.DirectionalLight;
   private hemi: THREE.HemisphereLight;
+  /** Ato da sala montada (a luz das Minas é outra). */
+  private roomAct = 1;
   readonly town = new Town();
   /** O jogador escolheu olhar a vila com o herói lá embaixo (botão Vila/Herói do HUD). */
   watchTown = false;
@@ -390,10 +394,10 @@ export class Stage {
     this.camera.setViewOffset(w, h, this.insetNow.x / 2, this.insetNow.y / 2, w, h);
   }
 
-  private wantedRoom(w: World): { key: string; kind: Parameters<typeof buildRoom>[1]; look: number; remains: boolean } | null {
+  private wantedRoom(w: World): { key: string; kind: Parameters<typeof buildRoom>[1]; look: number; remains: boolean; floor: number } | null {
     if (!w.room || (w.phase !== 'sala' && w.phase !== 'voltando')) return null;
     const remains = w.remains.some((r) => r.floor === w.room!.floor && r.room === w.room!.index);
-    return { key: `${w.room.floor}:${w.room.index}:${w.room.look}:${remains}`, kind: w.room.kind, look: w.room.look, remains };
+    return { key: `${w.room.floor}:${w.room.index}:${w.room.look}:${remains}`, kind: w.room.kind, look: w.room.look, remains, floor: w.room.floor };
   }
 
   /** Luz da vila pela hora: céu, névoa, sol e céu refletido. A Cripta tem a própria luz fria. */
@@ -419,15 +423,16 @@ export class Stage {
   }
 
   private lightCrypt(): void {
-    (this.scene.background as THREE.Color).copy(CRYPT_SKY);
+    const mine = this.roomAct >= 2;
+    (this.scene.background as THREE.Color).copy(mine ? MINE_SKY : CRYPT_SKY);
     const fog = this.scene.fog as THREE.Fog;
-    fog.color.copy(CRYPT_SKY);
+    fog.color.copy(mine ? MINE_SKY : CRYPT_SKY);
     fog.near = 20;
     fog.far = 44;
-    this.sun.intensity = 1.6;
-    this.sun.color.set(0xc8d6ff);
-    this.hemi.intensity = 1.1;
-    this.hemi.color.set(0x8a9cc4);
+    this.sun.intensity = mine ? 1.35 : 1.6;
+    this.sun.color.set(mine ? 0xb2dde6 : 0xc8d6ff);
+    this.hemi.intensity = mine ? 1.2 : 1.1;
+    this.hemi.color.set(mine ? 0x7fb0b4 : 0x8a9cc4);
     const sc = this.sun.shadow.camera;
     if (sc.right !== 13) {
       sc.left = sc.bottom = -13;
@@ -442,7 +447,8 @@ export class Stage {
     if (!want) return;
     if (want.key === this.roomKey || this.building) return;
     this.building = true;
-    const built = await buildRoom(want.look, want.kind, want.remains);
+    const built = await buildRoom(want.look, want.kind, want.remains, want.floor);
+    this.roomAct = actOf(want.floor);
     this.room?.group.removeFromParent();
     for (const a of this.enemies.values()) a.dispose();
     this.enemies.clear();

@@ -8,7 +8,7 @@ import { BASES, tierBand } from '../sim/index.ts';
 import type { HeadId, Item, Slot } from '../sim/index.ts';
 import { Animator } from './animator.ts';
 import { bandMaterial, legendaryMaterial, load, releaseLegendary } from './assets.ts';
-import { BARE_LEGS, BARE_TORSO, BASE_VISUALS, DONOR_FILES, HEAD_VISUALS, HELM_FIT, PREFIX } from './visuals.ts';
+import { BARE_LEGS, BARE_TORSO, BASE_VISUALS, DONOR_FILES, HEAD_VISUALS, HELM_FIT, PREFIX, itemVisual } from './visuals.ts';
 import type { HelmFit, RigidVisual, SkinnedVisual } from './visuals.ts';
 
 /** Geometria do elmo com o ajuste por cabeça (escala em volta do osso da cabeça, na pose de bind). */
@@ -170,7 +170,8 @@ export class HeroRig {
       const legend = !!item?.legend;
       // O elmo depende da cabeça (ajuste por cabeça); a assinatura leva os dois.
       const fit = key === 'elmo' && item ? HELM_FIT[item.base]?.[head] : undefined;
-      const sig = `${key}:${id ?? item?.base ?? 'nu'}${key === 'elmo' ? `@${head}` : ''}:${band}:${legend}`;
+      const mesh = v.kind === 'rigid' ? v.file : '';
+      const sig = `${key}:${id ?? item?.base ?? 'nu'}${key === 'elmo' ? `@${head}` : ''}:${mesh}:${band}:${legend}`;
       want.set(key, {
         sig,
         build: (p) => (v.kind === 'skinned' ? this.skinned(v, band, legend, p, fit) : this.rigid(v, band, legend, p, fit)),
@@ -181,7 +182,7 @@ export class HeroRig {
     add('perneiras', equip.perneiras ? BASE_VISUALS[equip.perneiras.base] ?? null : BARE_LEGS, equip.perneiras);
     for (const slot of ['arma', 'secundaria', 'elmo', 'capa'] as Slot[]) {
       const item = equip[slot];
-      if (item && BASES[item.base]) add(slot, BASE_VISUALS[item.base] ?? null, item);
+      if (item && BASES[item.base]) add(slot, itemVisual(item.base, item.tier), item);
     }
     const sig = [...want.values()].map((x) => x.sig).join('|');
     if (sig === this.signature) return;

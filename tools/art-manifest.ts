@@ -25,6 +25,8 @@ const DUNGEON = [
   'box_stacked', 'crates_stacked', 'rubble_large', 'rubble_half', 'banner_red', 'banner_patternA_red',
   'banner_thin_red', 'coin_stack_small', 'coin_stack_medium', 'candle_lit', 'candle_triple', 'table_medium_broken',
   'table_small', 'chair', 'stool', 'sword_shield_broken', 'keyring_hanging', 'bottle_A_green', 'trunk_medium_A',
+  // As Minas Inundadas (M3.2): chão de terra, paredes escoradas e a armação de escora solta.
+  'floor_dirt_large_rocky', 'wall_scaffold', 'wall_doorway_scaffold', 'wall_window_closed_scaffold', 'wall_open_scaffold', 'keg',
 ];
 
 const FOREST = ['Tree_1_A', 'Tree_2_A', 'Tree_3_A', 'Tree_4_A', 'Bush_1_A', 'Bush_2_A', 'Rock_1_A', 'Rock_2_A', 'Grass_1_A', 'Grass_2_A'].map((n) => `${n}_Color1`);
@@ -74,7 +76,11 @@ const SURVIVAL = [
 ];
 
 const TOOLS = ['anvil', 'grindstone', 'map', 'compass_base', 'blueprint', 'bucket_metal', 'axe', 'hammer', 'saw', 'shovel', 'lantern', 'pickaxe'];
-const RESOURCE = ['Wood_Log_Stack', 'Wood_Planks_Stack_Medium', 'Stone_Bricks_Stack_Medium', 'Iron_Bars_Stack_Small', 'Textiles_Stack_Small', 'Pallet_Wood', 'Wood_Log_A'];
+const RESOURCE = [
+  'Wood_Log_Stack', 'Wood_Planks_Stack_Medium', 'Stone_Bricks_Stack_Medium', 'Iron_Bars_Stack_Small', 'Textiles_Stack_Small', 'Pallet_Wood', 'Wood_Log_A',
+  // Minério e pedra das minas (M3.2).
+  'Iron_Nuggets', 'Iron_Nugget_Large', 'Stone_Chunks_Large', 'Stone_Chunks_Small', 'Wood_Planks_Stack_Small',
+];
 const FURNITURE = ['table_medium', 'chair_A_wood', 'bed_single_A', 'chair_stool_wood', 'shelf_A_small'];
 const MIXED = ['flax_flower_A', 'flax_flower_B', 'guitar_A', 'circus_tent', 'umbrella_green', 'mining_helmet'];
 
@@ -127,12 +133,19 @@ export const PACKS: PackEntry[] = [
     ],
   },
   {
-    // KayKit Fantasy Weapons Bits 1.0: as armas do Ato II (martelo, lança e alabarda), M3.1.
+    // KayKit Fantasy Weapons Bits 1.0: as armas do Ato II (martelo, lança e alabarda, M3.1) e as malhas
+    // das bases antigas dos tiers 6 em diante (M3.2).
     out: 'weapons',
     dir: 'weapons',
     root: 'KayKit_FantasyWeaponsBits_1.0_FREE',
     groups: [
-      { path: 'Assets/gltf', ext: '.gltf', files: ['hammer_A', 'hammer_B', 'hammer_C', 'spear_A', 'halberd'] },
+      {
+        path: 'Assets/gltf', ext: '.gltf',
+        files: [
+          'hammer_A', 'hammer_B', 'hammer_C', 'spear_A', 'halberd', 'sword_B', 'sword_C', 'sword_E',
+          'axe_A', 'axe_B', 'axe_C', 'dagger_A', 'dagger_B', 'shield_B', 'shield_C',
+        ],
+      },
     ],
   },
   {

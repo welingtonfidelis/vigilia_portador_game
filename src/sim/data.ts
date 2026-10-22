@@ -131,8 +131,9 @@ export const CLOTH_BANDS: [string, string, string, string][] = [
   ['régio', 'régia', 'régios', 'régias'],
 ];
 
+/** Faixa de cor do tier, que segue o ato: ferro, aço e bronze no I, ferro-negro no II (6 a 10), ouro no III. */
 export function tierBand(tier: number): number {
-  return Math.min(4, Math.floor((tier - 1) / 2));
+  return tier <= 2 ? 0 : tier <= 4 ? 1 : tier <= 5 ? 2 : tier <= 10 ? 3 : 4;
 }
 
 export interface EnemyDef {

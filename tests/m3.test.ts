@@ -1,4 +1,8 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { BASE_VISUALS, itemVisual, visualFiles } from '../src/render/visuals.ts';
+import type { RigidVisual } from '../src/render/visuals.ts';
+import { tierBand } from '../src/sim/data.ts';
 import { couracaCut, makeEnemy, spawnGroup, stepFight } from '../src/sim/combat.ts';
 import { BALANCE, actOf, floorInAct, floorTier, groupSize, roomsOnFloor } from '../src/sim/config.ts';
 import { startDescent } from '../src/sim/expedition.ts';
@@ -255,5 +259,25 @@ describe('Ato II: regras, habilidades e vila', () => {
     expect(back.hero.swings).toBe(0);
     expect(back.rules.combat.map((r) => r.skill)).toContain('quebra_couraca');
     expect(() => serialize(back)).not.toThrow();
+  });
+});
+
+describe('Ato II: a cara das armas (M3.2)', () => {
+  it('a arma muda de malha no tier 6 (e de novo no 11), e a cor do metal segue o ato', () => {
+    // Ferro, aço e bronze no Ato I; ferro-negro no II (6 a 10); ouro no III.
+    expect([1, 2, 3, 4, 5, 6, 10, 11, 15].map(tierBand)).toEqual([0, 0, 1, 1, 2, 3, 3, 4, 4]);
+    const file = (base: string, tier: number) => (itemVisual(base, tier) as RigidVisual).file;
+    expect(file('espada', 5)).toBe('adventurers/sword_1handed.gltf');
+    expect(file('espada', 6)).toBe('weapons/sword_B.gltf');
+    expect(file('espada', 11)).toBe('weapons/sword_C.gltf');
+    expect(file('machado_grande', 9)).toBe('weapons/axe_B.gltf');
+    expect(file('escudo_torre', 9)).toBe('adventurers/shield_square.gltf');
+    expect(itemVisual('couraca_placas', 9)).toBe(BASE_VISUALS.couraca_placas);
+  });
+
+  it('toda malha que o herói pode vestir está no manifesto da arte', () => {
+    const manifest = JSON.parse(readFileSync('public/assets/kaykit/manifest.json', 'utf8')) as { files: { path: string }[] };
+    const have = new Set(manifest.files.map((f) => f.path));
+    for (const f of visualFiles()) expect(have.has(f), f).toBe(true);
   });
 });

@@ -497,6 +497,9 @@ export class Stage {
     // a vila; senão, a masmorra.
     const heroInTown = w.phase === 'vila' || w.phase === 'descendo';
     const showTown = heroInTown || this.watchTown;
+    // A tela de equipamento chega a câmera perto do herói só se ele estiver na cena mostrada: olhando
+    // a vila com ele lá embaixo, a vista da ilha fica.
+    const closeUp = this.closeUp && (!showTown || heroInTown);
     if (showTown !== this.showingTown) {
       this.showingTown = showTown;
       this.town.group.visible = showTown;
@@ -520,7 +523,9 @@ export class Stage {
       }
       this.lastPhase = w.phase;
     }
-    this.hero.root.visible = showTown ? heroInTown : true;
+    // Depois de empurrar a porta, o herói entrou na capela: some da vila durante a descida.
+    const inside = w.phase === 'descendo' && travel.mode === 'viagem';
+    this.hero.root.visible = showTown ? heroInTown && !inside : true;
     this.hero.request(this.previewHead ?? w.hero.head, w.hero.equip);
     const roomShown = !showTown && w.room;
     // Onde o herói deve estar. Ele anda em velocidade constante e para no alvo (nada de correr
@@ -561,7 +566,7 @@ export class Stage {
       const tgt = w.room.enemies.find((e) => e.id === tid && e.state !== 'morto') ?? w.room.enemies.find((e) => e.state === 'anel');
       const a = tgt ? this.enemies.get(tgt.id) : undefined;
       face = a ? a.pos.clone().sub(this.heroPos) : ENEMY_DOOR.clone().sub(this.heroPos);
-    } else if (w.phase === 'vila') face = this.closeUp ? new THREE.Vector3(0.6, 0, 1) : FIRE_POS.clone().sub(this.heroPos);
+    } else if (w.phase === 'vila') face = closeUp ? new THREE.Vector3(0.6, 0, 1) : FIRE_POS.clone().sub(this.heroPos);
     if (face && face.lengthSq() > 1e-4) {
       const want = Math.atan2(face.x, face.z);
       let d = want - this.heroFacing;
@@ -572,7 +577,7 @@ export class Stage {
     const two = w.hero.equip.arma && BASES[w.hero.equip.arma.base]?.hands === 2;
     const inFight = w.phase === 'sala' && w.room?.phase === 'luta';
     // Na vila, parado na fogueira, senta (de pé na tela de equipamento).
-    const sitting = w.phase === 'vila' && !running && !this.closeUp && this.heroPos.distanceTo(SEAT_POS) < 0.3;
+    const sitting = w.phase === 'vila' && !running && !closeUp && this.heroPos.distanceTo(SEAT_POS) < 0.3;
     if (sitting && !this.seated) this.hero.animator.play({ name: 'Sit_Floor_Down', duration: 0.9 });
     this.seated = sitting;
     const idle = sitting ? 'Sit_Floor_Idle' : inFight && two ? 'Melee_2H_Idle' : inFight ? 'Melee_Unarmed_Idle' : 'Idle_A';
@@ -623,12 +628,12 @@ export class Stage {
     } else this.lightCrypt();
     // Câmera: na masmorra persegue o herói; na vila, segue o herói (ou a praça) até o jogador arrastar.
     const portrait = this.camera.aspect < 0.85;
-    this.zoom += ((this.closeUp ? 0.58 : 1) - this.zoom) * (1 - Math.exp(-dt * 4));
+    this.zoom += ((closeUp ? 0.58 : 1) - this.zoom) * (1 - Math.exp(-dt * 4));
     const dist = (portrait ? 1.55 : 1.15) * this.zoom;
-    let goal = this.heroPos.clone().add(new THREE.Vector3(0, this.closeUp ? 1.25 : 1.1, 0));
-    const diorama = showTown && !this.closeUp;
+    let goal = this.heroPos.clone().add(new THREE.Vector3(0, closeUp ? 1.25 : 1.1, 0));
+    const diorama = showTown && !closeUp;
     if (showTown) {
-      if (this.closeUp) this.townCam.free = false;
+      if (closeUp) this.townCam.free = false;
       else this.keyTown(dt);
       // Vista de casa (a ilha inteira); na tela de equipamento, perto do herói.
       if (!this.townCam.free) this.townCam.target.copy(portrait ? HOME_PORTRAIT : HOME);
@@ -643,7 +648,7 @@ export class Stage {
       this.camera.updateProjectionMatrix();
     }
     this.focus.lerp(goal, 1 - Math.exp(-dt * (this.townCam.free ? 10 : 3)));
-    const dir = diorama ? TOWN_DIR : new THREE.Vector3(6.5, this.closeUp ? 5.2 : 8.2, 10.5).normalize();
+    const dir = diorama ? TOWN_DIR : new THREE.Vector3(6.5, closeUp ? 5.2 : 8.2, 10.5).normalize();
     this.camera.position.copy(this.focus).addScaledVector(dir, this.camDist);
     this.camera.lookAt(this.focus);
     this.applyInset(dt);

@@ -169,6 +169,12 @@ export function App({ session }: { session: Session }) {
   useEffect(() => {
     dispatchEvent(new CustomEvent('portador-watch', { detail: watching }));
   }, [watching]);
+  // O herói desce à Cripta e a câmera fica na vila; quem quiser segui-lo usa o botão ⚔ Herói.
+  const lastPhase = useRef(w.phase);
+  useEffect(() => {
+    if (w.phase === 'descendo' && lastPhase.current !== 'descendo') setWatching(true);
+    lastPhase.current = w.phase;
+  }, [w.phase]);
   // Tocar num prédio na vila abre a tela da vila.
   useEffect(() => {
     const onLot = () => setPanel('vila');

@@ -909,6 +909,10 @@ export class Town {
     this.flame.scale.set(1, 0.85 + 0.25 * flick, 1);
     for (const l of this.lights) l.intensity = 14 * (1 - day);
     for (const m of this.fogLayers) (m.material as THREE.MeshBasicMaterial).color.copy(fog);
+    // A fumaça pega a luz da hora: clara de dia, quase da cor do céu à noite.
+    const lit = 0.28 + 0.72 * day;
+    (this.smoke.material.uniforms.uLight!.value as THREE.Color).setRGB(0.85 * lit, 0.83 * lit, 0.81 * lit);
+    (this.smoke.material.uniforms.uDark!.value as THREE.Color).setRGB(0.23 * lit, 0.2 * lit, 0.19 * lit);
     this.smoke.material.uniforms.uScale!.value = pxScale;
     this.embers.material.uniforms.uScale!.value = pxScale;
     this.smoke.update(dt, 0.35);

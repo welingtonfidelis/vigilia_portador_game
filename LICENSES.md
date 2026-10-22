@@ -50,10 +50,11 @@ A lista exata, com o tamanho e o SHA-256 de cada arquivo copiado, é gerada por 
 | Kenney Castle 2.0 | 26 peças em GLB mais a paleta: a torre do Salão de Táticas, ameias, bandeiras, estandartes, a balista e pedras |
 | Kenney Survival 2.0 | 44 peças em GLB mais a paleta: tendas, a fogueira de vigília, bancadas da forja, caixas, barris, estruturas de obra e mato |
 | Resource Bits 1.0 | Pilhas de madeira, pedra, ferro e tecido e a tora (obras, ferreiro, carroceiro e fogueira) |
-| RPG Tools Bits 1.0 | Bigorna, rebolo, mapa e bússola (ferreiro e Salão de Táticas); machado, martelo, serrote, pá, balde e lanterna esperam a M2.2 |
+| RPG Tools Bits 1.0 | Bigorna, rebolo, mapa e bússola (ferreiro e Salão de Táticas); o martelo do ferreiro e o machado do lenhador (M2.2) |
 | Furniture Bits 1.0 | Mesa, cadeira e cama (alquimista, curandeira e Salão de Táticas) |
-| Mixed Bag 1 | Flores (alquimista, curandeira e casas); violão, guarda-chuva e tenda de circo esperam a M2.2 |
-| Character Animations 1.1 (M2) | Mais os conjuntos `Rig_Medium_Simulation` (o herói sentado na fogueira) e `Rig_Medium_Tools` (os ofícios da M2.2) |
+| Mixed Bag 1 | Flores (alquimista, curandeira e casas); o violão do músico e a tenda de circo da festa (M2.2) |
+| Character Animations 1.1 (M2) | Mais os conjuntos `Rig_Medium_Simulation` (sentar, acenar, comemorar) e `Rig_Medium_Tools` (martelar, rachar lenha, segurar) |
+| Adventurers 2.0 (M2.2) | Os moradores usam o corpo do Ranger e do Rogue, com a roupa recolorida no jogo, e as cabeças dos cinco rostos |
 | Fantasy Weapons Bits 1.0 | Ainda não usado no M0 (reservado para as armas dos atos seguintes) |
 
 ## Fora da família (nenhum por enquanto)

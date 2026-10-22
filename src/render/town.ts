@@ -9,11 +9,14 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {
   CELL, CRYPT, CRYPT_DOOR, FIRE, ISLAND, LOTS, PATHS, PLAZA, STAIRS, TERRACES, TERRACE_Y,
-  daylight, heightAt, lotBox, lotKey, lotView, townHour, townStage,
+  daylight, heightAt, lotBox, lotFront, lotKey, lotView, townHour, townStage,
 } from '../game/townPlan.ts';
 import type { Lot, LotView, Side, TownStage } from '../game/townPlan.ts';
+import { BENCHES, DEPOT, FOLK_CAP, MARKET, SPOTS, WOODPILE, lifeMarks } from '../game/townFolk.ts';
+import type { LifeMarks } from '../game/townFolk.ts';
 import type { World } from '../sim/index.ts';
 import { load } from './assets.ts';
+import { FOLK_FILES, Folk } from './folk.ts';
 import { mergeStatic } from './dungeon.ts';
 import { paletteMaterial } from './palette.ts';
 import type { PaletteSpec } from './palette.ts';
@@ -389,7 +392,6 @@ class Puffs {
 
 /** Rotação de uma parede do Kenney (que fica na face +x da célula) para cada lado. */
 const FACE_ROT: Record<Side, number> = { e: 0, n: Math.PI / 2, w: Math.PI, s: -Math.PI / 2 };
-const FACE_DIR: Record<Side, [number, number]> = { e: [1, 0], n: [0, -1], w: [-1, 0], s: [0, 1] };
 
 /** Faces externas de um lote: [lado, x e z da célula]. */
 function faces(lot: Lot): [Side, number, number][] {
@@ -410,14 +412,6 @@ function faces(lot: Lot): [Side, number, number][] {
 function isDoorFace(lot: Lot, side: Side, x: number, z: number): boolean {
   if (side !== lot.door) return false;
   return side === 'n' || side === 's' ? x === lot.x : z === lot.z + (lot.d - 1) * K;
-}
-
-/** Ponto em frente à porta, de onde saem os objetos do ofício, e o vetor ao longo da fachada. */
-export function lotFront(lot: Lot): { x: number; z: number; along: [number, number]; out: [number, number] } {
-  const [dx, dz] = FACE_DIR[lot.door];
-  const cx = lot.x + ((lot.w - 1) * K) / 2, cz = lot.z + ((lot.d - 1) * K) / 2;
-  const reach = ((dx !== 0 ? lot.w : lot.d) * K) / 2 + 2.6;
-  return { x: cx + dx * reach, z: cz + dz * reach, along: [-dz, dx], out: [dx, dz] };
 }
 
 const lotCenter = (lot: Lot) => ({ x: lot.x + ((lot.w - 1) * K) / 2, z: lot.z + ((lot.d - 1) * K) / 2 });
@@ -656,7 +650,49 @@ function nearPath(x: number, z: number, m: number): boolean {
 // ---------------------------------------------------------------------------------------------------
 // Enfeites por estágio: a capela e o cemitério, a fogueira, a escada, a praça e a borda da ilha.
 
-async function buildDecor(stage: TownStage): Promise<{ group: THREE.Group; smoke: Emitter[]; embers: Emitter[]; lanterns: THREE.Vector3[] }> {
+/** Assinatura dos enfeites: o estágio e os marcos de vida que põem coisas na vila. */
+function decorKey(stage: TownStage, m: LifeMarks): string {
+  return `${stage}:${m.stalls}:${m.lenhador}:${m.carregador}:${m.festa}:${m.bandeirolas}`;
+}
+
+/** Bandeirolas: cordões caídos entre postes, com bandeirinhas de quatro cores (uma malha só). */
+function bunting(lines: [THREE.Vector3, THREE.Vector3][], poles: THREE.Vector3[]): THREE.Mesh {
+  const pos: number[] = [], col: number[] = [];
+  const colors = [0xb8402f, 0xd9b44a, 0x3f6fa0, 0x4f8a45].map((c) => new THREE.Color(c));
+  let k = 0;
+  const tri = (a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, color: THREE.Color) => {
+    for (const v of [a, b, c]) {
+      pos.push(v.x, v.y, v.z);
+      col.push(color.r, color.g, color.b);
+    }
+  };
+  const at = (a: THREE.Vector3, b: THREE.Vector3, t: number) => a.clone().lerp(b, t).add(new THREE.Vector3(0, -1.1 * 4 * t * (1 - t), 0));
+  for (const [a, b] of lines) {
+    const len = a.distanceTo(b);
+    for (let d = 0.3; d < len - 0.5; d += 0.75) {
+      const p0 = at(a, b, d / len), p1 = at(a, b, (d + 0.45) / len);
+      const tip = p0.clone().lerp(p1, 0.5).add(new THREE.Vector3(0, -0.55, 0));
+      tri(p0, p1, tip, colors[k++ % colors.length]!);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  geo.computeVertexNormals();
+  const parts = [geo];
+  for (const p of poles) {
+    const pole = new THREE.CylinderGeometry(0.09, 0.12, p.y, 6).translate(p.x, p.y / 2, p.z).toNonIndexed();
+    pole.deleteAttribute('uv');
+    const n = pole.attributes.position!.count;
+    pole.setAttribute('color', new THREE.Float32BufferAttribute(new Array(n * 3).fill(0).map((_, i) => [0.36, 0.24, 0.16][i % 3]!), 3));
+    parts.push(pole);
+  }
+  const mesh = new THREE.Mesh(mergeGeometries(parts, false)!, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, side: THREE.DoubleSide }));
+  mesh.castShadow = true;
+  return mesh;
+}
+
+async function buildDecor(stage: TownStage, marks: LifeMarks): Promise<{ group: THREE.Group; smoke: Emitter[]; embers: Emitter[]; lanterns: THREE.Vector3[] }> {
   const g = new THREE.Group();
   const tasks: Promise<unknown>[] = [];
   const add = (file: string, x: number, z: number, o: PutOpts = {}) => tasks.push(put(g, file, x, z, o));
@@ -720,9 +756,25 @@ async function buildDecor(stage: TownStage): Promise<{ group: THREE.Group; smoke
   } else {
     for (const [x, z, rot] of [[-21, 17.5, 0], [-17, 17.5, 0], [-29, 17.5, 0], [-25, 17.5, 0]] as const) add('kenney-town/fence.glb', x, z, { rot, scale: K });
     add(gy('hay-bale'), -18, 15.4, { rot: 0.4, scale: 3.6 });
-    add(gy('hay-bale-bundled'), 25, 10.6, { rot: 1.2, scale: 3.4 });
+    add(gy('hay-bale-bundled'), 29.5, 14.6, { rot: 1.2, scale: 3.4 });
     add('kenney-survival/barrel.glb', -7.4, 1.2, { scale: 3.4 });
   }
+  // Bancos da praça (o do músico e o dos mais velhos).
+  for (const b of BENCHES) add(gy(stage === 0 ? 'bench-damaged' : 'bench'), b.x, b.z, { rot: b.rot, scale: 3.2, pal: old });
+  // A feira: uma barraca com 4 moradores, três depois do Capitão.
+  const stalls = ['kenney-town/stall-red.glb', 'kenney-town/stall-green.glb', 'kenney-town/stall.glb'];
+  MARKET.slice(0, marks.stalls).forEach((m, k) => add(stalls[k]!, m.x, m.z, { rot: m.rot + Math.PI / 2, scale: 3 }));
+  if (marks.lenhador) {
+    add('resource/Wood_Log_Stack.gltf', WOODPILE.x, WOODPILE.z, { rot: Math.PI / 2, scale: 1.5 });
+    add(gy('trunk'), (SPOTS.lenha.x + WOODPILE.x) / 2, (SPOTS.lenha.z + WOODPILE.z) / 2 + 0.3, { scale: 2.4 });
+    add('resource/Wood_Log_A.gltf', WOODPILE.x + 0.6, WOODPILE.z + 1.6, { rot: 0.7, scale: 1.3 });
+  }
+  if (marks.carregador) {
+    add('kenney-survival/box-large.glb', DEPOT.x, DEPOT.z, { rot: 0.4, scale: 4 });
+    add('kenney-survival/box.glb', DEPOT.x + 0.9, DEPOT.z - 1, { rot: 1.1, scale: 4 });
+    add('kenney-survival/box.glb', DEPOT.x + 0.2, DEPOT.z - 0.6, { rot: 0.2, scale: 4, y: 1 });
+  }
+  if (marks.festa) add('mixed/circus_tent.gltf', 25.8, 18.4, { rot: -0.6, scale: 2.6 });
   if (stage >= 2) {
     for (const [x, z] of [[-4.5, 1], [5.5, 9.5], [-4, 16], [9, -6.5]] as const) {
       add('kenney-town/lantern.glb', x, z, { scale: K * 0.75 });
@@ -730,10 +782,7 @@ async function buildDecor(stage: TownStage): Promise<{ group: THREE.Group; smoke
     }
   }
   if (stage >= 3) {
-    // Praça com a fonte, barracas de feira e a muralha baixa na frente.
-    add('kenney-town/stall-red.glb', PLAZA.x - 7.4, PLAZA.z - 3.2, { rot: Math.PI / 2, scale: K * 0.9 });
-    add('kenney-town/stall-green.glb', PLAZA.x + 7.6, PLAZA.z - 2.6, { rot: -Math.PI / 2, scale: K * 0.9 });
-    add('kenney-town/stall-bench.glb', PLAZA.x - 4, PLAZA.z + 4.4, { rot: 0.6, scale: K });
+    // A fonte e a muralha baixa na frente.
     for (let x = -26; x <= 28; x += 3.6) {
       if (Math.abs(x + 4) < 4) continue;
       add(gy(r() < 0.2 ? 'stone-wall-damaged' : 'stone-wall'), x, 22.6, { scale: 3.6 });
@@ -742,8 +791,32 @@ async function buildDecor(stage: TownStage): Promise<{ group: THREE.Group; smoke
   }
   await Promise.all(tasks);
   const merged = mergeStatic(g);
+  if (marks.bandeirolas) {
+    // Bandeirolas da festa do Senhor, presas nas lanternas da praça (ou em postes, sem lanternas).
+    const anchors = [[-4.5, 1], [5.5, 9.5], [-4, 16]].map(([x, z]) => new THREE.Vector3(x!, 4.4, z!));
+    merged.add(bunting([[anchors[0]!, anchors[1]!], [anchors[1]!, anchors[2]!], [anchors[0]!, anchors[2]!]], stage >= 2 ? [] : anchors));
+  }
   if (stage >= 3) merged.add(await put(new THREE.Group(), 'kenney-town/fountain-round.glb', PLAZA.x, PLAZA.z, { scale: K }));
   return { group: merged, smoke, embers, lanterns };
+}
+
+/** Pinheiro simples (tronco e três andares de cone, uns 60 triângulos) para o fundo da floresta. */
+function simplePine(): THREE.BufferGeometry {
+  const parts: THREE.BufferGeometry[] = [];
+  const paint = (g: THREE.BufferGeometry, color: number) => {
+    const c = new THREE.Color(color);
+    const n = g.attributes.position!.count;
+    g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(n * 3).map((_, k) => [c.r, c.g, c.b][k % 3]!), 3));
+    return g.index ? g.toNonIndexed() : g;
+  };
+  parts.push(paint(new THREE.CylinderGeometry(0.1, 0.15, 0.55, 5).translate(0, 0.27, 0), 0x6b4630));
+  for (const [rad, h, y, color] of [[0.6, 0.95, 0.85, 0x467a42], [0.47, 0.8, 1.35, 0x4e8549], [0.33, 0.7, 1.8, 0x579050]] as const) {
+    parts.push(paint(new THREE.ConeGeometry(rad, h, 7).translate(0, y, 0), color));
+  }
+  for (const g of parts) for (const name of Object.keys(g.attributes)) if (!['position', 'normal', 'color'].includes(name)) g.deleteAttribute(name);
+  const geo = mergeGeometries(parts, false)!;
+  geo.computeVertexNormals();
+  return geo;
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -754,8 +827,11 @@ export class Town {
   stageOverride: TownStage | null = null;
   viewOverride: Record<string, LotView> | null = null;
   hourOverride: number | null = null;
+  /** Troca o mundo que a vila mostra (depuração: mais moradores, chefes vencidos, a festa). */
+  worldOverride: ((w: World) => World) | null = null;
+  readonly folk = new Folk(matchMedia('(pointer: coarse)').matches ? FOLK_CAP.phone : FOLK_CAP.desktop);
   private lots = new Map<string, { key: string; built: BuiltLot | null; building: boolean }>();
-  private decor: { stage: TownStage; group: THREE.Group | null; building: boolean; lanterns: THREE.Vector3[] } = { stage: -1 as TownStage, group: null, building: false, lanterns: [] };
+  private decor: { key: string; group: THREE.Group | null; building: boolean; lanterns: THREE.Vector3[] } = { key: '', group: null, building: false, lanterns: [] };
   private fire!: THREE.PointLight;
   private flame!: THREE.Mesh;
   private lights: THREE.PointLight[] = [];
@@ -770,7 +846,9 @@ export class Town {
     return this.stageOverride ?? townStage(w);
   }
 
-  async init(): Promise<void> {
+  async init(clips: Map<string, THREE.AnimationClip>): Promise<void> {
+    this.folk.init(clips);
+    this.group.add(this.folk.group);
     // Chão pintado (o topo da ilha e dos platôs usa UV em metros, mapeado para a tela de pintura).
     const canvas = document.createElement('canvas');
     canvas.width = GW;
@@ -801,24 +879,44 @@ export class Town {
       pineMat ??= paletteMaterial(m.material as THREE.MeshStandardMaterial, 'kenney-graveyard:pinheiro', PAL['kenney-graveyard']!.pinheiro!);
     });
     const pineGeo = mergeGeometries(parts.map((p) => (p.index ? p.toNonIndexed() : p)), false)!;
+    // Floresta densa em volta: uma grade com sorteio (mais cheia perto da ilha). Os pinheiros do
+    // Kenney (uns 340 triângulos) ficam no anel mais perto; mais longe, na névoa, o pinheiro simples
+    // de três andares (uns 60).
     const r = rng(77);
-    const spots: THREE.Matrix4[] = [];
-    // Só perto da ilha: mais longe, a névoa já esconde (e cada pinheiro custa uns 340 triângulos).
-    while (spots.length < 80) {
-      const x = (r() - 0.5) * 150, z = (r() - 0.5) * 120 - 8;
-      const dx = Math.max(i.x0 - x, x - i.x1, 0), dz = Math.max(i.z0 - z, z - i.z1, 0);
-      const out = Math.hypot(dx, dz);
-      const front = z > i.z1 - 10;
-      if (out < 3 || out > 34 || (front && out < 9)) continue;
-      const s = 4.5 + r() * 3;
-      // Os da frente ficam mais fundos, para não tapar a borda da ilha.
-      const y = -6 - Math.min(out, 40) * 0.22 - r() * 3 - (front ? 12 : 0);
-      spots.push(new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, r() * 6, 0)), new THREE.Vector3(s, s * (0.9 + r() * 0.3), s)));
+    const near: THREE.Matrix4[] = [];
+    const far: THREE.Matrix4[] = [];
+    const shades: number[] = [];
+    for (let gx = -118; gx <= 118; gx += 6.5) {
+      for (let gz = -104; gz <= 66; gz += 6.5) {
+        const x = gx + (r() - 0.5) * 5, z = gz + (r() - 0.5) * 5;
+        const dx = Math.max(i.x0 - x, x - i.x1, 0), dz = Math.max(i.z0 - z, z - i.z1, 0);
+        const out = Math.hypot(dx, dz);
+        const front = z > i.z1 - 10;
+        // Na frente, só uma faixa estreita e bem funda: lá fica a câmera.
+        if (out < 3 || out > 100 || (front && (out < 9 || z > i.z1 + 26))) continue;
+        if (r() > (out < 22 ? 0.95 : out < 55 ? 0.75 : 0.5)) continue;
+        const s = 4.5 + r() * 3.2;
+        // Cada vez mais fundos com a distância; os da frente, mais ainda, para não tapar a borda da ilha.
+        const y = -6 - Math.min(out, 45) * 0.22 - r() * 3 - (front ? 12 : 0);
+        const m = new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, r() * 6, 0)), new THREE.Vector3(s, s * (0.9 + r() * 0.3), s));
+        if (out < 10) near.push(m);
+        else {
+          far.push(m);
+          shades.push(0.82 + r() * 0.3);
+        }
+      }
     }
-    const forest = new THREE.InstancedMesh(pineGeo, pineMat!, spots.length);
-    spots.forEach((m, k) => forest.setMatrixAt(k, m));
-    forest.frustumCulled = false;
+    const forest = new THREE.InstancedMesh(pineGeo, pineMat!, near.length);
+    near.forEach((m, k) => forest.setMatrixAt(k, m));
+    forest.computeBoundingSphere();
     this.group.add(forest);
+    const simple = new THREE.InstancedMesh(simplePine(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true }), far.length);
+    far.forEach((m, k) => {
+      simple.setMatrixAt(k, m);
+      simple.setColorAt(k, new THREE.Color().setScalar(shades[k]!));
+    });
+    simple.computeBoundingSphere();
+    this.group.add(simple);
     // Camadas de névoa embaixo da ilha (a parede de terra some nela, como nas imagens de referência).
     for (const [y, a] of [[-3, 0.38], [-7, 0.42], [-12, 0.5]] as const) {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(420, 420), new THREE.MeshBasicMaterial({ color: 0x7e9a97, transparent: true, opacity: a, depthWrite: false, fog: false }));
@@ -845,19 +943,21 @@ export class Town {
   }
 
   /** Repinta o chão e remonta os enfeites e os lotes cujo estado (ou o estágio) mudou. */
-  sync(w: World): void {
+  sync(real: World): void {
+    const w = this.worldOverride?.(real) ?? real;
     const stage = this.stageOf(w);
+    const marks = lifeMarks(w);
     if (this.ground.stage !== stage) {
       paintGround(this.ground.canvas.getContext('2d')!, stage);
       this.ground.tex.needsUpdate = true;
       this.ground.stage = stage;
     }
-    if (this.decor.stage !== stage && !this.decor.building) {
+    const dkey = decorKey(stage, marks);
+    if (this.decor.key !== dkey && !this.decor.building) {
       this.decor.building = true;
-      const want = stage;
-      void buildDecor(stage).then((d) => {
+      void buildDecor(stage, marks).then((d) => {
         this.decor.group?.removeFromParent();
-        this.decor = { stage: want, group: d.group, building: false, lanterns: d.lanterns };
+        this.decor = { key: dkey, group: d.group, building: false, lanterns: d.lanterns };
         this.group.add(d.group);
         this.lights.forEach((l, k) => {
           const p = d.lanterns[k];
@@ -884,6 +984,7 @@ export class Town {
       changed = true;
     }
     if (changed) this.refreshEmitters();
+    this.folk.sync(w);
   }
 
   private refreshEmitters(): void {
@@ -898,10 +999,12 @@ export class Town {
   }
 
   /**
-   * Luz da hora do dia, fogo tremulando, fumaça e névoa da cor do céu. `pxScale` converte metros em
-   * pixels para o tamanho das partículas. Devolve a luz do dia (0..1) para o céu e o sol.
+   * Luz da hora do dia, fogo tremulando, fumaça, névoa da cor do céu e os moradores. `pxScale` converte
+   * metros em pixels para o tamanho das partículas; `far` é a câmera longe (animação em meio ritmo).
+   * Devolve a luz do dia (0..1) para o céu e o sol.
    */
-  update(w: World, time: number, dt: number, fog: THREE.Color, pxScale: number): number {
+  update(real: World, time: number, dt: number, fog: THREE.Color, pxScale: number, speed: number, far: boolean): number {
+    const w = this.worldOverride?.(real) ?? real;
     const hour = this.hourOverride ?? townHour(w.tick);
     const day = daylight(hour);
     const flick = 0.85 + 0.15 * Math.sin(time * 11) * Math.sin(time * 6.3);
@@ -917,6 +1020,7 @@ export class Town {
     this.embers.material.uniforms.uScale!.value = pxScale;
     this.smoke.update(dt, 0.35);
     this.embers.update(dt, 0.2);
+    this.folk.update(w, hour, dt, speed, far);
     return day;
   }
 
@@ -933,6 +1037,7 @@ export class Town {
 }
 
 export const TOWN_FILES = [
+  ...FOLK_FILES,
   'kenney-graveyard/pine.glb', 'kenney-graveyard/crypt-large.glb', 'kenney-graveyard/crypt-large-roof.glb',
   'kenney-survival/campfire-pit.glb', 'kenney-town/stairs-wide-stone.glb', 'kenney-town/roof-high.glb', 'kenney-town/wall-wood.glb',
 ];

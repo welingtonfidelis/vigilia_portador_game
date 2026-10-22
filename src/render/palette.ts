@@ -11,6 +11,8 @@ export type Remap = Record<string, number>;
 
 export interface PaletteSpec {
   remap: Remap;
+  /** Colunas e linhas da grade de faixas: 16 × 4 no Kenney (o padrão), 8 × 4 nos aventureiros do KayKit. */
+  grid?: [number, number];
   /** Multiplica as faixas que não estão no remap (para o carvão das ruínas queimadas). */
   rest?: number;
 }
@@ -50,10 +52,11 @@ export function paletteMaterial(base: THREE.MeshStandardMaterial, name: string, 
 
 function recolor(data: ImageData, spec: PaletteSpec): void {
   const { width: w, height: h, data: px } = data;
-  const cw = w / 16, ch = h / 4;
+  const [cols, rows] = spec.grid ?? [16, 4];
+  const cw = w / cols, ch = h / rows;
   const lum = (i: number) => 0.3 * px[i]! + 0.59 * px[i + 1]! + 0.11 * px[i + 2]!;
-  for (let r = 0; r < 4; r++) {
-    for (let c = 0; c < 16; c++) {
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
       const target = spec.remap[`${r}:${c}`];
       if (target === undefined && spec.rest === undefined) continue;
       const x0 = c * cw, y0 = r * ch;

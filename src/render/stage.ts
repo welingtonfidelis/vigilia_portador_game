@@ -150,7 +150,7 @@ export class Stage {
       this.enemyClips.set(k, v);
     }
     await this.hero.init(this.heroClips);
-    await this.town.init();
+    await this.town.init(this.heroClips);
     this.ready = true;
   }
 
@@ -239,6 +239,8 @@ export class Stage {
     this.townCam.free = true;
   }
 
+  private shadowTick = 0;
+
   /** Distância da câmera ao foco no último quadro (o pan anda na mesma proporção). */
   private camDist = 30;
 
@@ -274,8 +276,24 @@ export class Stage {
     const ndc = new THREE.Vector2(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
     const ray = new THREE.Raycaster();
     ray.setFromCamera(ndc, this.camera);
+    // Primeiro um morador (mostra nome e ofício em cima dele); senão, o prédio (abre o painel).
+    const who = this.lastWorld ? this.town.folk.pick3d(ray, this.town.worldOverride?.(this.lastWorld) ?? this.lastWorld) : null;
+    if (who) return this.showName(who.label, who.target);
     const lot = this.town.pick(ray);
     if (lot) dispatchEvent(new CustomEvent('portador-lot', { detail: lot.kind }));
+  }
+
+  private lastWorld: World | null = null;
+  private nameTag: { el: HTMLDivElement; target: THREE.Object3D; until: number } | null = null;
+
+  /** Etiqueta "Joana, feirante" em cima do morador por alguns segundos. */
+  private showName(label: string, target: THREE.Object3D): void {
+    this.nameTag?.el.remove();
+    const el = document.createElement('div');
+    el.className = 'nametag';
+    el.textContent = label;
+    this.overlay.appendChild(el);
+    this.nameTag = { el, target, until: this.time + 3.5 };
   }
 
   /** Volta a câmera da vila para o herói (ou para a praça, com ele lá embaixo). */
@@ -347,9 +365,9 @@ export class Stage {
     this.hemi.intensity = 0.45 + 0.9 * day;
     this.hemi.color.setHSL(0.58, 0.45, 0.55 + 0.2 * day);
     const sc = this.sun.shadow.camera;
-    if (sc.right !== 38) {
-      sc.left = sc.bottom = -38;
-      sc.right = sc.top = 38;
+    if (sc.right !== 44) {
+      sc.left = sc.bottom = -44;
+      sc.right = sc.top = 44;
       sc.far = 130;
       sc.updateProjectionMatrix();
     }
@@ -393,6 +411,34 @@ export class Stage {
       this.heroPos.copy(entry);
       this.focus.copy(entry).add(new THREE.Vector3(0, 1.1, 0));
     }
+  }
+
+  /**
+   * Onde um inimigo que acabou de morrer vai deitar: um pouco para trás (longe do herói), no
+   * primeiro lugar a 1,3 m de qualquer outro corpo (e fora dos pés do herói), indo cada vez mais
+   * longe e para os lados, sem sair da sala.
+   */
+  private corpseSpot(a: EnemyActor): THREE.Vector3 {
+    const others = [...this.enemies.values()].filter((o) => o !== a && o.restAt).map((o) => o.restAt!);
+    const away = a.pos.clone().sub(this.heroPos).setY(0);
+    if (away.lengthSq() < 1e-4) away.set(0, 0, -1);
+    away.normalize();
+    const up = new THREE.Vector3(0, 1, 0);
+    let best = a.pos.clone(), bestScore = -Infinity;
+    // Anéis cada vez mais longe; em cada um, do "para trás" para os lados, de 30 em 30 graus.
+    for (const reach of [0.55, 0.9, 1.3, 1.8, 2.4]) {
+      for (let i = 0; i < 12; i++) {
+        const ang = (i % 2 ? 1 : -1) * Math.ceil(i / 2) * (Math.PI / 6);
+        const c = a.pos.clone().addScaledVector(away.clone().applyAxisAngle(up, ang), reach);
+        c.x = THREE.MathUtils.clamp(c.x, -6.8, 6.8);
+        c.z = THREE.MathUtils.clamp(c.z, -6.8, 6.8);
+        const clear = others.length ? Math.min(...others.map((o) => o.distanceTo(c))) : 9;
+        if (clear >= 1.3 && c.distanceTo(this.heroPos) > 1.2) return c;
+        const score = Math.min(clear, 1.3) - 0.04 * reach;
+        if (score > bestScore) [best, bestScore] = [c, score];
+      }
+    }
+    return best;
   }
 
   private ringPos(e: Enemy): THREE.Vector3 {
@@ -491,6 +537,7 @@ export class Stage {
   frame(w: World, events: SimEvent[], frac: number, dt: number, speed: number): void {
     if (!this.ready) return;
     this.time += dt;
+    this.lastWorld = w;
     this.perf.begin();
     const travel = travelView(w, frac);
     // Qual cena: a vila com o herói nela (ou saindo para a Cripta), ou quando o jogador quer olhar
@@ -603,7 +650,13 @@ export class Stage {
         const bIndex = e.state === 'fundo' ? bi++ : 0;
         if (!a.animator) continue;
         if (e.state === 'morto') {
+          // O corpo escorrega um pouco para trás ao cair, para um lugar livre de outros corpos.
+          if (!a.restAt) {
+            a.restAt = this.corpseSpot(a);
+            a.root.rotation.y += (Math.random() - 0.5) * 0.9;
+          }
           if (!a.animator.isDead) a.die();
+          a.pos.lerp(a.restAt, 1 - Math.exp(-dt * 6));
         } else {
           const goal = this.enemyTarget(w, e, qIndex, bIndex);
           const prev = a.pos.clone();
@@ -624,7 +677,7 @@ export class Stage {
     pulseLegendary(this.time);
     if (showTown) {
       const pxScale = this.canvas.clientHeight / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2));
-      this.lightTown(this.town.update(w, this.time, dt, (this.scene.fog as THREE.Fog).color, pxScale));
+      this.lightTown(this.town.update(w, this.time, dt, (this.scene.fog as THREE.Fog).color, pxScale, speed, this.camDist > 60));
     } else this.lightCrypt();
     // Câmera: na masmorra persegue o herói; na vila, segue o herói (ou a praça) até o jogador arrastar.
     const portrait = this.camera.aspect < 0.85;
@@ -652,8 +705,20 @@ export class Stage {
     this.camera.position.copy(this.focus).addScaledVector(dir, this.camDist);
     this.camera.lookAt(this.focus);
     this.applyInset(dt);
-    this.sun.target.position.copy(this.focus);
-    this.sun.position.copy(this.focus).add(showTown ? new THREE.Vector3(-26, 46, 30) : new THREE.Vector3(-7, 16, 9));
+    // Na vila, o sol fica preso no meio da ilha (a caixa da sombra já cobre a ilha toda) e a sombra
+    // é refeita a cada 5 quadros: quase nada nela anda (os moradores usam sombra redonda). Na
+    // masmorra, o sol segue o herói e a sombra é de todo quadro.
+    const island = diorama || (showTown && !heroInTown);
+    if (island) {
+      this.sun.target.position.set(0, 0, 0);
+      this.sun.position.set(-26, 46, 30);
+    } else {
+      this.sun.target.position.copy(this.focus);
+      this.sun.position.copy(this.focus).add(showTown ? new THREE.Vector3(-26, 46, 30) : new THREE.Vector3(-7, 16, 9));
+    }
+    const sm = this.renderer.shadowMap;
+    sm.autoUpdate = !island;
+    if (island && this.shadowTick++ % 5 === 0) sm.needsUpdate = true;
     // Com o cartão da viagem cobrindo a tela, não desenha (poupa bateria no celular).
     const covered = travel.mode === 'viagem' && !this.watchTown && travel.elapsed > (travel.carried ? CARRIED_EXIT_TICKS : EXIT_TICKS) + 6;
     if (!covered) this.renderer.render(this.scene, this.camera);
@@ -664,6 +729,16 @@ export class Stage {
   private updateFloaters(): void {
     const w = this.canvas.clientWidth, h = this.canvas.clientHeight;
     const v = new THREE.Vector3();
+    const tag = this.nameTag;
+    if (tag) {
+      if (this.time > tag.until || !this.showingTown || !tag.target.visible) {
+        tag.el.remove();
+        this.nameTag = null;
+      } else {
+        tag.target.getWorldPosition(v).add(new THREE.Vector3(0, 2.7 * tag.target.scale.y, 0)).project(this.camera);
+        tag.el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px) translate(-50%, -100%)`;
+      }
+    }
     this.floaters = this.floaters.filter((f) => {
       const age = this.time - f.born;
       if (age > 1.1) {

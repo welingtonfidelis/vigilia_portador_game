@@ -50,6 +50,8 @@ export class EnemyActor {
   readonly pos = new THREE.Vector3();
   readonly kind: EnemyKind;
   diedAt = -1;
+  /** Onde o corpo fica depois de cair (longe dos outros corpos); null enquanto vivo. */
+  restAt: THREE.Vector3 | null = null;
   private look: EnemyLook;
   private elite: EliteAffix | null;
 
@@ -119,6 +121,7 @@ export class EnemyActor {
   /** Erguido dos mortos pelo Senhor. */
   rise(): void {
     if (!this.animator) return;
+    this.restAt = null;
     this.animator.revive();
     this.animator.play({ name: 'Skeletons_Death_Resurrect', duration: 2, fade: 0.05 });
   }

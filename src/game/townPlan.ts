@@ -92,6 +92,16 @@ export function lotBox(l: Lot): { x0: number; x1: number; z0: number; z1: number
   return { x0: l.x - CELL / 2, x1: l.x + (l.w - 0.5) * CELL, z0: l.z - CELL / 2, z1: l.z + (l.d - 0.5) * CELL };
 }
 
+const FACE_DIR: Record<Side, [number, number]> = { e: [1, 0], n: [0, -1], w: [-1, 0], s: [0, 1] };
+
+/** Ponto em frente à porta, de onde saem os objetos do ofício, e os vetores ao longo da fachada e para fora. */
+export function lotFront(l: Lot): { x: number; z: number; along: [number, number]; out: [number, number] } {
+  const [dx, dz] = FACE_DIR[l.door];
+  const cx = l.x + ((l.w - 1) * CELL) / 2, cz = l.z + ((l.d - 1) * CELL) / 2;
+  const reach = ((dx !== 0 ? l.w : l.d) * CELL) / 2 + 2.6;
+  return { x: cx + dx * reach, z: cz + dz * reach, along: [-dz, dx], out: [dx, dz] };
+}
+
 /** Altura do chão: 0 no nível da praça, TERRACE_Y nos platôs e a rampa da escada entre os dois. */
 export function heightAt(x: number, z: number): number {
   if (x >= STAIRS.x0 && x <= STAIRS.x1 && z >= STAIRS.zTop && z <= STAIRS.zBottom) {

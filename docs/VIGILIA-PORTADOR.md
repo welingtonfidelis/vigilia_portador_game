@@ -27,6 +27,7 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 - **Quatro estágios,** como nas imagens de referência: destruída, reconstruída, melhorada e melhorada de novo. Eles mudam o chão, os telhados e os enfeites, e cada prédio continua com o próprio estado (ruína, obra, pronto ou ampliado).
 - **Dia e noite.**
 - **Câmera de observar:** arrastar, setas ou WASD movem; roda, pinça ou + e - dão zoom.
+- **Moradores (M2.2):** cada um tem nome, rosto, roupa e ofício, e segue uma rotina por hora (ferreiro, feirante, lenhador, carregador, crianças, músico e avô). Os marcos de vida trazem a feira, a lenha, a música e a festa do Senhor com as bandeirolas. Tocar num morador mostra o nome e o ofício.
 - **Botão Vila/Herói** no HUD, para olhar a vila com o herói lá embaixo.
 - **Toque num prédio** abre a tela da vila.
 
@@ -699,7 +700,7 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 |---|---|
 | **M0: protótipo vertical** (concluído) | Herói por partes, animações com crossfade, troca de arma e de armadura ao vivo, uma sala com esqueletos, combate pela simulação, telas de equipamento, habilidades e regras, regra de morte, testes e medição no celular |
 | **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
-| **M2: a vila viva** (M2.1 pronta, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
+| **M2: a vila viva** (M2.1 e M2.2 prontas, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
 | M3: Atos II e III | Inimigos novos (packs KayKit de monstros, se houver, ou recolor dos esqueletos), armas do Fantasy Weapons Bits, habilidades novas e materiais novos |
 | M4: polimento | Som, interface de celular, acessibilidade e eventos |
 | M5: Atos IV a VI e as profundezas | Conteúdo e Eras |
@@ -993,7 +994,7 @@ As imagens de referência ficam em `docs/img/conceito-vila-1-destruida.jpg` a `c
 - **`src/render/palette.ts`:** recolore a paleta dos packs do Kenney. Cada pack tem uma grade de 16 × 4 faixas, e trocar a cor de uma faixa troca a de tudo que a usa, mantendo o degradê. É assim que o mesmo telhado vira palha, telha ou carvão, a parede vira enxaimel (reboco claro e vigas escuras), o arenito do castelo vira pedra cinza e a cerca verde do cemitério vira ferro.
 - **`src/render/town.ts`:**
   - **Ilha e platôs:** extrudados, com o topo pintado numa textura que muda com o estágio (grama ou chão queimado, terra embaixo dos lotes, caminhos de terra ou calçados, cinzas e brasas). As paredes de terra têm camadas de cor e pedrinhas.
-  - **Floresta:** 80 pinheiros instanciados (um desenho só) e três camadas de névoa embaixo da ilha.
+  - **Floresta:** densa, a pedido do usuário. Cerca de 500 pinheiros instanciados: os do Kenney (uns 340 triângulos cada) só no anel mais perto da ilha, e mais longe um pinheiro simples de três andares (uns 60). Embaixo da ilha ficam três camadas de névoa.
   - **Lotes:** casas de enxaimel, as tendas do carroceiro e a torre do Salão de Táticas, montadas peça por peça.
   - **Fumaça e brasas:** partículas de um desenho só cada.
 - **Depuração:** `portador.stage.town.stageOverride`, `viewOverride` e `hourOverride` forçam o estágio, o estado dos lotes e a hora, só na tela e sem mexer no save. Foi assim que as capturas foram feitas.
@@ -1011,15 +1012,88 @@ As imagens de referência ficam em `docs/img/conceito-vila-1-destruida.jpg` a `c
 
 | Estágio | Chamadas de desenho | Triângulos |
 |---|---|---|
-| 0 | 88 | 92 mil |
-| 3 | 92 | 139 mil |
+| 0 | 89 | 104 mil |
+| 3 | 93 | 150 mil |
 
-O herói sentado na fogueira acrescenta cerca de 14 chamadas e 16 mil triângulos, o que leva o estágio 3 a uns 155 mil, um pouco acima do orçamento de 150 mil. Falta medir no celular.
+O herói sentado na fogueira acrescenta cerca de 14 chamadas e 16 mil triângulos, o que leva o estágio 3 a uns 166 mil, acima do orçamento de 150 mil. Falta medir no celular.
 
 **Fica para depois:**
 
 - **M2.2:** os moradores (corpo, cor de roupa, nome, ofício e rotina) e os marcos de vida (feira, músico, crianças, a festa do fim do Ato I).
 - **M2.3:** as janelas acesas à noite e o portão de caveira de boi das imagens de referência, que não existe nos packs.
+
+**Como ficou a M2.2 (2026-10-22): os moradores**
+
+| | |
+|---|---|
+| ![A praça com os moradores](img/m2-moradores-praca.jpg) | ![Nome e ofício no toque](img/m2-moradores-nome.jpg) |
+| A praça de manhã: gente passeando, crianças em volta da fonte, o avô no banco e a feira | Tocar num morador mostra o nome e o ofício em cima dele ("Rui, morador") |
+| ![O ferreiro na bigorna](img/m2-moradores-ferreiro.jpg) | ![A lenhadora na pilha de lenha](img/m2-moradores-lenhador.jpg) |
+| O ferreiro martelando na bigorna, de dia | A lenhadora rachando lenha no toco, com o machado |
+| ![A música no banco](img/m2-moradores-musico.jpg) | ![A festa do Senhor](img/m2-moradores-festa.jpg) |
+| Ao entardecer, a música toca violão no banco ao pé da escada | A festa do Senhor: todo mundo na praça, acenando e comemorando, com as bandeirolas |
+| ![A ilha com 18 moradores](img/m2-moradores-ilha.jpg) | |
+| A ilha inteira com 18 moradores | |
+
+**Onde está cada coisa:**
+
+- **`src/game/townFolk.ts` (puro):**
+  - quem mora na vila (nome, rosto, roupa e ofício, sempre os mesmos para a mesma semente, sem repetir nome entre os 24 primeiros);
+  - os marcos de vida;
+  - o ofício que só começa com o marco dele;
+  - a rotina por hora;
+  - os pontos de trabalho (bigorna, lenha, barracas, bancos e caixas);
+  - a rede de caminhos, com a rota mais curta e sem cortar a fonte.
+
+  9 testes cobrem isso, inclusive que nada entra no save.
+- **`src/render/folk.ts`:**
+  - **Corpo:** cada morador é montado no esqueleto do herói, com o corpo do Ranger ou do Rogue numa malha só. A túnica, o lenço e a calça são recoloridos nas faixas de tecido do atlas, sem mexer na pele nem no couro.
+  - **Cabeça:** vem de um dos cinco rostos.
+  - **Mãos:** martelo, machado, violão ou caixa.
+  - **Andar:** pela rede, com um empurrão leve para ninguém ficar em cima do outro.
+- **Depuração:** `portador.stage.town.worldOverride` troca o mundo que a vila mostra (mais moradores, chefes vencidos, a festa) sem mexer no save.
+
+**Os ofícios e a rotina:**
+
+| Ofício | Quando aparece | O que faz |
+|---|---|---|
+| Morador (o primeiro) | 1 morador | Passeia pela vila de dia e pela praça ao entardecer |
+| Ferreiro | 2 moradores | Martela na bigorna das 7 às 18 h (`Hammering`) |
+| Feirante | 4 moradores (a primeira barraca) | Fica atrás da barraca das 8 às 18 h |
+| Lenhador | 4 moradores (a pilha de lenha) | Racha lenha no toco das 7 às 17 h (`Chopping`) |
+| Carregador | 5 moradores (as caixas) | Leva caixas das tendas do carroceiro até a feira e volta |
+| Crianças | 6 moradores | Correm e pulam em volta da fonte das 8 às 19h30 |
+| Músico | 8 moradores e o Capitão vencido | Toca violão no banco das 16h30 às 23 h |
+| Avô ou avó | 9 moradores | Senta no banco das 9 às 18 h |
+
+Ao meio-dia, quem trabalha almoça na praça. À noite, cada um volta para a porta de uma casa (ou do prédio onde trabalha) e some. Na festa do Senhor, que dura um dia de jogo, todo mundo vai para a praça acenar e comemorar (`Waving`, `Cheering`), e aparece a tenda de circo. As bandeirolas da praça ficam depois da festa.
+
+**O que mudou em relação à especificação:**
+
+- **Os marcos põem coisas na vila,** além de gente:
+  - a feira cresce de 1 para 3 barracas com o Capitão;
+  - a pilha de lenha chega com o lenhador, e as caixas com o carregador;
+  - os bancos ficam no largo ao pé da escada, onde a câmera os vê (encostados nas casas, a parede tapava).
+- **Duas malhas por morador:** a completa, de perto, e uma simplificada pelo meshoptimizer do three (uns 22% dos triângulos, cerca de 1 800), usada na vista da ilha. Os pesos dos ossos ficam, porque ele só junta vértices que já existem. A animação de longe anda em meio ritmo.
+- **Sombra redonda** embaixo de cada morador, desenhada de uma vez só, em vez da sombra de verdade.
+- **Sombra da vila a cada 5 quadros:** o sol fica preso no meio da ilha, e quase nada que projeta sombra se mexe.
+- **Teto de 24 moradores na tela do computador e 14 na do celular,** como na especificação.
+
+**Desempenho no computador** (média de 10 quadros; o pico é o quadro em que a sombra é refeita):
+
+| Cena | Chamadas de desenho | Triângulos |
+|---|---|---|
+| Estágio 0, sem moradores | 62 (pico 91) | 82 mil (pico 108 mil) |
+| Estágio 3 com 18 moradores | 109 (pico 144) | 166 mil (pico 213 mil) |
+| A festa com 18 moradores | 109 (pico 145) | 166 mil (pico 214 mil) |
+
+O estágio 3 cheio passa do orçamento de 150 mil triângulos. Falta medir no celular, que mostra no máximo 14 moradores.
+
+**Fica para a M2.3:**
+
+- os bichos (a fonte ainda vai ser escolhida);
+- as janelas acesas à noite;
+- os passarinhos e o portão de caveira de boi.
 
 ### 15. Decisões em aberto
 
@@ -1214,6 +1288,15 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - floresta na névoa, fumaça e brasas;
     - três packs CC0 novos do Kenney (Graveyard, Castle e Survival);
     - 8 testes da planta (43 no total).
+  - **M2.2 pronta, os moradores:**
+    - nome, rosto, roupa e ofício pela semente;
+    - rotina por hora;
+    - marcos de vida (feira, lenha, caixas, música, crianças e festa);
+    - versão leve pelo meshoptimizer para a vista da ilha;
+    - sombra da vila a cada 5 quadros;
+    - floresta mais densa, a pedido do usuário;
+    - 9 testes dos moradores (52 no total).
+  - **Corpos dos inimigos espalhados:** quem morre escorrega um pouco para trás ao cair, para um lugar a pelo menos 1,3 m dos outros corpos e fora dos pés do herói. Antes, o próximo inimigo da mesma vaga caía exatamente em cima do anterior.
   - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
     - a vila é uma cena separada;
     - os moradores são aventureiros com roupa simples de cor variável;

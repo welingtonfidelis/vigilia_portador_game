@@ -174,3 +174,15 @@ input[type='number'] { width: 4.2em; }
 /* Regras compactas: cada seletor com largura máxima, para a linha quebrar em duas, não em quatro. */
 .rule-list li select { max-width: 13em; }
 .rule-list li select:nth-of-type(2) { max-width: 9em; }
+
+/* Menu e novo jogo */
+.menu { position: absolute; top: calc(78px + var(--safe-t)); right: 12px; display: flex; flex-direction: column; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px; z-index: 5; }
+.faces { display: flex; flex-wrap: wrap; gap: 6px; }
+.faces button { min-width: 6.5em; }
+input.name { font-size: 1.05rem; width: min(18em, 100%); padding: 0.35em 0.5em; }
+button.primary { background: #6a4c1c; border-color: var(--gold); font-weight: 600; padding: 0.45em 1.2em; }
+.newgame { top: calc(96px + var(--safe-t)); }
+.affix-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+@media (max-width: 720px) {
+  .menu { top: calc(96px + var(--safe-t)); }
+}

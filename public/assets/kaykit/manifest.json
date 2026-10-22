@@ -217,6 +217,11 @@
       "sha256": "c55e6ec1c79e83ae21d46fe1cd921c1b64be8b9a524a24517e51c6ba99231459"
     },
     {
+      "path": "animations/Rig_Medium_CombatRanged.glb",
+      "bytes": 1014852,
+      "sha256": "7fef1fc0e7b0feafd34b8e12d23f514c8c1f9d068047a691b854b56f1774dff5"
+    },
+    {
       "path": "animations/Rig_Medium_Special.glb",
       "bytes": 924308,
       "sha256": "74047dd2178fbed388656051664158e921b7bfc613abb119860aeb7b646bd640"

@@ -2,7 +2,7 @@ import { render } from 'preact';
 import { Session } from './game/session.ts';
 import { clearSave } from './game/storage.ts';
 import { itemName } from './sim/index.ts';
-import type { SimEvent } from './sim/index.ts';
+import type { HeadId, SimEvent } from './sim/index.ts';
 import { Stage, pickQuality } from './render/stage.ts';
 import { App } from './ui/App.tsx';
 import type { Toast } from './ui/App.tsx';
@@ -33,6 +33,9 @@ function resize(): void {
 }
 addEventListener('resize', resize);
 resize();
+addEventListener('portador-preview', (e) => {
+  stage.previewHead = (e as CustomEvent<HeadId | null>).detail;
+});
 addEventListener('portador-inset', (e) => {
   const d = (e as CustomEvent<{ x: number; y: number; closeUp: boolean }>).detail;
   stage.setInset(d.x, d.y, d.closeUp);

@@ -8,8 +8,36 @@ import { BASES, tierBand } from '../sim/index.ts';
 import type { HeadId, Item, Slot } from '../sim/index.ts';
 import { Animator } from './animator.ts';
 import { bandMaterial, legendaryMaterial, load, releaseLegendary } from './assets.ts';
-import { BARE_LEGS, BARE_TORSO, BASE_VISUALS, DONOR_FILES, HEAD_VISUALS, PREFIX } from './visuals.ts';
-import type { RigidVisual, SkinnedVisual } from './visuals.ts';
+import { BARE_LEGS, BARE_TORSO, BASE_VISUALS, DONOR_FILES, HEAD_VISUALS, HELM_FIT, PREFIX } from './visuals.ts';
+import type { HelmFit, RigidVisual, SkinnedVisual } from './visuals.ts';
+
+/** Geometria do elmo com o ajuste por cabeça (escala em volta do osso da cabeça, na pose de bind). */
+const fitted = new Map<string, THREE.BufferGeometry>();
+
+function fitGeometry(src: THREE.SkinnedMesh, fit: HelmFit): THREE.BufferGeometry {
+  const key = `${src.name}:${fit.scale}:${fit.y}`;
+  const have = fitted.get(key);
+  if (have) return have;
+  const headIdx = src.skeleton.bones.findIndex((b) => b.name === 'head');
+  const pivot = new THREE.Vector3();
+  if (headIdx >= 0) {
+    // A inversa da boneInverse é a pose do osso na hora do bind; leva para o espaço da malha.
+    const headBind = src.skeleton.boneInverses[headIdx]!.clone().invert();
+    pivot.setFromMatrixPosition(headBind).applyMatrix4(src.bindMatrixInverse);
+  }
+  const g = src.geometry.clone();
+  const pos = g.getAttribute('position') as THREE.BufferAttribute;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i).sub(pivot).multiplyScalar(fit.scale).add(pivot);
+    v.y += fit.y;
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  pos.needsUpdate = true;
+  g.computeBoundingSphere();
+  fitted.set(key, g);
+  return g;
+}
 
 type Equip = Partial<Record<Slot, Item>>;
 
@@ -59,7 +87,7 @@ export class HeroRig {
     return s;
   }
 
-  private async skinned(v: SkinnedVisual, band: number, legend: boolean, piece: Piece): Promise<void> {
+  private async skinned(v: SkinnedVisual, band: number, legend: boolean, piece: Piece, fit?: HelmFit): Promise<void> {
     const donor = await load(DONOR_FILES[v.donor]);
     const holder = this.rig.getObjectByName('Rig_Medium') ?? this.rig;
     for (const part of v.parts) {
@@ -71,7 +99,7 @@ export class HeroRig {
         mat = legendaryMaterial(mat);
         piece.materials.push(mat);
       }
-      const mesh = new THREE.SkinnedMesh(src.geometry, mat);
+      const mesh = new THREE.SkinnedMesh(fit ? fitGeometry(src, fit) : src.geometry, mat);
       mesh.name = src.name;
       mesh.position.copy(src.position);
       mesh.quaternion.copy(src.quaternion);
@@ -84,7 +112,7 @@ export class HeroRig {
     }
   }
 
-  private async rigid(v: RigidVisual, band: number, legend: boolean, piece: Piece): Promise<void> {
+  private async rigid(v: RigidVisual, band: number, legend: boolean, piece: Piece, fit?: HelmFit): Promise<void> {
     const g = await load(v.file);
     const bone = this.bone(v.bone);
     if (!bone) return;
@@ -99,6 +127,10 @@ export class HeroRig {
       obj = g.scene.clone();
     }
     if (v.scale) obj.scale.setScalar(v.scale);
+    if (fit) {
+      obj.scale.multiplyScalar(fit.scale);
+      obj.position.y += fit.y;
+    }
     obj.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;
@@ -132,17 +164,19 @@ export class HeroRig {
   /** Troca só os encaixes que mudaram. */
   async setEquip(head: HeadId, equip: Equip): Promise<void> {
     const want = new Map<string, { sig: string; build: (p: Piece) => Promise<void> }>();
-    const add = (key: string, v: SkinnedVisual | RigidVisual | null, item: Item | undefined) => {
+    const add = (key: string, v: SkinnedVisual | RigidVisual | null, item: Item | undefined, id?: string) => {
       if (!v) return;
       const band = item ? tierBand(item.tier) : 0;
       const legend = !!item?.legend;
-      const sig = `${key}:${item?.base ?? 'nu'}:${band}:${legend}`;
+      // O elmo depende da cabeça (ajuste por cabeça); a assinatura leva os dois.
+      const fit = key === 'elmo' && item ? HELM_FIT[item.base]?.[head] : undefined;
+      const sig = `${key}:${id ?? item?.base ?? 'nu'}${key === 'elmo' ? `@${head}` : ''}:${band}:${legend}`;
       want.set(key, {
         sig,
-        build: (p) => (v.kind === 'skinned' ? this.skinned(v, band, legend, p) : this.rigid(v, band, legend, p)),
+        build: (p) => (v.kind === 'skinned' ? this.skinned(v, band, legend, p, fit) : this.rigid(v, band, legend, p, fit)),
       });
     };
-    add('cabeca', HEAD_VISUALS[head], undefined);
+    add('cabeca', HEAD_VISUALS[head], undefined, head);
     add('peitoral', equip.peitoral ? BASE_VISUALS[equip.peitoral.base] ?? null : BARE_TORSO, equip.peitoral);
     add('perneiras', equip.perneiras ? BASE_VISUALS[equip.perneiras.base] ?? null : BARE_LEGS, equip.perneiras);
     for (const slot of ['arma', 'secundaria', 'elmo', 'capa'] as Slot[]) {

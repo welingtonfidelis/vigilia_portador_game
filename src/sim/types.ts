@@ -7,7 +7,7 @@ export type Weight = 'leve' | 'medio' | 'pesado' | 'nenhum';
 export type Material = 'ossos' | 'ferro';
 export type SkillId = 'golpe_amplo' | 'investida' | 'segundo_folego' | 'grito' | 'pele_de_ferro' | 'sede_de_sangue';
 export type BuildingId = 'ferreiro' | 'treinador' | 'alquimista' | 'carroceiro' | 'curandeira' | 'taticas';
-export type EnemyKind = 'lacaio' | 'guerreiro' | 'ladino' | 'mago' | 'capitao';
+export type EnemyKind = 'lacaio' | 'guerreiro' | 'ladino' | 'mago' | 'capitao' | 'senhor';
 export type EliteAffix = 'blindado' | 'vampirico' | 'furioso' | 'veloz';
 export type RoomKind = 'combate' | 'elite' | 'bau' | 'prisioneiro' | 'santuario' | 'chefe';
 export type HeadId = 'Knight' | 'Barbarian' | 'Mage' | 'Ranger' | 'Rogue' | 'Rogue_Hooded';
@@ -48,12 +48,16 @@ export interface Enemy {
   /** Tick em que termina a aproximação (estado "chegando"). */
   arriveAt: number;
   nextAttack: number;
-  /** Golpe em andamento: tick do impacto. */
-  windup: { impact: number; special: boolean } | null;
+  /** Golpe em andamento: tick do impacto. `cast` é conjuração sem dano (o Senhor chamando reforço). */
+  windup: { impact: number; special: boolean; cast?: boolean } | null;
   stunUntil: number;
   /** Próximo golpe especial (chefe). */
   nextSpecial: number;
   diedAt: number;
+  /** Fase do chefe (o Senhor da Cripta tem 2); 1 para os outros. */
+  phase: number;
+  /** Já foi erguido dos mortos uma vez (não levanta de novo nem dá saque). */
+  revived: boolean;
 }
 
 export type HeroActionKind = 'golpe' | 'habilidade' | 'pocao' | 'fuga';
@@ -83,6 +87,8 @@ export interface Room {
   fearUntil: number;
   /** Vida do herói ao começar a luta (para o balanceador). */
   hpAtStart: number;
+  /** Tick em que o chefe entrou na fase 2 (0 = ainda não). */
+  phase2At: number;
 }
 
 export type CondId = 'vida_abaixo' | 'anel_min' | 'fundo_min' | 'alvo_elite' | 'pocoes_max' | 'sempre';
@@ -182,10 +188,12 @@ export interface Construction {
 }
 
 export interface ForgeJob {
-  kind: 'forjar' | 'aprimorar';
+  kind: 'forjar' | 'aprimorar' | 'reforjar';
   item: Item;
-  /** Item original (aprimorar): id no baú ou no corpo. */
+  /** Item original (aprimorar e reforjar): id no baú ou no corpo. */
   sourceId: number | null;
+  /** Reforjar: qual afixo sai. */
+  affixIndex?: number;
   end: number;
 }
 
@@ -227,6 +235,14 @@ export interface Stats {
   /** Dano recebido em salas comuns, em fração da vida máxima (soma e contagem). */
   roomDamageFrac: number;
   roomDamageCount: number;
+  /** Peças forjadas ou reforjadas. */
+  forged: number;
+  /** Peças aprimoradas (+1 tier). */
+  upgraded: number;
+  /** Lutas com o Senhor da Cripta: quantas, ticks e soma da fração da luta em que a fase 2 começou. */
+  senhorFights: number;
+  senhorFightTicks: number;
+  senhorPhase2Frac: number;
 }
 
 export type Phase = 'vila' | 'descendo' | 'sala' | 'voltando';
@@ -266,6 +282,8 @@ export type SimEvent =
   | { t: 'inimigoGolpe'; tick: number; enemy: number; special: boolean }
   | { t: 'heroiAcertado'; tick: number; enemy: number; dmg: number; blocked: boolean }
   | { t: 'inimigoMorre'; tick: number; enemy: number }
+  | { t: 'inimigoRevive'; tick: number; enemy: number }
+  | { t: 'fase'; tick: number; enemy: number }
   | { t: 'pocao'; tick: number }
   | { t: 'cura'; tick: number; amount: number }
   | { t: 'salaNova'; tick: number; floor: number; room: number; kind: RoomKind }

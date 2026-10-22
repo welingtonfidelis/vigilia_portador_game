@@ -19,7 +19,25 @@ export function serialize(w: World): string {
 type Migration = (w: Record<string, unknown>) => void;
 
 /** Migrações em cadeia: MIGRATIONS[n] leva do save n para o n + 1. */
-const MIGRATIONS: Record<number, Migration> = {};
+const MIGRATIONS: Record<number, Migration> = {
+  // v1 → v2 (M1): fases de chefe, ressurreição, forja completa e as estatísticas novas.
+  1: (w) => {
+    const room = w.room as { enemies: Record<string, unknown>[]; phase2At?: number } | null;
+    if (room) {
+      room.phase2At ??= 0;
+      for (const e of room.enemies) {
+        e.phase ??= 1;
+        e.revived ??= false;
+      }
+    }
+    const stats = w.stats as Record<string, unknown>;
+    stats.forged ??= 0;
+    stats.upgraded ??= 0;
+    stats.senhorFights ??= 0;
+    stats.senhorFightTicks ??= 0;
+    stats.senhorPhase2Frac ??= 0;
+  },
+};
 
 export function deserialize(text: string): World {
   const wrap = JSON.parse(text) as { v: number; sum: string; body: string };

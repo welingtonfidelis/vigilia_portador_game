@@ -66,6 +66,8 @@ export const SLOT_NAMES: Record<Slot, string> = {
 export interface AffixDef {
   id: AffixId;
   name: string;
+  /** Material que a forja gasta para pôr este afixo. */
+  mat: 'ossos' | 'ferro' | 'ambos';
   /** Adjetivo: [m, f, m pl, f pl]. */
   adj: [string, string, string, string];
   value: number;
@@ -75,14 +77,14 @@ export interface AffixDef {
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 export const AFFIXES: Record<AffixId, AffixDef> = {
-  afiado: { id: 'afiado', name: 'Afiado', adj: ['afiado', 'afiada', 'afiados', 'afiadas'], value: 0.04, desc: (v) => `+${pct(v)} de crítico` },
-  brutal: { id: 'brutal', name: 'Brutal', adj: ['brutal', 'brutal', 'brutais', 'brutais'], value: 0.08, desc: (v) => `+${pct(v)} de dano` },
-  veloz: { id: 'veloz', name: 'Veloz', adj: ['veloz', 'veloz', 'velozes', 'velozes'], value: 0.07, desc: (v) => `+${pct(v)} de velocidade de ataque` },
-  robusto: { id: 'robusto', name: 'Robusto', adj: ['robusto', 'robusta', 'robustos', 'robustas'], value: 0.08, desc: (v) => `+${pct(v)} de vida máxima` },
-  guardiao: { id: 'guardiao', name: 'Guardião', adj: ['guardião', 'guardiã', 'guardiões', 'guardiãs'], value: 4, desc: (v) => `+${Math.round(v)} de armadura` },
-  sanguessuga: { id: 'sanguessuga', name: 'Sanguessuga', adj: ['sanguessuga', 'sanguessuga', 'sanguessugas', 'sanguessugas'], value: 0.03, desc: (v) => `cura ${pct(v)} do dano causado` },
-  afortunado: { id: 'afortunado', name: 'Afortunado', adj: ['afortunado', 'afortunada', 'afortunados', 'afortunadas'], value: 5, desc: (v) => `+${Math.round(v)} de sorte` },
-  sereno: { id: 'sereno', name: 'Sereno', adj: ['sereno', 'serena', 'serenos', 'serenas'], value: 0.15, desc: (v) => `+${pct(v)} de cura das poções` },
+  afiado: { id: 'afiado', name: 'Afiado', mat: 'ossos', adj: ['afiado', 'afiada', 'afiados', 'afiadas'], value: 0.04, desc: (v) => `+${pct(v)} de crítico` },
+  brutal: { id: 'brutal', name: 'Brutal', mat: 'ferro', adj: ['brutal', 'brutal', 'brutais', 'brutais'], value: 0.08, desc: (v) => `+${pct(v)} de dano` },
+  veloz: { id: 'veloz', name: 'Veloz', mat: 'ossos', adj: ['veloz', 'veloz', 'velozes', 'velozes'], value: 0.07, desc: (v) => `+${pct(v)} de velocidade de ataque` },
+  robusto: { id: 'robusto', name: 'Robusto', mat: 'ossos', adj: ['robusto', 'robusta', 'robustos', 'robustas'], value: 0.08, desc: (v) => `+${pct(v)} de vida máxima` },
+  guardiao: { id: 'guardiao', name: 'Guardião', mat: 'ferro', adj: ['guardião', 'guardiã', 'guardiões', 'guardiãs'], value: 4, desc: (v) => `+${Math.round(v)} de armadura` },
+  sanguessuga: { id: 'sanguessuga', name: 'Sanguessuga', mat: 'ambos', adj: ['sanguessuga', 'sanguessuga', 'sanguessugas', 'sanguessugas'], value: 0.03, desc: (v) => `cura ${pct(v)} do dano causado` },
+  afortunado: { id: 'afortunado', name: 'Afortunado', mat: 'ferro', adj: ['afortunado', 'afortunada', 'afortunados', 'afortunadas'], value: 5, desc: (v) => `+${Math.round(v)} de sorte` },
+  sereno: { id: 'sereno', name: 'Sereno', mat: 'ossos', adj: ['sereno', 'serena', 'serenos', 'serenas'], value: 0.15, desc: (v) => `+${pct(v)} de cura das poções` },
 };
 
 export const AFFIX_IDS = Object.keys(AFFIXES) as AffixId[];
@@ -133,6 +135,8 @@ export interface EnemyDef {
   bones: [number, number];
   /** Golpe especial (chefe): a cada n ticks. */
   specialEvery?: number;
+  /** Fase 2 (o Senhor da Cripta abaixo de metade da vida). */
+  phase2?: { dmg: number; interval: number; specialEvery: number };
 }
 
 export const ENEMIES: Record<EnemyKind, EnemyDef> = {
@@ -141,7 +145,15 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
   ladino: { kind: 'ladino', name: 'Ladino', hp: 40, dmg: 5, interval: 10, ranged: false, size: 1, block: 0, xp: 7, gold: 4, bones: [1, 1] },
   mago: { kind: 'mago', name: 'Mago', hp: 32, dmg: 9, interval: 24, ranged: true, size: 1, block: 0, xp: 8, gold: 5, bones: [1, 1] },
   capitao: { kind: 'capitao', name: 'Capitão da Cripta', hp: 1050, dmg: 16, interval: 22, ranged: false, size: 2, block: 0.1, xp: 150, gold: 90, bones: [8, 12], specialEvery: 120 },
+  senhor: {
+    kind: 'senhor', name: 'Senhor da Cripta', hp: 1500, dmg: 14, interval: 26, ranged: true, size: 2, block: 0, xp: 260, gold: 150,
+    bones: [12, 18], specialEvery: 150, phase2: { dmg: 18, interval: 20, specialEvery: 120 },
+  },
 };
+
+export function isBoss(kind: EnemyKind): boolean {
+  return kind === 'capitao' || kind === 'senhor';
+}
 
 export const ELITE_NAMES: Record<EliteAffix, string> = { blindado: 'Blindado', vampirico: 'Vampírico', furioso: 'Furioso', veloz: 'Veloz' };
 
@@ -186,8 +198,8 @@ export interface BuildingDef {
 export const BUILDINGS: Record<BuildingId, BuildingDef> = {
   ferreiro: {
     id: 'ferreiro', name: 'Ferreiro', max: 5, start: 1,
-    cost: (n) => ({ gold: 150 * n * n, mats: { ferro: 20 * n }, people: 2 * n }),
-    effect: (n) => `Forja até o tier ${2 * n} (limitado pelo andar mais fundo)${n >= 2 ? '; forja rara' : ''}`,
+    cost: (n) => ({ gold: 150 * n * n, mats: { ferro: 15 * n }, people: n + 1 }),
+    effect: (n) => `Forja até o tier ${2 * n} (limitado pelo andar mais fundo)${n >= 4 ? '; forja rara e épica; reforja' : n >= 3 ? '; forja rara; reforja' : n >= 2 ? '; forja rara' : ''}`,
   },
   treinador: {
     id: 'treinador', name: 'Treinador', max: 6, start: 0,

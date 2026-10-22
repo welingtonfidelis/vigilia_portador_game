@@ -55,7 +55,7 @@ export const PACKS: PackEntry[] = [
     groups: [
       {
         path: 'Animations/gltf/Rig_Medium', ext: '.glb',
-        files: ['Rig_Medium_General', 'Rig_Medium_MovementBasic', 'Rig_Medium_CombatMelee', 'Rig_Medium_Special'],
+        files: ['Rig_Medium_General', 'Rig_Medium_MovementBasic', 'Rig_Medium_CombatMelee', 'Rig_Medium_CombatRanged', 'Rig_Medium_Special'],
       },
     ],
   },

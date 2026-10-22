@@ -2,8 +2,8 @@
  * Cena 3D: só lê o estado e os eventos da simulação e anima. Nada aqui decide a luta.
  */
 import * as THREE from 'three';
-import { BALANCE, BASES } from '../sim/index.ts';
-import type { Enemy, SimEvent, World } from '../sim/index.ts';
+import { BALANCE, BASES, isBoss } from '../sim/index.ts';
+import type { Enemy, HeadId, SimEvent, World } from '../sim/index.ts';
 import { EnemyActor, enemyFiles } from './actors.ts';
 import { clips, load, pulseLegendary } from './assets.ts';
 import { buildRoom, DUNGEON_PIECES, ENEMY_DOOR, HERO_DOOR } from './dungeon.ts';
@@ -87,7 +87,10 @@ export class Stage {
   /** Carrega tudo que o protótipo usa (cerca de 8 MB) antes de mostrar a cena. */
   async init(onProgress?: (done: number, total: number) => void): Promise<void> {
     const files = [...visualFiles(), ...enemyFiles(), ...DUNGEON_PIECES];
-    const anims = ['animations/Rig_Medium_General.glb', 'animations/Rig_Medium_MovementBasic.glb', 'animations/Rig_Medium_CombatMelee.glb', 'animations/Rig_Medium_Special.glb'];
+    const anims = [
+      'animations/Rig_Medium_General.glb', 'animations/Rig_Medium_MovementBasic.glb', 'animations/Rig_Medium_CombatMelee.glb',
+      'animations/Rig_Medium_CombatRanged.glb', 'animations/Rig_Medium_Special.glb',
+    ];
     const total = files.length + anims.length;
     let done = 0;
     const tick = () => onProgress?.(++done, total);
@@ -117,6 +120,9 @@ export class Stage {
     this.inset = { x, y };
     this.closeUp = closeUp;
   }
+
+  /** Rosto mostrado na tela de novo jogo (null = o do herói). */
+  previewHead: HeadId | null = null;
 
   /** Tela de equipamento: a câmera chega perto do herói. */
   private closeUp = false;
@@ -157,7 +163,7 @@ export class Stage {
   }
 
   private ringPos(e: Enemy): THREE.Vector3 {
-    const big = e.kind === 'capitao';
+    const big = isBoss(e.kind);
     const a = big ? (RING_ANGLES[e.slot]! + RING_ANGLES[e.slot + 1]!) / 2 : RING_ANGLES[e.slot]!;
     const r = big ? 3.0 : 2.35;
     return new THREE.Vector3(Math.sin(a) * r, 0, -Math.cos(a) * r).add(this.heroPos);
@@ -212,9 +218,15 @@ export class Stage {
           break;
         case 'inimigoGolpe': {
           const e = w.room?.enemies.find((x) => x.id === ev.enemy);
-          actor?.attack(ev.special, Math.max(0.3, ((e?.interval ?? 16) * 0.8) / BALANCE.ticksPerSecond / speed));
+          actor?.attack(ev.special, Math.max(0.3, ((e?.interval ?? 16) * 0.8) / BALANCE.ticksPerSecond / speed), e?.phase ?? 1);
           break;
         }
+        case 'fase':
+          actor?.taunt();
+          break;
+        case 'inimigoRevive':
+          actor?.rise();
+          break;
         case 'heroiAcertado':
           if (!this.hero.animator.busy) this.hero.animator.play({ name: ev.blocked ? 'Melee_Block_Hit' : 'Hit_A', duration: 0.5 / Math.sqrt(speed) });
           this.float(ev.blocked ? `${ev.dmg}` : `-${ev.dmg}`, this.heroPos, ev.blocked ? 'blocked' : 'hurt');
@@ -246,7 +258,7 @@ export class Stage {
     this.time += dt;
     this.perf.begin();
     void this.swapRoom(w);
-    this.hero.request(w.hero.head, w.hero.equip);
+    this.hero.request(this.previewHead ?? w.hero.head, w.hero.equip);
     const t = w.tick + frac;
     const roomShown = this.roomKey !== 'vila' && w.room;
     // Onde o herói deve estar.

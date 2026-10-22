@@ -2,13 +2,14 @@
 import { chronicle } from './chronicle.ts';
 import { BALANCE, floorPower, isBossFloor, roomsOnFloor } from './config.ts';
 import { spawnGroup, stepFight } from './combat.ts';
-import { ENEMIES } from './data.ts';
+import { ENEMIES, isBoss } from './data.ts';
 import { gainXp, heroStats } from './hero.ts';
 import { addLoot, dropItem, emptyLoot, itemName, itemValue, jitter, lootValue, makeLegend } from './items.ts';
 import { chance, int, rand, weighted } from './rng.ts';
 import type { Enemy, Item, Loot, Rarity, ReturnReport, RoomKind, SimEvent, World } from './types.ts';
 
-const LEGEND_BY_BOSS_FLOOR: Record<number, string> = { 5: 'vigia_partida', 10: 'coroa_capitao' };
+/** A primeira vitória em cada chefe deixa a lendária dele: o elmo do Capitão, a espada do Senhor. */
+const LEGEND_BY_BOSS_FLOOR: Record<number, string> = { 5: 'coroa_capitao', 10: 'vigia_partida' };
 
 export function roomKind(w: World, floor: number, index: number): RoomKind {
   if (index === roomsOnFloor(floor) - 1 && isBossFloor(floor)) return 'chefe';
@@ -44,6 +45,8 @@ function onKill(w: World, e: Enemy, ev: SimEvent[]): void {
   const p = floorPower(floor);
   exp.kills++;
   w.stats.kills++;
+  // Quem o Senhor ergueu dos mortos não dá saque de novo.
+  if (e.revived) return;
   exp.bag.gold += jitter(w, d.gold * p * (e.elite ? 2 : 1));
   exp.bag.mats.ossos += int(w, d.bones[0], d.bones[1]);
   // O guerreiro deixa ferro velho da armadura.
@@ -51,7 +54,7 @@ function onKill(w: World, e: Enemy, ev: SimEvent[]): void {
   if (gainXp(w, Math.round(d.xp * Math.pow(p, 0.8) * (e.elite ? 2.5 : 1)))) {
     chronicle(w, `${w.hero.name} chegou ao nível ${w.hero.level}.`, 'bom', ev);
   }
-  if (e.kind === 'capitao') {
+  if (isBoss(e.kind)) {
     exp.bag.mats.ferro += 10;
     exp.bag.people += 2;
     const first = !w.bossesBeaten.includes(floor);
@@ -60,9 +63,9 @@ function onKill(w: World, e: Enemy, ev: SimEvent[]): void {
       w.stats.bossFirst[String(floor)] = w.tick;
       const legend = LEGEND_BY_BOSS_FLOOR[floor];
       if (legend) {
-        const item = makeLegend(w, legend, Math.ceil(floor / 2), `Capitão da Cripta, andar ${floor}`);
+        const item = makeLegend(w, legend, Math.ceil(floor / 2), `${d.name}, andar ${floor}`);
         bagItem(w, item, ev);
-        chronicle(w, `O Capitão da Cripta caiu no andar ${floor}. Nos ossos dele, ${itemName(item)}.`, 'lenda', ev);
+        chronicle(w, `${d.name} caiu no andar ${floor}. Nos ossos dele, ${itemName(item)}.`, 'lenda', ev);
       }
     }
     bagItem(w, dropItem(w, floor, 'epica', s.luck), ev);
@@ -87,6 +90,7 @@ export function enterRoom(w: World, ev: SimEvent[]): void {
     fightStart: 0,
     fearUntil: 0,
     hpAtStart: w.hero.hp,
+    phase2At: 0,
   };
   w.phase = 'sala';
   w.hero.action = null;
@@ -268,6 +272,11 @@ function roomCleared(w: World, ev: SimEvent[]): void {
     if (room.kind === 'chefe') {
       w.stats.bossFightTicks += ticks;
       w.stats.bossFights++;
+      if (room.enemies.some((e) => e.kind === 'senhor')) {
+        w.stats.senhorFights++;
+        w.stats.senhorFightTicks += ticks;
+        w.stats.senhorPhase2Frac += room.phase2At && ticks > 0 ? (room.phase2At - room.fightStart) / ticks : 1;
+      }
     } else if (room.kind === 'combate') {
       w.stats.roomDamageFrac += Math.max(0, room.hpAtStart - w.hero.hp) / s.maxHp;
       w.stats.roomDamageCount++;

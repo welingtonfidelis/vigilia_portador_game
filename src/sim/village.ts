@@ -1,12 +1,13 @@
 /** Vila: obras, forja, imposto dos moradores, descanso e ferimento (docs/VIGILIA-PORTADOR.md §2.9). */
 import { chronicle, dayOf } from './chronicle.ts';
 import { BALANCE } from './config.ts';
-import { BASES, BUILDINGS } from './data.ts';
+import { AFFIXES, AFFIX_IDS, BASES, BUILDINGS } from './data.ts';
 import type { Cost } from './data.ts';
 import { startDescent } from './expedition.ts';
 import { heroStats } from './hero.ts';
 import { forgeCap, itemName, makeItem } from './items.ts';
-import type { BuildingId, Item, Rarity, SimEvent, World } from './types.ts';
+import { pick } from './rng.ts';
+import type { AffixId, BuildingId, Item, Material, SimEvent, World } from './types.ts';
 
 export function nextCost(w: World, id: BuildingId): Cost | null {
   const def = BUILDINGS[id];
@@ -46,23 +47,64 @@ export function build(w: World, id: BuildingId): string | null {
   return null;
 }
 
-export function forgeCost(tier: number, rarity: Rarity): Cost {
-  const mult = rarity === 'rara' ? 2 : 1;
-  return { gold: BALANCE.forgeGold(tier) * mult, mats: { ossos: BALANCE.forgeBones(tier) * mult }, people: 0 };
+export type ForgeRarity = 'comum' | 'rara' | 'epica';
+
+/** Material do afixo na conta da forja (docs/VIGILIA-PORTADOR.md §14.2). */
+function addAffixMat(mats: Partial<Record<Material, number>>, affix: AffixId, n: number): void {
+  const m = AFFIXES[affix].mat;
+  if (m === 'ambos') {
+    mats.ossos = (mats.ossos ?? 0) + Math.ceil(n / 2);
+    mats.ferro = (mats.ferro ?? 0) + Math.ceil(n / 2);
+  } else {
+    mats[m] = (mats[m] ?? 0) + n;
+  }
 }
 
-export function forge(w: World, baseId: string, rarity: 'comum' | 'rara'): string | null {
+export function forgeCost(tier: number, rarity: ForgeRarity, affix: AffixId | null = null): Cost {
+  const mult = rarity === 'epica' ? 3 : rarity === 'rara' ? 2 : 1;
+  const mats: Partial<Record<Material, number>> = { ossos: BALANCE.forgeBones(tier) };
+  if (affix && rarity !== 'comum') addAffixMat(mats, affix, (rarity === 'epica' ? 10 : 5) * tier);
+  return { gold: BALANCE.forgeGold(tier) * mult, mats, people: 0 };
+}
+
+export function reforgeCost(tier: number): Cost {
+  return { gold: BALANCE.forgeGold(tier), mats: { ossos: 6 * tier, ferro: 6 * tier }, people: 0 };
+}
+
+/** Encomenda uma peça no tier máximo da forja. Rara e épica escolhem o (primeiro) afixo. */
+export function forge(w: World, baseId: string, rarity: ForgeRarity, affix: AffixId | null = null): string | null {
   const v = w.village;
   if (v.forge) return 'a forja está ocupada';
   if (!BASES[baseId]) return 'base desconhecida';
   if (rarity === 'rara' && v.buildings.ferreiro < 2) return 'forjar rara pede o ferreiro nível 2';
+  if (rarity === 'epica' && v.buildings.ferreiro < 4) return 'forjar épica pede o ferreiro nível 4';
+  if (rarity === 'comum' && baseId === 'amuleto') return 'o amuleto só tem afixos: forje raro';
+  if (rarity !== 'comum' && !affix) return 'escolha o afixo';
   const tier = forgeCap(w);
-  const c = forgeCost(tier, rarity);
+  const c = forgeCost(tier, rarity, affix);
   const why = lacking(w, c);
   if (why) return why;
   pay(w, c);
-  const item = makeItem(w, baseId, tier, baseId === 'amuleto' ? 'rara' : rarity, `Forjado no dia ${dayOf(w.tick)}`);
-  v.forge = { kind: 'forjar', item, sourceId: null, end: w.tick + BALANCE.forgeTicks };
+  const item = makeItem(w, baseId, tier, rarity, `Forjado no dia ${dayOf(w.tick)}`, affix ? [affix] : undefined);
+  const ticks = rarity === 'epica' ? BALANCE.epicForgeTicks : rarity === 'rara' ? BALANCE.rareForgeTicks : BALANCE.forgeTicks;
+  v.forge = { kind: 'forjar', item, sourceId: null, end: w.tick + ticks };
+  return null;
+}
+
+/** Troca um afixo da peça por outro sorteado (que ela ainda não tem). Lendária não se reforja. */
+export function reforge(w: World, itemId: number, affixIndex: number): string | null {
+  const v = w.village;
+  if (v.forge) return 'a forja está ocupada';
+  if (v.buildings.ferreiro < 3) return 'reforjar pede o ferreiro nível 3';
+  const item = findOwned(w, itemId);
+  if (!item) return 'peça não encontrada';
+  if (item.legend) return 'os afixos de uma lendária não mudam';
+  if (affixIndex < 0 || affixIndex >= item.affixes.length) return 'escolha um afixo da peça';
+  const c = reforgeCost(item.tier);
+  const why = lacking(w, c);
+  if (why) return why;
+  pay(w, c);
+  v.forge = { kind: 'reforjar', item: { ...item, affixes: [...item.affixes] }, sourceId: item.id, affixIndex, end: w.tick + BALANCE.reforgeTicks };
   return null;
 }
 
@@ -93,11 +135,26 @@ function finishForge(w: World, ev: SimEvent[]): void {
     const src = findOwned(w, job.sourceId);
     if (src) {
       src.tier = job.item.tier;
+      w.stats.upgraded++;
       chronicle(w, `O ferreiro aprimorou ${itemName(src)} para o tier ${src.tier}.`, 'bom', ev);
       return;
     }
   }
+  if (job.kind === 'reforjar' && job.sourceId !== null) {
+    const src = findOwned(w, job.sourceId);
+    const idx = job.affixIndex ?? 0;
+    if (src && idx < src.affixes.length) {
+      const before = itemName(src);
+      const out = src.affixes[idx]!;
+      const options = AFFIX_IDS.filter((a) => !src.affixes.includes(a));
+      src.affixes[idx] = pick(w, options);
+      w.stats.forged++;
+      chronicle(w, `O ferreiro reforjou ${before}: saiu ${AFFIXES[out].name}, entrou ${AFFIXES[src.affixes[idx]!].name}.`, 'bom', ev);
+    }
+    return;
+  }
   v.stash.push(job.item);
+  w.stats.forged++;
   chronicle(w, `O ferreiro entregou ${itemName(job.item)}.`, 'bom', ev);
 }
 

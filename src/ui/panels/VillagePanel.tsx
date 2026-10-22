@@ -1,9 +1,10 @@
 import { useState } from 'preact/hooks';
 import type { Session } from '../../game/session.ts';
 import {
-  BALANCE, BASES, BUILDINGS, BUILDING_IDS, SLOT_NAMES, commands, floorTier, forgeCap, forgeCost, lacking, nextCost,
+  AFFIXES, AFFIX_IDS, BALANCE, BASES, BUILDINGS, BUILDING_IDS, SLOT_NAMES, commands, floorTier, forgeCap, forgeCost, lacking, nextCost,
+  reforgeCost,
 } from '../../sim/index.ts';
-import type { Cost, World } from '../../sim/index.ts';
+import type { AffixId, Cost, ForgeRarity, World } from '../../sim/index.ts';
 import { RARITY_CLASS, duration, itemTitle, nf } from '../format.ts';
 
 function costText(c: Cost): string {
@@ -16,11 +17,18 @@ function costText(c: Cost): string {
 export function VillagePanel({ session, w }: { session: Session; w: World }) {
   const [msg, setMsg] = useState<string | null>(null);
   const [baseId, setBaseId] = useState('espada');
-  const [rarity, setRarity] = useState<'comum' | 'rara'>('comum');
+  const [rarity, setRarity] = useState<ForgeRarity>('comum');
+  const [affix, setAffix] = useState<AffixId>('brutal');
   const v = w.village;
   const cap = forgeCap(w);
   const act = (fn: (x: World) => string | null) => setMsg(session.run(fn));
-  const owned = [...Object.values(w.hero.equip), ...v.stash].filter((i) => !!i && i.tier < cap);
+  const all = [...Object.values(w.hero.equip), ...v.stash].filter((i) => !!i);
+  const owned = all.filter((i) => i!.tier < cap);
+  const rerollable = all.filter((i) => i!.affixes.length > 0 && !i!.legend);
+  const smith = v.buildings.ferreiro;
+  const chosen = rarity === 'comum' ? null : affix;
+  const forgeTime = rarity === 'epica' ? BALANCE.epicForgeTicks : rarity === 'rara' ? BALANCE.rareForgeTicks : BALANCE.forgeTicks;
+  const matName = { ossos: 'ossos', ferro: 'ferro', ambos: 'ossos e ferro' };
   return (
     <div class="village">
       <p class="note">
@@ -71,19 +79,34 @@ export function VillagePanel({ session, w }: { session: Session; w: World }) {
       <p class="small">
         Teto da forja: <b>tier {cap}</b> (ferreiro nível {v.buildings.ferreiro} forja até o {2 * v.buildings.ferreiro}; o andar mais fundo, o {w.hero.deepest}, é tier {floorTier(w.hero.deepest)})
       </p>
-      {v.forge && <div class="progress">{v.forge.kind === 'forjar' ? 'Forjando' : 'Aprimorando'} {itemTitle(v.forge.item)} · falta {duration(v.forge.end - w.tick)}</div>}
+      {v.forge && (
+        <div class="progress">
+          {{ forjar: 'Forjando', aprimorar: 'Aprimorando', reforjar: 'Reforjando' }[v.forge.kind]} {itemTitle(v.forge.item)} · falta {duration(v.forge.end - w.tick)}
+        </div>
+      )}
       <div class="form">
         <label>Forjar
           <select value={baseId} onChange={(e) => setBaseId((e.target as HTMLSelectElement).value)}>
             {Object.values(BASES).map((b) => <option key={b.id} value={b.id}>{b.name} ({SLOT_NAMES[b.slot]})</option>)}
           </select>
-          <select value={rarity} onChange={(e) => setRarity((e.target as HTMLSelectElement).value as 'comum' | 'rara')}>
+          <select value={rarity} onChange={(e) => setRarity((e.target as HTMLSelectElement).value as ForgeRarity)}>
             <option value="comum">comum</option>
-            <option value="rara" disabled={v.buildings.ferreiro < 2}>rara (ferreiro nível 2)</option>
+            <option value="rara" disabled={smith < 2}>rara{smith < 2 ? ' (ferreiro 2)' : ''}</option>
+            <option value="epica" disabled={smith < 4}>épica{smith < 4 ? ' (ferreiro 4)' : ''}</option>
           </select>
-          <span class="small">{costText(forgeCost(cap, rarity))} · {duration(BALANCE.forgeTicks)}</span>
-          <button disabled={!!v.forge} onClick={() => act((x) => commands.forge(x, baseId, rarity))}>Forjar tier {cap}</button>
+          {rarity !== 'comum' && (
+            <select value={affix} onChange={(e) => setAffix((e.target as HTMLSelectElement).value as AffixId)} title="O afixo escolhe o material gasto">
+              {AFFIX_IDS.map((a) => <option key={a} value={a}>{AFFIXES[a].name} ({matName[AFFIXES[a].mat]})</option>)}
+            </select>
+          )}
         </label>
+        <div class="affix-row">
+          <span class="small">
+            {costText(forgeCost(cap, rarity, chosen))} · {duration(forgeTime)}
+            {rarity === 'epica' ? ' · o segundo afixo é sorteado' : ''}
+          </span>
+          <button disabled={!!v.forge} onClick={() => act((x) => commands.forge(x, baseId, rarity, chosen))}>Forjar tier {cap}</button>
+        </div>
       </div>
       <h4>Aprimorar (+1 tier, mantém os afixos)</h4>
       <div class="list">
@@ -93,6 +116,23 @@ export function VillagePanel({ session, w }: { session: Session; w: World }) {
             <span>{itemTitle(item!)}</span>
             <span class="small muted">{costText(forgeCost(item!.tier + 1, 'comum'))}</span>
             <button disabled={!!v.forge} onClick={() => act((x) => commands.upgrade(x, item!.id))}>Aprimorar</button>
+          </div>
+        ))}
+      </div>
+      <h4>Reforjar (troca um afixo por outro sorteado){smith < 3 ? ' · ferreiro 3' : ''}</h4>
+      <div class="list">
+        {rerollable.length === 0 && <p class="muted small">Nenhuma peça com afixo (as lendárias não se reforjam).</p>}
+        {rerollable.map((item) => (
+          <div key={item!.id} class={`row ${RARITY_CLASS[item!.rarity]}`}>
+            <span>{itemTitle(item!)}</span>
+            <span class="small muted">{costText(reforgeCost(item!.tier))}</span>
+            <span class="affix-row">
+              {item!.affixes.map((a, i) => (
+                <button key={a} class="ghost" disabled={!!v.forge || smith < 3} onClick={() => act((x) => commands.reforge(x, item!.id, i))} title={`Tirar ${AFFIXES[a].name}`}>
+                  ✕ {AFFIXES[a].name}
+                </button>
+              ))}
+            </span>
           </div>
         ))}
       </div>

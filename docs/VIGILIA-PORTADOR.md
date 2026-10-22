@@ -19,7 +19,19 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 ## 1. Estado, como jogar e arquitetura
 
-**Estado atual: M0, o protótipo vertical, pronto** (seção 2.14). Inclui:
+**Estado atual: M1, o Ato I completo, pronto** (seção 14.2), sobre o M0, o protótipo vertical (seção 2.14).
+
+O M1 acrescentou:
+
+- **Novo jogo:** escolha de nome e rosto, com o herói 3D trocando de rosto na hora, e um menu com Novo jogo e Créditos.
+- **Forja completa:** rara e épica com o afixo escolhido pelo material, e reforja.
+- **O Senhor da Cripta,** chefe do andar 10, em duas fases: na segunda, ergue os mortos.
+- **Relatório "Enquanto você estava fora"** com peças, níveis, obras, restos e crônica.
+- **Cabelo sob o elmo:** ajuste por cabeça.
+- **Save v2,** com migração.
+- **Balanceador** com 18 metas.
+
+O M0 já trazia:
 
 - um herói montado por partes com os modelos KayKit, com as animações parado, correr, golpe, acerto e morte, e transição suave entre elas;
 - troca de arma, escudo, elmo, peitoral, perneiras e capa ao vivo pela tela de equipamento;
@@ -30,10 +42,10 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 Os andares vão de 1 a 10, com os chefes dos andares 5 e 10. O resto do GDD ainda é proposta.
 
-**Verificado em 2026-10-22:**
+**Verificado em 2026-10-22 (M1):**
 
-- 19 testes da simulação passam.
-- O balanceador passa as 15 metas em duas faixas de sementes (20 sementes a partir de 1000 e 30 a partir de 7000).
+- 29 testes da simulação passam.
+- O balanceador passa as 18 metas em duas faixas de sementes (20 sementes a partir de 1000 e 30 a partir de 7000).
 - O build sai sem erro.
 - O jogo rodou no navegador embutido e, na rede local, num celular a 133–136 fps (2.14).
 
@@ -49,6 +61,10 @@ Os andares vão de 1 a 10, com os chefes dos andares 5 e 10. O resto do GDD aind
 | Machado de duas mãos (tira o escudo), elmo de osso em ferro-negro (peça rígida) e túnica tier 9 (detalhes em ouro) | O herói caído; os restos já brilham no chão da sala |
 | ![Relatório da morte](img/morte-relatorio.jpg) | ![Celular](img/celular-luta.jpg) |
 | Relatório da volta: cada peça com a chance e o resultado, o que ficou no chão e o ferimento | Celular (375 × 812): HUD compacto e aviso de restos recuperados |
+| ![Novo jogo](img/novo-jogo.jpg) | ![Senhor da Cripta, fase 1](img/senhor-fase1.jpg) |
+| M1: novo jogo; ao escolher Marcela, o herói troca de rosto atrás da folha | M1: Senhor da Cripta na fase 1, conjurando ao fundo atrás da escolta |
+| ![Senhor da Cripta, fase 2](img/senhor-fase2.jpg) | ![Cabelo sob o elmo](img/cabelo-elmo.jpg) |
+| M1: fase 2; o Senhor vem para o anel e três esqueletos erguidos esperam na porta | M1: as 6 cabeças com os 4 elmos, já com o ajuste por cabeça ([antes](img/cabelo-elmo-antes.jpg)) |
 
 ### Jogar
 
@@ -269,7 +285,8 @@ Isso dá peso às escolhas:
 | Guerreiro | Skeleton_Warrior + Skeleton_Blade e escudo | 70 | 8 | 2,0 s | Corpo a corpo; bloqueia 20% dos golpes; 30% de chance de deixar 1 de ferro velho |
 | Ladino | Skeleton_Rogue + adaga | 40 | 5 | 1,0 s | Corpo a corpo, rápido |
 | Mago | Skeleton_Mage + Skeleton_Staff | 32 | 9 | 2,4 s | De longe, fica no fundo |
-| Capitão da Cripta (chefe dos andares 5 e 10) | Skeleton_Warrior em 1,5× com Skeleton_Axe, escudo grande e o elmo | 1050 | 16 | 2,2 s | Ocupa 2 vagas. A cada 12 s dá um golpe especial (2× o dano) e, se sobram menos de 3 da escolta, chama 2 lacaios |
+| Capitão da Cripta (chefe do andar 5) | Skeleton_Warrior em 1,5× com Skeleton_Axe, escudo grande e o elmo | 1050 | 16 | 2,2 s | Ocupa 2 vagas. A cada 12 s dá um golpe especial (2× o dano) e, se sobram menos de 3 da escolta, chama 2 lacaios |
+| Senhor da Cripta (chefe do andar 10, M1) | Skeleton_Mage em 1,6× com Skeleton_Staff e aura roxa | 1500 | 14 → 18 | 2,6 → 2,0 s | Duas fases (14.2). Na 1, conjura do fundo e chama reforço a cada 15 s. Abaixo de 50%, vem para o anel, bate mais forte e ergue até 3 mortos |
 
 Afixos de elite: **Blindado** (+60% de armadura própria, ou seja, −35% do dano recebido), **Vampírico** (cura 30% do dano que causa), **Furioso** (+50% de dano abaixo de metade da vida) e **Veloz** (intervalo −30%). A elite ganha um brilho na cor do afixo.
 
@@ -406,7 +423,7 @@ As armas da KayKit Fantasy Weapons Bits (espadas A–E, machados, martelos, alab
 | Afortunado | +5 de sorte |
 | Sereno | +15% de cura das poções |
 
-**Lendárias do Ato I.** A primeira vitória sobre o Capitão no andar 5 deixa a Vigia Partida; a primeira no andar 10, a Coroa do Capitão. O Juramento de Ferro tem 3% de chance em cada baú a partir do andar 6, uma vez só.
+**Lendárias do Ato I.** A primeira vitória sobre o Capitão, no andar 5, deixa a Coroa do Capitão, que é o elmo dele. A primeira sobre o Senhor da Cripta, no andar 10, deixa a Vigia Partida. O Juramento de Ferro tem 3% de chance em cada baú a partir do andar 6, uma vez só.
 
 | Lendária | Efeito único |
 |---|---|
@@ -432,12 +449,15 @@ As armas da KayKit Fantasy Weapons Bits (espadas A–E, machados, martelos, alab
 
 **O teto:** o ferreiro forja até `min(2 × nível do ferreiro, tier do andar mais fundo alcançado)`. Ele nunca passa do que o herói já viu lá embaixo.
 
-| Ação | Exige | Custo | Prazo |
+| Ação | Exige | Custo (t = tier) | Prazo |
 |---|---|---|---|
-| Forjar | Ferreiro nível 1 | `40 + 30 × tier` de ouro e `4 × tier` de ossos | 20 s |
-| Forjar rara | Ferreiro nível 2 | 2× o custo; um afixo, escolhido pelo material | 40 s |
-| Aprimorar | Ferreiro nível 1 | Sobe +1 tier e mantém os afixos; custa o mesmo que forjar o tier novo | 30 s |
-| Reforjar | Ferreiro nível 3 | Sorteia de novo um afixo; custa o dobro em materiais | 30 s |
+| Forjar comum | Ferreiro 1 | `40 + 30t` de ouro e `4t` ossos | 20 s |
+| Forjar rara | Ferreiro 2 | Escolhe o afixo; 2× o ouro, `4t` ossos e `5t` do material do afixo | 40 s |
+| Forjar épica | Ferreiro 4 | Escolhe o primeiro afixo e o segundo é sorteado; 3× o ouro, `4t` ossos e `10t` do material | 60 s |
+| Aprimorar | Ferreiro 1 | Sobe +1 tier e mantém os afixos; custa o mesmo que forjar comum no tier novo | 30 s |
+| Reforjar | Ferreiro 3 | Troca o afixo escolhido por outro sorteado; `40 + 30t` de ouro e `6t` de ossos e de ferro | 30 s |
+
+O material de cada afixo está na seção 14.2. O amuleto só se forja raro ou épico, porque não tem números de base. Lendárias não se reforjam.
 
 - **Uma encomenda por vez.** A peça pronta vai para o baú.
 - **Aprimorar é o que segura a lendária:** sem isso, ela ficaria velha quando o herói descesse mais.
@@ -494,7 +514,7 @@ A vila é a outra metade da progressão. Ela cresce com o que o herói traz e, e
 
 | Prédio | Níveis | O que libera | Pede para subir ao nível n |
 |---|---|---|---|
-| Ferreiro | 1–5 (começa no 1) | Teto de forja `2 × n`; forjar rara (n 2); reforjar (n 3) | `150 × n²` de ouro, `20 × n` de ferro e `2n` moradores |
+| Ferreiro | 1–5 (começa no 1) | Teto de forja `2 × n`; forjar rara (n 2); reforjar (n 3); forjar épica (n 4) | `150 × n²` de ouro, `15 × n` de ferro e `n + 1` moradores (no M0 eram `20n` de ferro e `2n` moradores) |
 | Treinador | 0–6 (começa no 0) | Habilidades do ato n | `200 × n²` de ouro, `30 × n` de ossos e `2n − 2` moradores (o nível 1 não pede gente) |
 | Alquimista | 0–4 | +1 poção por nível; a poção cura +5% por nível | `100 × n²` de ouro, `15 × n` de ossos e `n` moradores |
 | Carroceiro de resgate | 0–3 | +5% na rolagem da morte; os restos duram +1 dia | `120 × n²` de ouro, `10 × n` de ferro e `n + 1` moradores |
@@ -590,8 +610,12 @@ Exemplos, sem sorte e sem carroceiro:
 - usa as regras de fábrica;
 - veste a melhor peça do baú;
 - aprende as habilidades assim que dá;
-- constrói o prédio mais barato que estiver disponível;
-- aprimora a arma ou a armadura quando sobra ouro;
+- a cada visita à vila, segue esta ordem:
+  1. sobe o ferreiro, se der;
+  2. forja a peça rara (com o afixo escolhido) que aumenta a Força em pelo menos 3%;
+  3. reforja o afixo fraco da arma;
+  4. constrói o prédio mais barato;
+  5. aprimora a peça de tier menor;
 - desce até o andar mais fundo em que a "Força" da tela de equipamento chega a 1, e volta um andar depois de morrer. Com a morte cara, descer onde a Força ainda é 0,9 fazia uma semente empacar 53 min.
 
 O balanceador sai com código ≠ 0 se alguma meta falhar.
@@ -611,23 +635,28 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 | Impasse | 0 lutas com mais de 300 s | Contagem |
 | Determinismo | Mesma semente dá o mesmo resultado; salvar e carregar a cada 10 min dá o mesmo mundo | Hash do estado |
 | Desempenho | 3 h de jogo simuladas em menos de 3 s | Relógio |
+| Senhor da Cripta (M1) | 60–150 s de luta | Média |
+| Fase 2 do Senhor (M1) | Começa entre 25% e 75% do tempo da luta | Média de (início da fase 2 − início da luta) ÷ duração |
+| Forja usada (M1) | Mediana ≥ 3 encomendas ao ferreiro (forjar, aprimorar ou reforjar) até vencer o andar 10, e nenhuma semente com 0 | Contagem na primeira vitória sobre o Senhor |
 
-**Resultado em 2026-10-22, depois da morte mais cara** (20 sementes a partir de 1000 · 30 a partir de 7000):
+**Resultado em 2026-10-22, com o M1** (20 sementes a partir de 1000 · 30 a partir de 7000):
 
 | Meta | Faixa 1000 | Faixa 7000 |
 |---|---|---|
 | Chefe do andar 5 (mediana) | 28,3 min | 36,2 min |
-| Chefe do andar 10 (mediana) | 66,3 min | 77,8 min |
+| Chefe do andar 10, o Senhor (mediana) | 69,9 min | 72,1 min |
 | Sementes que vencem o andar 10 em 3 h | 20/20 | 30/30 |
-| Mortes por hora | 0,9 | 1,2 |
-| Luta por sala / dano por sala comum | 16,7 s / 16% | 16,0 s / 16% |
-| Luta de chefe | 51,1 s | 49,3 s |
-| Perda na morte (valor da mochila) | 64% | 65% |
+| Mortes por hora | 0,8 | 0,8 |
+| Luta por sala / dano por sala comum | 17,7 s / 15% | 17,1 s / 15% |
+| Luta de chefe (os dois) | 66,1 s | 63,0 s |
+| Luta com o Senhor · fase 2 começa em | 65,5 s · 53% | 62,6 s · 54% |
+| Encomendas ao ferreiro até o andar 10 (mín · mediana) | 1 · 3 | 1 · 3 |
+| Perda na morte (valor da mochila) | 62% | 66% |
 | Restos recuperados | 99% | 100% |
-| Parede (mediana · pior) | 18,1 · 41,5 min | 23,8 · 45,7 min |
-| Ouro parado na vitória do andar 10 | 0,9× | 0,9× |
+| Parede (mediana · pior) | 20,0 · 44,5 min | 22,4 · 37,9 min |
+| Ouro parado na vitória do andar 10 | 2,0× | 2,0× |
 | Impasses · determinismo | 0 · igual | 0 · igual |
-| Desempenho | 0,07 s por semente | 0,07 s por semente |
+| Desempenho | 0,08 s por semente | 0,07 s por semente |
 
 **O que o balanceador mudou em relação à primeira versão deste documento:**
 
@@ -648,8 +677,8 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 
 | Marco | Conteúdo |
 |---|---|
-| **M0: protótipo vertical** (este) | Herói por partes, animações com crossfade, troca de arma e de armadura ao vivo, uma sala com esqueletos, combate pela simulação, telas de equipamento, habilidades e regras, regra de morte, testes e medição no celular |
-| M1: Ato I completo | 10 andares com os 6 tipos de sala, chefe em duas fases, forja completa, os 6 prédios, crônica, relatório offline e balanceador com todas as metas |
+| **M0: protótipo vertical** (concluído) | Herói por partes, animações com crossfade, troca de arma e de armadura ao vivo, uma sala com esqueletos, combate pela simulação, telas de equipamento, habilidades e regras, regra de morte, testes e medição no celular |
+| **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
 | M2: vila em 3D | O diorama do Medieval Hexagon com obras visíveis e moradores |
 | M3: Atos II e III | Inimigos novos (packs KayKit de monstros, se houver, ou recolor dos esqueletos), armas do Fantasy Weapons Bits, habilidades novas e materiais novos |
 | M4: polimento | Som, interface de celular, acessibilidade e eventos |
@@ -703,6 +732,94 @@ As chamadas de desenho que sobram são dos personagens: 41 malhas com skin (9 do
 - sombra só nos personagens, com a sala sem projetar;
 - juntar as partes do herói numa malha só ao trocar o equipamento;
 - o modo `?q=low`, que já existe.
+
+#### 14.2 Especificação do M1: o Ato I completo
+
+O M0 já tem os 10 andares, os 6 tipos de sala, a antessala e os 6 prédios. O M1 fecha o que faltava para o Ato I ser um jogo inteiro do começo ao chefe final. Ficam de fora o som, a vila em 3D (M2) e o modo manual da vila, que o usuário pediu para mais à frente (15.5).
+
+**1. Novo jogo.** Sem save, o jogo abre numa tela de novo jogo; ela também abre por Menu → Novo jogo, com confirmação ("isso apaga o herói atual").
+
+- **Nome:** até 18 letras. O padrão vem do rosto: Aldo, Bruno, Teodoro, Lívia, Marcela ou Sombra.
+- **Rosto:** os 6 aventureiros (Knight, Barbarian, Ranger, Rogue, Mage e Rogue_Hooded). O herói 3D troca de rosto na hora, atrás da tela.
+- **Tempo:** a simulação fica parada enquanto a tela está aberta. O herói só desce depois de "Começar".
+- **Menu:** um botão ☰ no HUD abre Novo jogo e Créditos (KayKit, Kay Lousberg, CC0).
+
+**2. Forja completa.** Cada afixo passa a ter um material de origem, que é o que a forja gasta para pôr aquele afixo:
+
+| Afixo | Material |
+|---|---|
+| Afiado, Veloz, Robusto, Sereno | Ossos |
+| Brutal, Guardião, Afortunado | Ferro |
+| Sanguessuga | Ossos e ferro (metade de cada) |
+
+| Ação | Exige | O jogador escolhe | Custo (t = tier) | Prazo |
+|---|---|---|---|---|
+| Forjar comum | Ferreiro 1 | Base | `40 + 30t` de ouro e `4t` ossos | 20 s |
+| Forjar rara | Ferreiro 2 | Base e o afixo | 2× o ouro, `4t` ossos e `5t` do material do afixo | 40 s |
+| Forjar épica | Ferreiro 4 | Base e o primeiro afixo (o segundo é sorteado) | 3× o ouro, `4t` ossos e `10t` do material do afixo | 60 s |
+| Aprimorar | Ferreiro 1 | Peça | O mesmo de forjar comum no tier novo | 30 s |
+| Reforjar | Ferreiro 3 | Peça e o afixo que sai | `40 + 30t` de ouro e `6t` de ossos e de ferro | 30 s |
+
+- **Reforjar:** troca o afixo escolhido por outro sorteado, que a peça ainda não tem e que não é o que saiu. Lendárias não se reforjam, porque os afixos delas são fixos.
+- **Fila:** continua uma encomenda por vez.
+- **Nível 5 do ferreiro:** teto de forja 10, que só vale no Ato II.
+- **Jogador automático:** forja um amuleto raro (Robusto) quando o ferreiro chega ao nível 2 e o encaixe está vazio. Reforja o afixo mais fraco da arma quando sobra ouro, e continua aprimorando como antes.
+
+**3. O Senhor da Cripta (chefe do andar 10).** O Capitão continua no andar 5. O andar 10 ganha um chefe próprio, em duas fases. Ele usa o modelo `Skeleton_Mage` em 1,6× com o cajado.
+
+| | Fase 1 (100% a 50% da vida) | Fase 2 (abaixo de 50%) |
+|---|---|---|
+| Onde fica | No fundo da sala, atirando; só entra no anel quando a escolta cai, ou com a Investida | No anel, ocupando 2 vagas |
+| Ataque | Chama Fria: 14 de dano a cada 2,6 s (× poder do andar) | Golpe de cajado: 18 a cada 2,0 s, mais um Golpe Sepulcral a cada 12 s (2× o dano) |
+| Truque | A cada 15 s, chama 2 lacaios se sobram menos de 3 de escolta | Ao entrar na fase, ergue até 3 esqueletos mortos da sala com metade da vida (uma vez só) |
+
+- **Vida:** base de 1500 (× poder do andar).
+- **Na tela:**
+  - a troca de fase é um grito (`Skeletons_Taunt_Longer`) e um evento próprio;
+  - os mortos se levantam com `Skeletons_Death_Resurrect`;
+  - na fase 1, o Senhor conjura com `Ranged_Magic_Spellcasting`.
+- **Arte:** o conjunto `Rig_Medium_CombatRanged` (1 MB) entra no manifesto, e o mago esqueleto comum passa a usar `Ranged_Magic_Shoot`.
+- **Lendárias:** a primeira vitória no andar 5 deixa a Coroa do Capitão, que é o elmo do próprio Capitão; a primeira no andar 10, a Vigia Partida.
+
+**4. Relatório da ausência.** O "Enquanto você estava fora" ganha:
+
+- peças novas que chegaram ao baú;
+- níveis ganhos;
+- obras concluídas;
+- restos recuperados e perdidos;
+- as últimas 8 linhas da crônica do período.
+
+**5. Cabelo sob o elmo.** O M1 confere as 6 cabeças com os 4 elmos (placas, urso, mago e osso).
+
+- **O que se faz com o que atravessa:** cada elmo ganha um ajuste por cabeça: escala e altura pequenas, na tabela de visuais. A cópia da cabeça "sem cabelo" (3.3) só entra se o ajuste não bastar.
+- **Captura:** o resultado vai para `docs/img/`, numa grade 6 × 4.
+
+**6. Save v2.** O inimigo ganha `phase` e `revived`, e a encomenda da forja ganha `affixIndex`. A migração 1 → 2 preenche os padrões. Um teste carrega um save v1 de verdade.
+
+**7. Balanceador.** As 15 metas continuam. Entram mais três:
+
+| Meta | Alvo |
+|---|---|
+| Luta com o Senhor da Cripta | 60–150 s |
+| Fase 2 do Senhor | Começa depois de 25% e antes de 75% do tempo da luta (nem relâmpago, nem parede) |
+| Forja usada | O jogador automático forja ou reforja pelo menos 3 peças até vencer o andar 10 |
+
+**Pronto quando:**
+
+- tudo acima funciona no navegador;
+- os testes cobrem forja, reforja, fases do Senhor, ressurreição, migração do save e relatório;
+- o balanceador passa as 18 metas nas duas faixas de sementes.
+
+**Como ficou (2026-10-22):** tudo pronto e conferido no navegador (capturas no topo do documento). São 29 testes, e as 18 metas passam nas duas faixas. A implementação mudou três coisas em relação ao especificado:
+
+- **O ferreiro ficou mais barato:** `15n` de ferro e `n + 1` moradores (eram `20n` e `2n`). Antes, o nível 2 chegava entre 50 e 70 min. Nessa hora, o tier 4 que ele forjava já perdia para as peças de tier 5 achadas no andar 10, e a forja quase não era usada. Agora o nível 2 chega entre 31 e 52 min.
+- **O jogador automático ganhou ordem de prioridades** (2.12): ferreiro primeiro, depois a peça rara que rende pelo menos 3% de Força. A primeira regra que pus ("guardar ouro para a próxima obra") barrava as encomendas.
+- **A meta da forja virou "mediana ≥ 3 encomendas e nenhuma semente sem usar"** (o especificado era "≥ 3 em toda semente"). A variação do saque faz algumas sementes acharem tudo de que precisam lá embaixo; nas duas faixas, a pior faz 1 encomenda e a mediana, 3. Isso também mostra que, no Ato I, a forja vale mais pela escolha do afixo do que pelo tier.
+
+Ficou para depois:
+
+- **Medidor no celular:** o envio do medidor de desempenho a partir do celular continua sem chegar (15.6).
+- **Prévia do novo jogo:** a tela mostra o rosto novo, mas o HUD só troca o nome depois de "Começar".
 
 ### 15. Decisões em aberto
 
@@ -762,6 +879,8 @@ Os arquivos foram lidos só como dados, por scripts próprios (Python com `-I`),
 | Poção | Use_Item | General |
 | Morte | Death_A, Death_B | General |
 | Esqueletos | Skeletons_Idle, Skeletons_Walking, Skeletons_Death, Skeletons_Awaken_Standing | Special |
+| Mago e Senhor (M1) | Ranged_Magic_Shoot, Ranged_Magic_Spellcasting, Ranged_Magic_Summon | CombatRanged |
+| Fase 2 do Senhor (M1) | Skeletons_Taunt_Longer (o grito), Skeletons_Death_Resurrect (os mortos se erguem) | Special |
 
 - **Escala.** Os personagens têm 2,2 a 2,5 m. As peças da masmorra seguem um grid de 4 m: piso grande de 4 × 4, parede de 4 m de largura por 4 m de altura e pilar de 1,5 m. Os prédios do Medieval Hexagon são miniaturas de cerca de 1 m sobre hexágonos de 2 m. Por isso a vila é um diorama, não um cenário em escala do herói.
 - **Texturas.** Cada personagem tem um PNG de 13 a 17 KB, num atlas de gradiente em grade de 8 × 4 faixas. Os glTF da masmorra e das armas apontam para um PNG compartilhado, como `dungeon_texture.png`.
@@ -805,7 +924,7 @@ A pergunta era: os personagens do KayKit são corpos inteiros ou peças por enca
 - **Montagem por partes:** funciona.
   - O herói é um `Rig_Medium` clonado do cavaleiro, sem malhas; cada encaixe pendura as malhas do doador, religadas ao mesmo esqueleto por nome de osso.
   - Combinações testadas, sem costura visível no pescoço, nos punhos ou na cintura: cabeça do cavaleiro com tronco e pernas do patrulheiro; placas; túnica do mago; peito nu do bárbaro.
-  - O elmo de placas sobre a cabeça do cavaleiro não deixou o cabelo atravessar. Falta conferir as cabeças de cabelo longo (Mage e Rogue) e o capuz.
+  - **Cabelo sob o elmo (M1):** a grade 6 × 4 ([antes](img/cabelo-elmo-antes.jpg), [depois](img/cabelo-elmo.jpg)) mostrou três problemas: o topo do cabelo do Knight atravessava o elmo de osso e o chapéu de mago, a franja do Ranger e da Rogue saía na frente do elmo de placas, e o capuz do Rogue_Hooded escapava. O ajuste por cabeça (`HELM_FIT` em `visuals.ts`) resolveu sem a cópia "sem cabelo": nos elmos com skin, a geometria é escalada em volta do osso da cabeça na pose de bind (de 4% a 8%, mais 1 a 5 cm de altura); no elmo de osso, que é rígido, a escala e a altura vão no próprio objeto (até 14% no Knight). O cabelo longo que cai por baixo do elmo ficou como está, porque parece natural.
 - **Peça rígida:** o elmo de osso dos esqueletos entra no osso `head` com a transformação local do arquivo original e acompanha as animações.
 - **Tier pela cor:** recolorir no carregamento os pixels de metal (saturação abaixo de 0,2) dá aço azulado, bronze, ferro-negro e ouro sem tocar na pele. Custa uma textura por atlas e por faixa, criada só quando aparece.
 - **Lendária:** emissivo pulsando a 0,8 Hz em cima da própria textura, mais uma luz pontual laranja na arma.
@@ -877,3 +996,14 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
   - **Primeira conversa sobre o protótipo:**
     - **Morte mais cara, a pedido do usuário:** base de 85% para 55%, 3,5 para 4 pontos por andar, bônus de raridade menores, teto de 75%. Os restos ficam como estavam. A meta de perda passou de 25–55% para 55–80%, e o jogador automático ficou mais cauteloso (Força 1).
     - **Tempo na vila:** está bom no automático; o modo manual fica para depois (15.5).
+  - **M1 (Ato I completo), no mesmo dia, a pedido do usuário ("vamos ao m1"):**
+    - especificação em 14.2;
+    - novo jogo com nome e rosto, menu e créditos;
+    - forja rara, épica e reforja, com material por afixo;
+    - Senhor da Cripta em duas fases, com ressurreição dos mortos;
+    - lendárias trocadas: a Coroa no andar 5, a Vigia Partida no 10;
+    - relatório da ausência completo;
+    - ajuste do elmo por cabeça;
+    - save v2;
+    - ferreiro mais barato;
+    - 18 metas no balanceador e 29 testes.

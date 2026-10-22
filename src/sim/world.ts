@@ -5,9 +5,9 @@ import { makeItem } from './items.ts';
 import { defaultCombatRules, defaultDescentRules } from './rules.ts';
 import type { BuildingId, HeadId, World } from './types.ts';
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
-export function createWorld(seed: number, head: HeadId = 'Knight'): World {
+export function createWorld(seed: number, head: HeadId = 'Knight', name?: string): World {
   const buildings = Object.fromEntries(BUILDING_IDS.map((id) => [id, BUILDINGS[id].start])) as Record<BuildingId, number>;
   const w: World = {
     version: SAVE_VERSION,
@@ -16,7 +16,7 @@ export function createWorld(seed: number, head: HeadId = 'Knight'): World {
     tick: 0,
     nextId: 1,
     hero: {
-      name: HEADS.find((h) => h.id === head)?.name ?? 'Herói',
+      name: name?.trim().slice(0, 18) || (HEADS.find((h) => h.id === head)?.name ?? 'Herói'),
       head,
       level: 1,
       xp: 0,
@@ -56,7 +56,8 @@ export function createWorld(seed: number, head: HeadId = 'Knight'): World {
     stats: {
       descents: 0, deaths: 0, kills: 0, rooms: 0, fightTicks: 0, maxFightTicks: 0, bossFirst: {}, bossFightTicks: 0,
       bossFights: 0, remainsCreated: 0, remainsRecovered: 0, remainsExpired: 0, bagValueAtDeath: 0, lostValueAtDeath: 0,
-      deepestAt: { '1': 0 }, roomDamageFrac: 0, roomDamageCount: 0,
+      deepestAt: { '1': 0 }, roomDamageFrac: 0, roomDamageCount: 0, forged: 0, upgraded: 0, senhorFights: 0, senhorFightTicks: 0,
+      senhorPhase2Frac: 0,
     },
     bossesBeaten: [],
     hold: false,

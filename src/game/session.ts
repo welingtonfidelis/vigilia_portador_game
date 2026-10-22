@@ -17,6 +17,8 @@ export class Session {
   private lastSave = 0;
   /** Resultado do progresso offline ao abrir (para o "Enquanto você estava fora"). */
   away: CatchUpResult | null = null;
+  /** Sem save: a tela de novo jogo abre e o tempo fica parado até "Começar". */
+  isNew = false;
 
   constructor(world: World) {
     this.world = world;
@@ -35,11 +37,14 @@ export class Session {
         console.warn('save inválido, começando de novo', e);
       }
     }
-    return new Session(createWorld((Date.now() % 1e9) >>> 0));
+    const s = new Session(createWorld((Date.now() % 1e9) >>> 0));
+    s.isNew = true;
+    s.paused = true;
+    return s;
   }
 
-  static fresh(head: HeadId): Session {
-    return new Session(createWorld((Date.now() % 1e9) >>> 0, head));
+  static fresh(head: HeadId, name?: string): Session {
+    return new Session(createWorld((Date.now() % 1e9) >>> 0, head, name));
   }
 
   /** Fração do tick atual (para suavizar o 3D entre ticks). */
@@ -88,6 +93,8 @@ export class Session {
   replace(s: Session): void {
     this.world = s.world;
     this.acc = 0;
+    this.away = null;
+    this.isNew = false;
     this.save();
     this.emit();
   }

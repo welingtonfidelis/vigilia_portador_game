@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { Session } from '../game/session.ts';
-import { BALANCE, ELITE_NAMES, ENEMIES, heroStats, roomsOnFloor, xpToNext } from '../sim/index.ts';
+import { BALANCE, ELITE_NAMES, ENEMIES, heroStats, isBoss, roomsOnFloor, xpToNext } from '../sim/index.ts';
 import type { World } from '../sim/index.ts';
 import { duration, nf } from './format.ts';
 import { ChroniclePanel } from './panels/ChroniclePanel.tsx';
 import { EquipPanel } from './panels/EquipPanel.tsx';
+import { Credits, NewGame } from './panels/NewGame.tsx';
 import { ReportModal, AwayModal } from './panels/ReportModal.tsx';
 import { RulesPanel } from './panels/RulesPanel.tsx';
 import { SkillsPanel } from './panels/SkillsPanel.tsx';
@@ -53,14 +54,14 @@ function where(w: World): string {
   return `Andar ${r.floor} · sala ${r.index + 1}/${roomsOnFloor(r.floor)} · ${kind}`;
 }
 
-function Hud({ session, w, onBell }: { session: Session; w: World; onBell: () => void }) {
+function Hud({ session, w, onBell, onMenu }: { session: Session; w: World; onBell: () => void; onMenu: () => void }) {
   const h = w.hero;
   const s = heroStats(w);
   const hpPct = Math.max(0, Math.min(1, h.hp / s.maxHp));
   const xpPct = h.xp / xpToNext(h.level);
   const v = w.village;
   const alive = w.room?.enemies.filter((e) => e.state !== 'morto') ?? [];
-  const boss = alive.find((e) => e.kind === 'capitao');
+  const boss = alive.find((e) => isBoss(e.kind));
   return (
     <div class="hud">
       <div class="hud-hero">
@@ -82,7 +83,7 @@ function Hud({ session, w, onBell }: { session: Session; w: World; onBell: () =>
         <div>{where(w)}</div>
         {w.phase === 'sala' && alive.length > 0 && (
           <div class="muted small">
-            {boss ? `${ENEMIES.capitao.name}: ${nf((boss.hp / boss.maxHp) * 100)}% · ` : ''}
+            {boss ? `${ENEMIES[boss.kind].name}${boss.kind === 'senhor' ? ` (fase ${boss.phase})` : ''}: ${nf((boss.hp / boss.maxHp) * 100)}% · ` : ''}
             {alive.length} {alive.length === 1 ? 'inimigo' : 'inimigos'}
             {alive.some((e) => e.elite) ? ` · elite ${ELITE_NAMES[alive.find((e) => e.elite)!.elite!]}` : ''}
           </div>
@@ -109,6 +110,7 @@ function Hud({ session, w, onBell }: { session: Session; w: World; onBell: () =>
             <button key={x} class={!session.paused && session.speed === x ? 'on' : ''} onClick={() => { session.speed = x; session.paused = false; session.emit(); }}>{x}×</button>
           ))}
           <button class="bell" disabled={!w.exp || w.phase !== 'sala' || !!w.exp.recall} onClick={onBell} title="Sino: volta no fim da luta">🔔</button>
+          <button onClick={onMenu} title="Menu" aria-label="Menu">☰</button>
         </div>
       </div>
     </div>
@@ -121,9 +123,13 @@ export function App({ session }: { session: Session }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [seenReport, setSeenReport] = useState<number>(w.report?.tick ?? -1);
   const [away, setAway] = useState(session.away);
+  const [newGame, setNewGame] = useState<'inicio' | 'trocar' | null>(session.isNew ? 'inicio' : null);
+  const [menu, setMenu] = useState(false);
+  const [credits, setCredits] = useState(false);
 
   // Painel aberto: a câmera abre espaço para o herói (à esquerda na tela larga, acima no celular).
   useEffect(() => {
+    if (newGame) return;
     const measure = () => {
       const el = document.querySelector('.sheet');
       const r = el?.getBoundingClientRect();
@@ -138,7 +144,7 @@ export function App({ session }: { session: Session }) {
       clearTimeout(t);
       removeEventListener('resize', measure);
     };
-  }, [panel]);
+  }, [panel, newGame]);
 
   // A tela de equipamento ou de habilidades aberta segura o herói na vila.
   useEffect(() => {
@@ -182,7 +188,13 @@ export function App({ session }: { session: Session }) {
   const report = w.report && w.report.tick !== seenReport ? w.report : null;
   return (
     <>
-      <Hud session={session} w={w} onBell={() => session.run((x) => x.exp && (x.exp.recall = true))} />
+      <Hud session={session} w={w} onBell={() => session.run((x) => x.exp && (x.exp.recall = true))} onMenu={() => setMenu((m) => !m)} />
+      {menu && (
+        <div class="menu">
+          <button onClick={() => { setMenu(false); setPanel(null); setNewGame('trocar'); }}>Novo jogo</button>
+          <button onClick={() => { setMenu(false); setCredits(true); }}>Créditos</button>
+        </div>
+      )}
       <nav class="dock">
         {PANELS.map((p) => (
           <button key={p.id} class={panel === p.id ? 'on' : ''} onClick={() => setPanel(panel === p.id ? null : p.id)} title={`${p.label} (${p.key})`}>
@@ -191,7 +203,9 @@ export function App({ session }: { session: Session }) {
           </button>
         ))}
       </nav>
-      {panel && (
+      {newGame && <NewGame session={session} replacing={newGame === 'trocar'} onClose={() => setNewGame(null)} />}
+      {credits && <Credits onClose={() => setCredits(false)} />}
+      {panel && !newGame && (
         <section class="sheet" key={panel}>
           <header>
             <h2>{PANELS.find((p) => p.id === panel)!.label}</h2>
@@ -211,8 +225,8 @@ export function App({ session }: { session: Session }) {
           <div key={t.id} class={`toast t-${t.tone}`}>{t.text}</div>
         ))}
       </div>
-      {report && <ReportModal report={report} w={w} onClose={() => setSeenReport(report.tick)} />}
-      {!report && away && <AwayModal away={away} onClose={() => setAway(null)} />}
+      {report && !newGame && <ReportModal report={report} w={w} onClose={() => setSeenReport(report.tick)} />}
+      {!report && !newGame && away && <AwayModal away={away} onClose={() => setAway(null)} />}
     </>
   );
 }

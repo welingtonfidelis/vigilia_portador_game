@@ -12,14 +12,23 @@ interface EnemyLook {
   scale: number;
   attack: string;
   special?: string;
+  /** Fase 2 do chefe (outra animação de golpe). */
+  attack2?: string;
+  special2?: string;
+  /** Aura própria (o Senhor da Cripta). */
+  aura?: number;
 }
 
 const LOOKS: Record<EnemyKind, EnemyLook> = {
   lacaio: { file: 'skeletons/Skeleton_Minion.glb', right: 'skeletons/Skeleton_Blade.gltf', scale: 1, attack: 'Melee_1H_Attack_Slice_Diagonal' },
   guerreiro: { file: 'skeletons/Skeleton_Warrior.glb', right: 'skeletons/Skeleton_Blade.gltf', left: 'skeletons/Skeleton_Shield_Small_A.gltf', scale: 1, attack: 'Melee_1H_Attack_Chop' },
   ladino: { file: 'skeletons/Skeleton_Rogue.glb', right: 'skeletons/Skeleton_Blade.gltf', scale: 0.95, attack: 'Melee_1H_Attack_Stab' },
-  mago: { file: 'skeletons/Skeleton_Mage.glb', right: 'skeletons/Skeleton_Staff.gltf', scale: 1, attack: 'Throw' },
+  mago: { file: 'skeletons/Skeleton_Mage.glb', right: 'skeletons/Skeleton_Staff.gltf', scale: 1, attack: 'Ranged_Magic_Shoot' },
   capitao: { file: 'skeletons/Skeleton_Warrior.glb', right: 'skeletons/Skeleton_Axe.gltf', left: 'skeletons/Skeleton_Shield_Large_A.gltf', scale: 1.5, attack: 'Melee_1H_Attack_Chop', special: 'Melee_2H_Attack_Chop' },
+  senhor: {
+    file: 'skeletons/Skeleton_Mage.glb', right: 'skeletons/Skeleton_Staff.gltf', scale: 1.6, attack: 'Ranged_Magic_Spellcasting',
+    special: 'Ranged_Magic_Summon', attack2: 'Melee_2H_Attack_Slice', special2: 'Melee_2H_Attack_Chop', aura: 0x9b6bff,
+  },
 };
 
 const ELITE_COLOR: Record<EliteAffix, number> = { blindado: 0x8fb4ff, vampirico: 0xff4060, furioso: 0xff8a2a, veloz: 0x7dffb0 };
@@ -84,14 +93,34 @@ export class EnemyActor {
       light.position.set(0, 1.4, 0);
       this.root.add(light);
     }
+    if (this.look.aura) {
+      const light = new THREE.PointLight(this.look.aura, 3, 5, 1.8);
+      light.position.set(0, 2.2, 0);
+      this.root.add(light);
+    }
     this.root.add(model);
     this.animator = new Animator(model, clips);
     this.animator.play({ name: 'Skeletons_Awaken_Standing', duration: 1.2, fade: 0 });
     this.animator.loop('Skeletons_Idle');
   }
 
-  attack(special: boolean, duration: number): void {
-    this.animator?.play({ name: special && this.look.special ? this.look.special : this.look.attack, duration });
+  attack(special: boolean, duration: number, phase = 1): void {
+    const l = this.look;
+    const normal = phase === 2 && l.attack2 ? l.attack2 : l.attack;
+    const strong = phase === 2 && l.special2 ? l.special2 : l.special;
+    this.animator?.play({ name: special && strong ? strong : normal, duration });
+  }
+
+  /** Troca de fase do chefe: grita. */
+  taunt(): void {
+    this.animator?.play({ name: 'Skeletons_Taunt_Longer', duration: 1.5, fade: 0.1 });
+  }
+
+  /** Erguido dos mortos pelo Senhor. */
+  rise(): void {
+    if (!this.animator) return;
+    this.animator.revive();
+    this.animator.play({ name: 'Skeletons_Death_Resurrect', duration: 2, fade: 0.05 });
   }
 
   hit(): void {

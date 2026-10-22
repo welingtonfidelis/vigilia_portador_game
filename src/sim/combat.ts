@@ -3,7 +3,7 @@
  * golpes com preparação e impacto e as regras do jogador decidindo cada ação.
  */
 import { BALANCE, floorPower } from './config.ts';
-import { ENEMIES, SKILLS } from './data.ts';
+import { ENEMIES, SKILLS, isBoss } from './data.ts';
 import { armorReduction, hasLegend, heroStats } from './hero.ts';
 import type { HeroStats } from './hero.ts';
 import { chance, int, pick } from './rng.ts';
@@ -36,6 +36,8 @@ export function makeEnemy(w: World, kind: EnemyKind, floor: number, elite: Elite
     stunUntil: 0,
     nextSpecial: w.tick + delay + (d.specialEvery ?? 0),
     diedAt: 0,
+    phase: 1,
+    revived: false,
   };
 }
 
@@ -47,7 +49,8 @@ export function spawnGroup(w: World, floor: number, kind: RoomKind, delay: numbe
   if (floor >= 2) table.push('ladino', 'mago');
   if (floor >= 4) table.push('guerreiro', 'mago');
   const list: Enemy[] = [];
-  if (kind === 'chefe') list.push(makeEnemy(w, 'capitao', floor, null, delay));
+  // O andar 10 de cada ato é do Senhor da Cripta; o 5, do Capitão.
+  if (kind === 'chefe') list.push(makeEnemy(w, floor % 10 === 0 ? 'senhor' : 'capitao', floor, null, delay));
   if (kind === 'elite') {
     const affix = pick(w, ['blindado', 'vampirico', 'furioso', 'veloz'] as const);
     list.push(makeEnemy(w, pick(w, ['guerreiro', 'ladino'] as const), floor, affix, delay));
@@ -93,12 +96,14 @@ function fillRing(w: World, room: Room): void {
   if (!melee) {
     for (const e of room.enemies) {
       if (e.state !== 'fundo') continue;
-      const s = freeSlot(used, 1);
+      const size = ENEMIES[e.kind].size;
+      const s = freeSlot(used, size);
       if (s < 0) break;
       e.state = 'chegando';
       e.slot = s;
       e.arriveAt = w.tick + BALANCE.approachTicks;
       used[s] = true;
+      if (size === 2) used[s + 1] = true;
     }
   }
   for (const e of room.enemies) if (e.state === 'chegando' && w.tick >= e.arriveAt) e.state = 'anel';
@@ -137,21 +142,25 @@ function enemiesAct(w: World, room: Room, s: HeroStats, ev: SimEvent[]): void {
     }
     if (e.windup) {
       if (w.tick >= e.windup.impact) {
-        hitHero(w, room, e, s, e.windup.special, ev);
+        if (!e.windup.cast) hitHero(w, room, e, s, e.windup.special, ev);
         e.windup = null;
         if (w.hero.hp <= 0) return;
       }
       continue;
     }
     const d = ENEMIES[e.kind];
-    if (d.specialEvery && w.tick >= e.nextSpecial && e.state === 'anel') {
-      e.windup = { impact: w.tick + 15, special: true };
-      e.nextSpecial = w.tick + d.specialEvery;
+    const conjurer = e.kind === 'senhor' && e.phase === 1;
+    if (d.specialEvery && w.tick >= e.nextSpecial && (e.state === 'anel' || conjurer)) {
+      // Capitão e Senhor na fase 2: golpe com o dobro do dano. Senhor na fase 1: conjura reforço, sem dano.
+      e.windup = { impact: w.tick + 15, special: true, cast: conjurer };
+      e.nextSpecial = w.tick + (e.phase === 2 && d.phase2 ? d.phase2.specialEvery : d.specialEvery);
       e.nextAttack = w.tick + e.interval;
       ev.push({ t: 'inimigoGolpe', tick: w.tick, enemy: e.id, special: true });
-      // O chefe chama reforço (2 lacaios) quando sobra pouca escolta.
-      const escort = room.enemies.filter((x) => x.state !== 'morto' && x.kind !== 'capitao').length;
-      if (escort < 3) for (let i = 0; i < 2; i++) room.enemies.push(makeEnemy(w, 'lacaio', room.floor, null, 10));
+      // Reforço (2 lacaios) quando sobra pouca escolta.
+      if (e.kind === 'capitao' || conjurer) {
+        const escort = room.enemies.filter((x) => x.state !== 'morto' && !isBoss(x.kind)).length;
+        if (escort < 3) for (let i = 0; i < 2; i++) room.enemies.push(makeEnemy(w, 'lacaio', room.floor, null, 10));
+      }
       continue;
     }
     if (w.tick >= e.nextAttack) {
@@ -159,6 +168,43 @@ function enemiesAct(w: World, room: Room, s: HeroStats, ev: SimEvent[]): void {
       e.nextAttack = w.tick + e.interval;
       ev.push({ t: 'inimigoGolpe', tick: w.tick, enemy: e.id, special: false });
     }
+  }
+}
+
+/**
+ * Senhor da Cripta abaixo de metade da vida: grita, vem para o anel, bate mais forte e ergue até
+ * 3 esqueletos mortos da sala com metade da vida (uma vez cada).
+ */
+function enterPhase2(w: World, room: Room, e: Enemy, ev: SimEvent[]): void {
+  const p2 = ENEMIES.senhor.phase2!;
+  const p = floorPower(room.floor);
+  e.phase = 2;
+  e.dmg = p2.dmg * p;
+  e.interval = p2.interval;
+  e.windup = null;
+  e.stunUntil = w.tick + 15;
+  e.nextAttack = w.tick + 15 + e.interval;
+  e.nextSpecial = w.tick + 15 + p2.specialEvery;
+  if (e.state === 'fundo') {
+    e.state = 'fila';
+    e.slot = -1;
+  }
+  room.phase2At = w.tick;
+  ev.push({ t: 'fase', tick: w.tick, enemy: e.id });
+  ev.push({ t: 'aviso', tick: w.tick, text: 'O Senhor da Cripta grita e ergue os mortos!', tone: 'ruim' });
+  let raised = 0;
+  for (const x of room.enemies) {
+    if (raised >= 3) break;
+    if (x.state !== 'morto' || x.revived || isBoss(x.kind)) continue;
+    x.state = ENEMIES[x.kind].ranged ? 'fundo' : 'fila';
+    x.hp = Math.round(x.maxHp / 2);
+    x.revived = true;
+    x.slot = -1;
+    x.windup = null;
+    x.stunUntil = w.tick + 20;
+    x.nextAttack = w.tick + 20 + int(w, 0, x.interval);
+    ev.push({ t: 'inimigoRevive', tick: w.tick, enemy: x.id });
+    raised++;
   }
 }
 
@@ -174,6 +220,7 @@ function damageEnemy(w: World, e: Enemy, raw: number, s: HeroStats, ev: SimEvent
   }
   if (e.elite === 'blindado') dmg *= 0.65;
   e.hp -= dmg;
+  if (e.kind === 'senhor' && e.phase === 1 && e.hp > 0 && e.hp <= e.maxHp / 2) enterPhase2(w, w.room!, e, ev);
   if (s.lifesteal > 0) w.hero.hp = Math.min(s.maxHp, w.hero.hp + dmg * s.lifesteal);
   ev.push({ t: 'acerto', tick: w.tick, target: e.id, dmg: Math.round(dmg), crit, blocked });
   if (e.hp <= 0) {
@@ -206,7 +253,7 @@ function applyAction(w: World, room: Room, s: HeroStats, ev: SimEvent[], kill: K
       const t = room.enemies.find((e) => e.id === a.target && e.state === 'fundo') ?? inBack(w)[0];
       if (t) {
         const used = slotsUsed(room);
-        const free = freeSlot(used, 1);
+        const free = freeSlot(used, ENEMIES[t.kind].size);
         if (free >= 0) {
           t.state = 'anel';
           t.slot = free;

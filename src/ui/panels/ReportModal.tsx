@@ -41,10 +41,20 @@ export function AwayModal({ away, onClose }: { away: CatchUpResult; onClose: () 
         <p>Passaram {duration(away.ticks)} de jogo.</p>
         <ul>
           <li>{away.descents} descidas, {away.kills} esqueletos abatidos</li>
-          <li>{away.deaths} {away.deaths === 1 ? 'morte' : 'mortes'}</li>
-          <li>{away.gold >= 0 ? '+' : ''}{nf(away.gold)} de ouro no tesouro</li>
+          <li>{away.deaths} {away.deaths === 1 ? 'morte' : 'mortes'}{away.remainsRecovered ? ` · ${away.remainsRecovered} pilha(s) de restos recuperada(s)` : ''}{away.remainsLost ? ` · ${away.remainsLost} perdida(s) para a cripta` : ''}</li>
+          <li>{away.gold >= 0 ? '+' : ''}{nf(away.gold)} de ouro no tesouro · {away.items} {away.items === 1 ? 'peça nova' : 'peças novas'} no baú</li>
+          {away.levels > 0 && <li>+{away.levels} {away.levels === 1 ? 'nível' : 'níveis'}</li>}
+          {away.buildings.length > 0 && <li>Obras: {away.buildings.join(', ')}</li>}
           <li>Andar mais fundo: {away.deepest}</li>
         </ul>
+        {away.lines.length > 0 && (
+          <>
+            <h3>Da crônica</h3>
+            <ul class="small">
+              {away.lines.map((l, i) => <li key={i}>{l}</li>)}
+            </ul>
+          </>
+        )}
         <button onClick={onClose}>Continuar</button>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { startDescent } from './expedition.ts';
 import { canEquip, heroStats } from './hero.ts';
 import { base, itemValue } from './items.ts';
 import type { DescentRules, Rule, SimEvent, SkillId, Slot, World } from './types.ts';
-import { build, forge, upgrade } from './village.ts';
+import { build, forge, reforge, upgrade } from './village.ts';
 
 function inVillage(w: World): string | null {
   return w.phase === 'vila' ? null : 'o herói precisa estar na vila';
@@ -110,4 +110,4 @@ export function setHold(w: World, hold: boolean): void {
   w.hold = hold;
 }
 
-export const commands = { equip, unequip, sell, learn, setBar, setRules, ringBell, descend, setHold, build, forge, upgrade };
+export const commands = { equip, unequip, sell, learn, setBar, setRules, ringBell, descend, setHold, build, forge, reforge, upgrade };

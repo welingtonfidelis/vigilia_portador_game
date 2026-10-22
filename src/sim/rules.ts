@@ -1,4 +1,4 @@
-import { SKILLS } from './data.ts';
+import { SKILLS, isBoss } from './data.ts';
 import type { HeroStats } from './hero.ts';
 import type { CondId, DescentRules, Enemy, Rule, SkillId, TargetPolicy, World } from './types.ts';
 
@@ -22,7 +22,7 @@ export function pickTarget(list: Enemy[], policy: TargetPolicy): Enemy | null {
   if (policy === 'forte') return by((e) => -e.hp);
   if (policy === 'ferido') return by((e) => e.hp / e.maxHp);
   if (policy === 'elite') {
-    const elites = list.filter((e) => e.elite || e.kind === 'capitao');
+    const elites = list.filter((e) => e.elite || isBoss(e.kind));
     if (elites.length) return elites.reduce((a, b) => (b.hp < a.hp ? b : a));
   }
   return by((e) => e.hp);
@@ -43,7 +43,7 @@ function condHolds(w: World, s: HeroStats, cond: CondId, param: number): boolean
       return inBack(w).length >= param;
     case 'alvo_elite': {
       const t = pickTarget(inReach(w), w.rules.descent.target);
-      return !!t && (!!t.elite || t.kind === 'capitao');
+      return !!t && (!!t.elite || isBoss(t.kind));
     }
     case 'pocoes_max':
       return h.potions <= param;

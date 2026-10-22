@@ -36,6 +36,10 @@ interface Run {
   goldEnd: number;
   /** Ouro no tesouro ao vencer o chefe do andar 10 ÷ custo da obra mais barata ainda possível. */
   goldIdle: number | null;
+  senhorSec: number | null;
+  senhorPhase2: number | null;
+  /** Encomendas ao ferreiro (forjar, aprimorar e reforjar) até vencer o andar 10. */
+  forgedAtBoss10: number | null;
   impasses: number;
   deepest: number;
   level: number;
@@ -53,6 +57,7 @@ function runSeed(seed: number): Run {
   const ev: SimEvent[] = [];
   let prevPhase = w.phase;
   let goldIdle: number | null = null;
+  let forgedAtBoss10: number | null = null;
   for (let t = 0; t < TICKS; t++) {
     ev.length = 0;
     step(w, ev);
@@ -61,6 +66,7 @@ function runSeed(seed: number): Run {
     if (goldIdle === null && w.bossesBeaten.includes(10)) {
       const costs = BUILDING_IDS.map((id) => nextCost(w, id)?.gold).filter((g): g is number => g !== undefined);
       goldIdle = costs.length ? w.village.gold / Math.min(...costs) : 0;
+      forgedAtBoss10 = w.stats.forged + w.stats.upgraded;
     }
     if (w.room?.phase === 'luta' && w.tick - w.room.fightStart === 3000) impasses++;
     if (w.hero.deepest > lastDeep) {
@@ -90,6 +96,9 @@ function runSeed(seed: number): Run {
     forgeOk,
     goldEnd: w.village.gold,
     goldIdle,
+    senhorSec: s.senhorFights ? s.senhorFightTicks / s.senhorFights / 10 : null,
+    senhorPhase2: s.senhorFights ? s.senhorPhase2Frac / s.senhorFights : null,
+    forgedAtBoss10,
     impasses,
     deepest: w.hero.deepest,
     level: w.hero.level,
@@ -144,6 +153,22 @@ const checks: Check[] = [
     ok: median(runs.map((r) => r.maxStallMin)) <= 30 && Math.max(...runs.map((r) => r.maxStallMin)) <= 50,
   },
   { name: 'Ouro parado ao vencer o andar 10 (mediana, × obra)', value: f1(median(runs.map((r) => r.goldIdle ?? 0))), ok: median(runs.map((r) => r.goldIdle ?? 0)) < 3 },
+  (() => {
+    const xs = runs.map((r) => r.senhorSec).filter((x): x is number => x !== null);
+    return { name: 'Luta com o Senhor da Cripta (s)', value: f1(mean(xs)), ok: xs.length > 0 && mean(xs) >= 60 && mean(xs) <= 150 };
+  })(),
+  (() => {
+    const xs = runs.map((r) => r.senhorPhase2).filter((x): x is number => x !== null);
+    return { name: 'Fase 2 do Senhor (fração da luta)', value: xs.length ? `${(mean(xs) * 100).toFixed(0)}%` : '—', ok: xs.length > 0 && mean(xs) >= 0.25 && mean(xs) <= 0.75 };
+  })(),
+  (() => {
+    const xs = runs.map((r) => r.forgedAtBoss10).filter((x): x is number => x !== null);
+    return {
+      name: 'Encomendas ao ferreiro até o andar 10 (mín · mediana)',
+      value: xs.length ? `${Math.min(...xs)} · ${median(xs)}` : '—',
+      ok: xs.length > 0 && Math.min(...xs) >= 1 && median(xs) >= 3,
+    };
+  })(),
   { name: 'Teto da forja ≤ tier do mais fundo', value: runs.every((r) => r.forgeOk) ? 'sim' : 'não', ok: runs.every((r) => r.forgeOk) },
   { name: 'Impasses (lutas > 300 s)', value: String(runs.reduce((s, r) => s + r.impasses, 0)), ok: runs.every((r) => r.impasses === 0) },
   { name: 'Determinismo (mesma semente, saves a cada 10 min)', value: again.hash === runs[0]!.hash ? 'igual' : 'DIFERENTE', ok: again.hash === runs[0]!.hash },

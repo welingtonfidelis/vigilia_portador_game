@@ -32,7 +32,7 @@ A lista exata, com o tamanho e o SHA-256 de cada arquivo copiado, é gerada por 
 |---|---|
 | Adventurers 2.0 | `Characters/gltf/{Barbarian,Knight,Mage,Ranger,Rogue}.glb` e as texturas; `Assets/gltf/{sword_1handed,sword_2handed,axe_1handed,axe_2handed,dagger,shield_round,shield_square,shield_spikes}` (`.gltf` + `.bin`) |
 | Skeletons 1.1 | `characters/gltf/Skeleton_{Minion,Warrior,Rogue,Mage}.glb` e a textura; `assets/gltf/Skeleton_{Blade,Axe,Staff,Shield_Small_A}` |
-| Character Animations 1.1 | `Animations/gltf/Rig_Medium/Rig_Medium_{General,MovementBasic,CombatMelee,Special}.glb` |
+| Character Animations 1.1 | `Animations/gltf/Rig_Medium/Rig_Medium_{General,MovementBasic,CombatMelee,CombatRanged,Special}.glb` (o CombatRanged entrou no M1, para o mago e o Senhor da Cripta) |
 | Dungeon 1.1 | Piso, paredes, porta, pilares, tochas, baús, barris, caixas, entulho, estandartes e moedas (lista no manifesto) |
 | Medieval Hexagon 1.0 | Ainda não usado no M0 (reservado para a vila em 3D, M2) |
 | Fantasy Weapons Bits 1.0 | Ainda não usado no M0 (reservado para as armas dos atos seguintes) |

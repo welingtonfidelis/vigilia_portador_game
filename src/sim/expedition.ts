@@ -294,7 +294,9 @@ function roomCleared(w: World, ev: SimEvent[]): void {
   }
   recoverRemains(w, ev);
   room.phase = 'saque';
-  room.phaseEnd = w.tick + BALANCE.lootTicks;
+  // Seguindo, ele ainda atravessa a sala até a porta do fundo; voltando, a volta tem a própria saída.
+  room.exitTo = leaveReason(w) ? 'volta' : 'fundo';
+  room.phaseEnd = w.tick + BALANCE.lootTicks + (room.exitTo === 'fundo' ? BALANCE.roomExitTicks : 0);
   ev.push({ t: 'salaLimpa', tick: w.tick });
 }
 
@@ -303,14 +305,31 @@ function hasItemAnywhere(w: World, legend: string): boolean {
   return all.some((i) => i?.legend === legend);
 }
 
-function nextRoom(w: World, ev: SimEvent[]): void {
+/**
+ * Por que o herói volta depois da sala atual (ou null, se segue). `floorEnd` diz que o motivo é o
+ * fim do andar: aí o andar mais fundo sobe antes de ele voltar.
+ */
+export function leaveReason(w: World): { text: string; floorEnd: boolean } | null {
   const exp = w.exp!;
   const r = w.rules.descent;
   const h = w.hero;
   const s = heroStats(w);
-  if (exp.recall) return leave(w, 'o sino tocou', ev);
-  if (r.returnBagFull && exp.bag.items.length >= BALANCE.bagSize) return leave(w, 'mochila cheia', ev);
-  if (r.returnNoPotionsBelow > 0 && h.potions === 0 && (h.hp / s.maxHp) * 100 < r.returnNoPotionsBelow) return leave(w, 'sem poções e ferido', ev);
+  if (exp.recall) return { text: 'o sino tocou', floorEnd: false };
+  if (r.returnBagFull && exp.bag.items.length >= BALANCE.bagSize) return { text: 'mochila cheia', floorEnd: false };
+  if (r.returnNoPotionsBelow > 0 && h.potions === 0 && (h.hp / s.maxHp) * 100 < r.returnNoPotionsBelow) return { text: 'sem poções e ferido', floorEnd: false };
+  if (exp.room + 1 >= roomsOnFloor(exp.floor)) {
+    if (r.mode === 'ficar') return { text: `andar ${exp.floor} concluído`, floorEnd: true };
+    if (r.mode === 'ate' && exp.floor >= r.untilFloor) return { text: 'chegou ao andar planejado', floorEnd: true };
+    if (exp.floor >= BALANCE.maxFloor) return { text: 'fundo da cripta', floorEnd: true };
+  }
+  return null;
+}
+
+function nextRoom(w: World, ev: SimEvent[]): void {
+  const exp = w.exp!;
+  const h = w.hero;
+  const why = leaveReason(w);
+  if (why && !why.floorEnd) return leave(w, why.text, ev);
   exp.room++;
   if (exp.room >= roomsOnFloor(exp.floor)) {
     const reached = Math.min(BALANCE.maxFloor, exp.floor + 1);
@@ -319,9 +338,7 @@ function nextRoom(w: World, ev: SimEvent[]): void {
       w.stats.deepestAt[String(reached)] = w.tick;
       if (reached > exp.floor) chronicle(w, `${h.name} abriu caminho até o andar ${reached}.`, 'bom', ev);
     }
-    if (r.mode === 'ficar') return leave(w, `andar ${exp.floor} concluído`, ev);
-    if (r.mode === 'ate' && exp.floor >= r.untilFloor) return leave(w, `chegou ao andar planejado`, ev);
-    if (exp.floor >= BALANCE.maxFloor) return leave(w, 'fundo da cripta', ev);
+    if (why) return leave(w, why.text, ev);
     exp.floor++;
     exp.room = 0;
   }

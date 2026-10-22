@@ -220,6 +220,7 @@ flowchart TB
 - **Saída:** o herói corre até a porta (a da Cripta, na vila; a da esquerda, na sala) e a empurra (`Interact`). Carregado, ele fica caído 2 s.
 - **Viagem:** a tela escurece por baixo do HUD. Um cartão mostra para onde ele vai, o motivo da volta, a barra e o tempo que falta.
 - **Chegada:** o cartão some e o herói entra pela porta do lugar novo.
+- **Entre duas salas:** a simulação dá 1,8 s a mais depois do saque (`roomExitTicks`). Nesse tempo, ele corre até a porta do fundo, por onde vieram os esqueletos. A tela escurece por um instante, com "Andar N" quando o andar muda, e ele entra na sala seguinte pela porta da esquerda. Se ele vai voltar para a vila depois daquela sala, não atravessa até o fundo: sai pela porta de onde veio. A decisão de seguir ou voltar é tomada ao limpar a sala (`leaveReason`), e é ela que diz ao 3D para qual porta ir.
 
 Enquanto o cartão cobre a tela, o 3D não é desenhado, o que poupa bateria no celular. Tudo anda em ticks, então 2× e 4× aceleram junto. Antes (2026-10-22), o herói ficava correndo contra a porta enquanto o tempo contava, e o usuário apontou o problema.
 
@@ -1004,6 +1005,7 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
   - **Primeira conversa sobre o protótipo:**
     - **Morte mais cara, a pedido do usuário:** base de 85% para 55%, 3,5 para 4 pontos por andar, bônus de raridade menores, teto de 75%. Os restos ficam como estavam. A meta de perda passou de 25–55% para 55–80%, e o jogador automático ficou mais cauteloso (Força 1).
     - **Tempo na vila:** está bom no automático; o modo manual fica para depois (15.5).
+  - **Passagem entre salas,** a pedido do usuário, que viu o herói "simplesmente aparecer entre as salas": agora ele sai pela porta do fundo, a tela escurece e ele entra na próxima pela porta da esquerda. Cada sala ganhou 1,8 s, e as 18 metas continuam passando.
   - **Viagem na tela,** a pedido do usuário, que viu o herói "correndo contra a porta enquanto conta segundos". Agora ele sai pela porta, um cartão escuro mostra a viagem e ele entra pela porta do lugar novo (2.1).
   - **M1 (Ato I completo), no mesmo dia, a pedido do usuário ("vamos ao m1"):**
     - especificação em 14.2;

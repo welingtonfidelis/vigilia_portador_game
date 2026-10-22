@@ -4,13 +4,15 @@
  *   saindo   o herói anda até a porta e a empurra (ou, carregado, fica caído um instante)
  *   viagem   a tela escurece e um cartão mostra para onde ele vai, com a barra e o tempo
  *   chegando o cartão some e ele entra pela porta do lugar novo
+ *   passagem entre duas salas: depois do saque ele corre até a porta do fundo e a tela escurece
+ *            um instante (com "Andar N" quando muda de andar)
  *
  * Tudo em ticks da simulação, então 2× e 4× aceleram junto.
  */
-import { BALANCE } from '../sim/index.ts';
+import { BALANCE, roomsOnFloor } from '../sim/index.ts';
 import type { World } from '../sim/index.ts';
 
-export type TravelMode = 'nenhum' | 'saindo' | 'viagem' | 'chegando';
+export type TravelMode = 'nenhum' | 'saindo' | 'viagem' | 'chegando' | 'passagem';
 
 export interface TravelView {
   mode: TravelMode;
@@ -30,6 +32,8 @@ export const EXIT_TICKS = 28;
 export const CARRIED_EXIT_TICKS = 20;
 /** Chegada: quanto tempo depois de chegar o cartão ainda some e o herói entra. */
 export const ARRIVE_TICKS = 15;
+/** Passagem entre salas: a tela começa a escurecer nestes últimos ticks da saída pelo fundo. */
+export const PASS_FADE_TICKS = 5;
 
 function total(w: World): number {
   const floor = w.exp?.floor ?? 1;
@@ -56,6 +60,13 @@ export function travelView(w: World, frac = 0): TravelView {
     if (elapsed < exit) return { ...none, mode: 'saindo', elapsed, left, title, subtitle, carried: w.carried };
     const progress = all > exit ? Math.min(1, (elapsed - exit) / (all - exit)) : 1;
     return { mode: 'viagem', elapsed, progress, left, title, subtitle, carried: w.carried };
+  }
+  if (w.phase === 'sala' && w.room?.phase === 'saque' && w.room.exitTo === 'fundo') {
+    const left = w.room.phaseEnd - t;
+    const elapsed = Math.max(0, BALANCE.lootTicks + BALANCE.roomExitTicks - left);
+    if (left > PASS_FADE_TICKS) return { ...none, mode: 'saindo', elapsed };
+    const lastRoom = w.room.index + 1 >= roomsOnFloor(w.room.floor);
+    return { ...none, mode: 'passagem', elapsed, left: Math.max(0, left), title: lastRoom ? `Andar ${w.room.floor + 1}` : '' };
   }
   if (w.phase === 'sala' && w.room?.phase === 'entrando') {
     return { ...none, mode: 'chegando', elapsed: Math.max(0, BALANCE.enterTicks - (w.room.phaseEnd - t)) };

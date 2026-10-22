@@ -282,6 +282,10 @@ export class Stage {
       if (w.phase === 'descendo') target.copy(ENEMY_DOOR).add(new THREE.Vector3(0, 0, 0.7));
     } else if (w.phase === 'voltando' && !w.carried && roomShown) {
       target.copy(HERO_DOOR).add(new THREE.Vector3(0.7, 0, 0));
+    } else if (w.phase === 'sala' && w.room?.phase === 'saque' && w.room.exitTo === 'fundo') {
+      // Saque recolhido: atravessa a sala até a porta do fundo, por onde vieram os esqueletos.
+      const sinceClear = BALANCE.lootTicks + BALANCE.roomExitTicks - (w.room.phaseEnd - (w.tick + frac));
+      if (sinceClear >= BALANCE.lootTicks) target.copy(ENEMY_DOOR).add(new THREE.Vector3(0, 0, 0.7));
     }
     const toTarget = target.clone().sub(this.heroPos);
     const gap = toTarget.length();
@@ -291,14 +295,15 @@ export class Stage {
     this.hero.root.position.copy(this.heroPos);
     // Chegou à porta na saída: empurra (uma vez por viagem).
     const doorKey = `${w.phase}:${w.phaseEnd}`;
-    if (travel.mode === 'saindo' && !travel.carried && !running && this.doorKey !== doorKey) {
+    if (travel.mode === 'saindo' && w.phase !== 'sala' && !travel.carried && !running && this.doorKey !== doorKey) {
       this.doorKey = doorKey;
       this.hero.animator.play({ name: 'Interact', duration: 1.2 / Math.max(1, speed) });
     }
     // Para onde olhar: o alvo do golpe, senão a porta dos inimigos, senão a câmera.
     let face: THREE.Vector3 | null = null;
     if (running) face = target.clone().sub(this.heroPos);
-    else if (travel.mode === 'saindo') face = (w.phase === 'descendo' ? ENEMY_DOOR : HERO_DOOR).clone().sub(this.heroPos);
+    else if (travel.mode === 'saindo' && w.phase !== 'sala') face = (w.phase === 'descendo' ? ENEMY_DOOR : HERO_DOOR).clone().sub(this.heroPos);
+    else if (travel.mode === 'saindo' || travel.mode === 'passagem') face = ENEMY_DOOR.clone().sub(this.heroPos);
     else if (w.room && w.phase === 'sala') {
       const tid = w.hero.action?.target;
       const tgt = w.room.enemies.find((e) => e.id === tid && e.state !== 'morto') ?? w.room.enemies.find((e) => e.state === 'anel');

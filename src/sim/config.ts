@@ -35,6 +35,8 @@ export const BALANCE = {
   approachTicks: 10,
   enterTicks: 25,
   lootTicks: 10,
+  /** Saída pela porta do fundo depois do saque, quando segue para a próxima sala. */
+  roomExitTicks: 18,
   descendTicks: (floor: number) => (5 + 2 * floor) * 10,
   returnTicks: (floor: number) => (10 + 4 * floor) * 10,
   carriedMult: 1.5,

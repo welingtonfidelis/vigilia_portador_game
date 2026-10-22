@@ -89,6 +89,8 @@ export interface Room {
   hpAtStart: number;
   /** Tick em que o chefe entrou na fase 2 (0 = ainda não). */
   phase2At: number;
+  /** Depois do saque: segue pela porta do fundo ou volta para a vila (decidido ao limpar a sala). */
+  exitTo?: 'fundo' | 'volta';
 }
 
 export type CondId = 'vida_abaixo' | 'anel_min' | 'fundo_min' | 'alvo_elite' | 'pocoes_max' | 'sempre';

@@ -194,3 +194,5 @@ button.primary { background: #6a4c1c; border-color: var(--gold); font-weight: 60
 .travel-card h2 { font-size: 1.5rem; margin-bottom: 0.2em; }
 .travel.carried .travel-card h2 { color: #e0806f; }
 .travel-bar { height: 6px; margin: 14px 0 8px; }
+.travel.quick { transition-duration: 0.25s; }
+.travel.quick.on { opacity: 1; }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ARRIVE_TICKS, CARRIED_EXIT_TICKS, EXIT_TICKS, travelView } from '../src/game/travel.ts';
+import { ARRIVE_TICKS, CARRIED_EXIT_TICKS, EXIT_TICKS, PASS_FADE_TICKS, travelView } from '../src/game/travel.ts';
 import { BALANCE, createWorld, step } from '../src/sim/index.ts';
 import type { World } from '../src/sim/index.ts';
 
@@ -50,5 +50,38 @@ describe('viagem na tela', () => {
     expect(travelView(w).mode).toBe('chegando');
     for (let i = 0; i < ARRIVE_TICKS; i++) step(w);
     expect(travelView(w).mode).toBe('nenhum');
+  });
+
+  it('entre salas: depois do saque sai pelo fundo, escurece um instante e entra na próxima', () => {
+    const w = createWorld(6);
+    until(w, (x) => x.room?.phase === 'saque');
+    const room = w.room!;
+    expect(room.exitTo).toBe('fundo');
+    expect(room.phaseEnd - w.tick).toBe(BALANCE.lootTicks + BALANCE.roomExitTicks);
+    expect(travelView(w).mode).toBe('saindo');
+    until(w, (x) => x.room === room && x.room.phaseEnd - x.tick <= PASS_FADE_TICKS);
+    const v = travelView(w);
+    expect(v.mode).toBe('passagem');
+    expect(v.title).toBe('');
+    until(w, (x) => x.room !== room);
+    expect(w.room!.index).toBe(room.index + 1);
+    expect(travelView(w).mode).toBe('chegando');
+  });
+
+  it('quando vai voltar para a vila, não atravessa até o fundo', () => {
+    const w = createWorld(7);
+    until(w, (x) => x.room?.phase === 'luta');
+    w.exp!.recall = true;
+    until(w, (x) => x.room?.phase === 'saque');
+    expect(w.room!.exitTo).toBe('volta');
+    expect(w.room!.phaseEnd - w.tick).toBe(BALANCE.lootTicks);
+  });
+
+  it('na última sala do andar, a passagem mostra o andar seguinte', () => {
+    const w = createWorld(8);
+    w.hero.level = 25;
+    until(w, (x) => x.room?.phase === 'saque' && x.room.index === 3 && x.room.exitTo === 'fundo', 200_000);
+    until(w, (x) => travelView(x).mode === 'passagem');
+    expect(travelView(w).title).toBe(`Andar ${w.room!.floor + 1}`);
   });
 });

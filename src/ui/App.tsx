@@ -58,19 +58,21 @@ function where(w: World): string {
 /** Entre a vila e a sala: a tela escurece e o cartão mostra para onde o herói vai. */
 function TravelCard({ session, w }: { session: Session; w: World }) {
   const v = travelView(w, session.frac);
-  const on = v.mode === 'viagem';
+  const trip = v.mode === 'viagem';
+  const on = trip || v.mode === 'passagem';
   // Enquanto o cartão some (na chegada), ele continua mostrando para onde o herói ia.
   const last = useRef(v);
-  if (on || v.mode === 'saindo') last.current = v;
+  if (on || (v.mode === 'saindo' && v.title)) last.current = v;
   const show = on ? v : last.current;
+  const pass = show.mode === 'passagem';
   return (
-    <div class={`travel ${on ? 'on' : ''} ${show.carried ? 'carried' : ''}`} aria-hidden={!on}>
+    <div class={`travel ${on ? 'on' : ''} ${pass ? 'quick' : ''} ${show.carried ? 'carried' : ''}`} aria-hidden={!on}>
       {show.title && (
         <div class="travel-card">
           <h2>{show.title}</h2>
           {show.subtitle && <p class="muted">{show.subtitle}</p>}
-          <div class="bar xp travel-bar"><div style={{ width: `${(on ? v.progress : 1) * 100}%` }} /></div>
-          <p class="small muted">{on ? `faltam ${duration(v.left)}${session.speed > 1 ? ` · ${session.speed}×` : ''}` : 'chegando'}</p>
+          {!pass && <div class="bar xp travel-bar"><div style={{ width: `${(trip ? v.progress : 1) * 100}%` }} /></div>}
+          {!pass && <p class="small muted">{trip ? `faltam ${duration(v.left)}${session.speed > 1 ? ` · ${session.speed}×` : ''}` : 'chegando'}</p>}
         </div>
       )}
     </div>

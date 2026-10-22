@@ -1,0 +1,710 @@
+{
+  "source": "KayKit (Kay Lousberg), CC0 1.0 — ver LICENSES.md",
+  "files": [
+    {
+      "path": "adventurers/Barbarian.glb",
+      "bytes": 386648,
+      "sha256": "d37824a1d6e8e8af57ef9ae4a87e9271c3986210fbc432fb44670749a577ccac"
+    },
+    {
+      "path": "adventurers/Knight.glb",
+      "bytes": 341688,
+      "sha256": "e484370733824a0740683e7f6040aae0d20e5efd4107dde1175d6a2ad7e2f199"
+    },
+    {
+      "path": "adventurers/Mage.glb",
+      "bytes": 352472,
+      "sha256": "1f7d891bde50b879c70965f155b7b765b166dc3f8518e5abb86c0002f191a26e"
+    },
+    {
+      "path": "adventurers/Ranger.glb",
+      "bytes": 484712,
+      "sha256": "3a0b0166b9d61d58dcaaa739c3cc0538be46e00d2928dd5cb513d9a41770d2e9"
+    },
+    {
+      "path": "adventurers/Rogue.glb",
+      "bytes": 409188,
+      "sha256": "cae5d9b2f08d53f7b4ab2617d9f42f021c546eb10920455fdcd82a110867fae4"
+    },
+    {
+      "path": "adventurers/Rogue_Hooded.glb",
+      "bytes": 381432,
+      "sha256": "e8f3233c6db190506fbef3ad855683e6cb8bd7350de637d923e14a08aef088dc"
+    },
+    {
+      "path": "adventurers/sword_1handed.gltf",
+      "bytes": 3075,
+      "sha256": "2a6074d46c3e337f84f0295d0ea862b116fec7d816db8d027d75a464311228b6"
+    },
+    {
+      "path": "adventurers/sword_1handed.bin",
+      "bytes": 13256,
+      "sha256": "c8acdc21adf19257e66b78e86d37855474a0a9fda796c39b39d6d08a5ca34bd5"
+    },
+    {
+      "path": "adventurers/sword_2handed.gltf",
+      "bytes": 3076,
+      "sha256": "42ffb9b49e928763fe21fd928675402ebccd3750ccd89bcec8d186e12c6fdccd"
+    },
+    {
+      "path": "adventurers/sword_2handed.bin",
+      "bytes": 19912,
+      "sha256": "4e8100535e482ed9e2cdd5b32b1e3dc301dcff92f472bb9f6047d1021f4433b1"
+    },
+    {
+      "path": "adventurers/axe_1handed.gltf",
+      "bytes": 3080,
+      "sha256": "43796b063aa9501cc79cf11e801b98ce0c218022dea850e7b6b33387dd4b89da"
+    },
+    {
+      "path": "adventurers/axe_1handed.bin",
+      "bytes": 12524,
+      "sha256": "909561b9e5774d2ab0dcb1cbe66e1c0ea116b6eef5fcb4780ed56fe834b07f58"
+    },
+    {
+      "path": "adventurers/axe_2handed.gltf",
+      "bytes": 3078,
+      "sha256": "8fb5b782848f66a3a7170f4c5da723e1441671938d7434ecc3dd417cebaf4fff"
+    },
+    {
+      "path": "adventurers/axe_2handed.bin",
+      "bytes": 21960,
+      "sha256": "23a4c27d4e700159217033c84fcca1ab81c52ba1a3d557581a07543d4edc68b0"
+    },
+    {
+      "path": "adventurers/dagger.gltf",
+      "bytes": 3051,
+      "sha256": "db324dd13443d48b736fe4dba5e24090f4b476dd8d9ee53cf7c6718f00c47e1a"
+    },
+    {
+      "path": "adventurers/dagger.bin",
+      "bytes": 7656,
+      "sha256": "da7857e41d902cdd39e894563a544719901a9af55053f2b96b21019ed6717677"
+    },
+    {
+      "path": "adventurers/shield_round.gltf",
+      "bytes": 3075,
+      "sha256": "dd052a109d5a003fa7ebe4641c31e89a5189ad8d606ee8fc969d05e2d99dab38"
+    },
+    {
+      "path": "adventurers/shield_round.bin",
+      "bytes": 12008,
+      "sha256": "42da365328fc8804f44cd3db6becc8bc98729f11862b63e51b42820559d6e1e0"
+    },
+    {
+      "path": "adventurers/shield_square.gltf",
+      "bytes": 3074,
+      "sha256": "7d70e034e5af0cde3a6e8b2cc53da46af01f6981c79917ad0c6501a7f5c87d16"
+    },
+    {
+      "path": "adventurers/shield_square.bin",
+      "bytes": 10724,
+      "sha256": "8698b59caab1efe9ab924bd82c555e9582ad5c7d0d23c9c40efa4047d2a9e2fe"
+    },
+    {
+      "path": "adventurers/shield_spikes.gltf",
+      "bytes": 3076,
+      "sha256": "5f89b2e927fc6a5d4308e829e9c931e3c095ea70ad759cfdfe6005ac4e33814d"
+    },
+    {
+      "path": "adventurers/shield_spikes.bin",
+      "bytes": 21464,
+      "sha256": "de615f1d5bd01a6562a91d0f41960e50c4e35712388b38af4e549832b0677e0c"
+    },
+    {
+      "path": "adventurers/knight_texture.png",
+      "bytes": 12914,
+      "sha256": "028db4d1cd8b3471e6ba21686515abd4e36ae582f8b314b71ad2ab1fb5453b12"
+    },
+    {
+      "path": "adventurers/barbarian_texture.png",
+      "bytes": 14424,
+      "sha256": "f11434d3e5e4df929dacd2c69d15734effb82babf8176a80bb040d2007f5f882"
+    },
+    {
+      "path": "adventurers/rogue_texture.png",
+      "bytes": 15026,
+      "sha256": "2e2fc741e20e7e2c85b176c8143b49b769bca0d2ed1a1cfc1807a758a0e4d3e1"
+    },
+    {
+      "path": "skeletons/Skeleton_Minion.glb",
+      "bytes": 318520,
+      "sha256": "1fadbf1bc66fd7ce008eecd0ffccc8f8089e1c2887813559ca553680a738fece"
+    },
+    {
+      "path": "skeletons/Skeleton_Warrior.glb",
+      "bytes": 367484,
+      "sha256": "992d5cfd6beb5565c50f742587d492f2a2cfcdfb3ffe4435aa16461c6d0e54be"
+    },
+    {
+      "path": "skeletons/Skeleton_Rogue.glb",
+      "bytes": 331180,
+      "sha256": "d5b8f074a78a9972af0966014905ea1df2e71d2c3495d37a211980e6343ee774"
+    },
+    {
+      "path": "skeletons/Skeleton_Mage.glb",
+      "bytes": 265676,
+      "sha256": "aee903d0febd151dbc49a4784ad4135862b20c1b025bf433b98a08d52e5f7849"
+    },
+    {
+      "path": "skeletons/Skeleton_Blade.gltf",
+      "bytes": 3047,
+      "sha256": "682a1df2eecb93dea35de628d6b93ca40d1b83586422356f3c1956741f2abf76"
+    },
+    {
+      "path": "skeletons/Skeleton_Blade.bin",
+      "bytes": 20056,
+      "sha256": "ccf4f6642130d11650400fa649669ccdb784280eef235fac3a12a197cbc7debe"
+    },
+    {
+      "path": "skeletons/Skeleton_Axe.gltf",
+      "bytes": 3045,
+      "sha256": "44c8b65942cbb573c99dc14c2a188fad8c47e29ad9764d27b47e6f57bb7e4ebd"
+    },
+    {
+      "path": "skeletons/Skeleton_Axe.bin",
+      "bytes": 25348,
+      "sha256": "f994f9e1b3297961a2b27120adb81ccc61ef7a901586b584fa53fdba8b962cc7"
+    },
+    {
+      "path": "skeletons/Skeleton_Staff.gltf",
+      "bytes": 3057,
+      "sha256": "6bb554fef0889dc9e1a69a71ddae793a772fc18eea059ded61be4f8157fd2f04"
+    },
+    {
+      "path": "skeletons/Skeleton_Staff.bin",
+      "bytes": 69244,
+      "sha256": "2b91a59316cea919b2a8b3d94ab85e3b5faa9fdb607a9ab633a6bb6d1e6bbf2f"
+    },
+    {
+      "path": "skeletons/Skeleton_Shield_Small_A.gltf",
+      "bytes": 3069,
+      "sha256": "9d1d5acb0d945d36aebc57ffb9b64ad016967973e4353a632246e5c7e07346e2"
+    },
+    {
+      "path": "skeletons/Skeleton_Shield_Small_A.bin",
+      "bytes": 21688,
+      "sha256": "0a56f31d33ec36483163aa680279884b1b488cd634fe73541089d7032fac7962"
+    },
+    {
+      "path": "skeletons/Skeleton_Shield_Large_A.gltf",
+      "bytes": 3071,
+      "sha256": "7844df0f1607259c45d01fd4f9d7bad03b5bfe50897a136831915fecff240a92"
+    },
+    {
+      "path": "skeletons/Skeleton_Shield_Large_A.bin",
+      "bytes": 33292,
+      "sha256": "06d975dbf7058088c0ad2cde1932e15435b5d374de3be21199a97d3be25d776d"
+    },
+    {
+      "path": "skeletons/skeleton_texture.png",
+      "bytes": 17037,
+      "sha256": "15741a25c53e04fa9bf3beac3bc0de442359404b1ff9be863b892cb551ad3657"
+    },
+    {
+      "path": "animations/Rig_Medium_General.glb",
+      "bytes": 828240,
+      "sha256": "5f725c0f745f36078c7238968cd5c04843cbc6260689eb6e7f5e2bbd7ffdd7ad"
+    },
+    {
+      "path": "animations/Rig_Medium_MovementBasic.glb",
+      "bytes": 689624,
+      "sha256": "11422afd50abf7e8c92ea107e2e0bc94abd38023d6d15f55ad580347efbfa29e"
+    },
+    {
+      "path": "animations/Rig_Medium_CombatMelee.glb",
+      "bytes": 999416,
+      "sha256": "c55e6ec1c79e83ae21d46fe1cd921c1b64be8b9a524a24517e51c6ba99231459"
+    },
+    {
+      "path": "animations/Rig_Medium_Special.glb",
+      "bytes": 924308,
+      "sha256": "74047dd2178fbed388656051664158e921b7bfc613abb119860aeb7b646bd640"
+    },
+    {
+      "path": "dungeon/floor_tile_large.gltf",
+      "bytes": 2999,
+      "sha256": "c9c8807b44e18ecf1cb058b45f237008a23503e95e2d2282498730c87a734af1"
+    },
+    {
+      "path": "dungeon/floor_tile_large.bin",
+      "bytes": 9928,
+      "sha256": "d4649c85286ff59fbf4b3fc8e5b228dc63ee2bb6914dbe716ca88acc9937ab23"
+    },
+    {
+      "path": "dungeon/floor_tile_large_rocks.gltf",
+      "bytes": 3020,
+      "sha256": "ea1b2b948a6671d3eeeed692160e26a48e723d1aa179aac32cb1a13fa8e18640"
+    },
+    {
+      "path": "dungeon/floor_tile_large_rocks.bin",
+      "bytes": 19564,
+      "sha256": "c1456a57bbdb36482526a0d92facefa255c106bea4cb00fd289e2acf994c53f6"
+    },
+    {
+      "path": "dungeon/floor_tile_small.gltf",
+      "bytes": 2997,
+      "sha256": "f0010a6d9debe6856e73c2706566a846d87b05135d5ef02b242e5ccbe169905c"
+    },
+    {
+      "path": "dungeon/floor_tile_small.bin",
+      "bytes": 3596,
+      "sha256": "3ec7d573d3dc154e99688ddd01ac726d35a14955ce8ba2bd3815b87ae845885d"
+    },
+    {
+      "path": "dungeon/floor_tile_small_broken_A.gltf",
+      "bytes": 3025,
+      "sha256": "836c27b6b1599c8b535521161c3d7e905c3b64fceeab90c8d80a75b6214a5b8b"
+    },
+    {
+      "path": "dungeon/floor_tile_small_broken_A.bin",
+      "bytes": 5108,
+      "sha256": "64e6ac3e39f79f16e744f41abc111db1c8290d95b796c7b190ef75fcbde51132"
+    },
+    {
+      "path": "dungeon/floor_tile_small_broken_B.gltf",
+      "bytes": 3024,
+      "sha256": "cc267bee16df09e4e5b943689ea295e9313817fb709533bedbdbd80282d4ba04"
+    },
+    {
+      "path": "dungeon/floor_tile_small_broken_B.bin",
+      "bytes": 4040,
+      "sha256": "54ca63248b8ec4d16c28a5a971d6b9ea9d8812db69e99db750c7a630e5f25a89"
+    },
+    {
+      "path": "dungeon/floor_tile_small_decorated.gltf",
+      "bytes": 3032,
+      "sha256": "d83f93fb6a56df94bfc8d7ba65cc745e97f5a3f3f05c4120c05da6dde6a1642e"
+    },
+    {
+      "path": "dungeon/floor_tile_small_decorated.bin",
+      "bytes": 21668,
+      "sha256": "20b83230dd5afe702583534c0220f1806f50bf9211281bb2ce2d369a75529274"
+    },
+    {
+      "path": "dungeon/floor_tile_big_grate.gltf",
+      "bytes": 2996,
+      "sha256": "696ba811077244d19bb1bcc37b419e84e5ca6c2d16e5ea75cd49cedbd7498442"
+    },
+    {
+      "path": "dungeon/floor_tile_big_grate.bin",
+      "bytes": 19288,
+      "sha256": "4639f2612b0040f32f624894321540a3a3e4b7f5337706b91d5fc11403b42d77"
+    },
+    {
+      "path": "dungeon/floor_dirt_large.gltf",
+      "bytes": 3064,
+      "sha256": "8d1ff1ca68749e1b16c8d0255502907698746bceb42809b73d2cebf2d1ce6c50"
+    },
+    {
+      "path": "dungeon/floor_dirt_large.bin",
+      "bytes": 6896,
+      "sha256": "fffb9faf447d70bc4c1e53c270bf078b15a3ea77644ec672299626390c56cb8c"
+    },
+    {
+      "path": "dungeon/wall.gltf",
+      "bytes": 2940,
+      "sha256": "e7262d242545816fde7ab138be802a50e5e4af0a5a392682a32c5657184d4de1"
+    },
+    {
+      "path": "dungeon/wall.bin",
+      "bytes": 35284,
+      "sha256": "cb081f98e2abd7f857d812534fe40c8b151b628a5b15f1c1c532fd93b46c29b2"
+    },
+    {
+      "path": "dungeon/wall_corner.gltf",
+      "bytes": 2988,
+      "sha256": "0e11f419d2bac3495978a57b5130f42c2bc50231e9335c8b7687bcfef4e33f59"
+    },
+    {
+      "path": "dungeon/wall_corner.bin",
+      "bytes": 31172,
+      "sha256": "d7003d519c8ac34d2d65a6cf7ddb710f385f6efcf8554c484e88fcad7e39eb6f"
+    },
+    {
+      "path": "dungeon/wall_doorway.gltf",
+      "bytes": 5045,
+      "sha256": "0c3a76c0a92b541e103de3244468c2f22cf75d97242f4572a32119738b3e9427"
+    },
+    {
+      "path": "dungeon/wall_doorway.bin",
+      "bytes": 52360,
+      "sha256": "e6fb2825c6f4d86f61aab8c7aab773826add3bc9be727dcdfe7510ab2792e785"
+    },
+    {
+      "path": "dungeon/wall_arched.gltf",
+      "bytes": 3008,
+      "sha256": "81ff13faf26cab5dafa68263a016e86d3eb77d234aba8440c252761e84ccf9ca"
+    },
+    {
+      "path": "dungeon/wall_arched.bin",
+      "bytes": 50712,
+      "sha256": "dc5518624c9e43dfe394d91adaab7785345f93d3649d768c1c1a0848ef31a7dd"
+    },
+    {
+      "path": "dungeon/wall_cracked.gltf",
+      "bytes": 2997,
+      "sha256": "4eb34d05e4bc5f38d7e1ba1adb9ce8cb6e73ddcf15daaec433a838c2f0bec38b"
+    },
+    {
+      "path": "dungeon/wall_cracked.bin",
+      "bytes": 103260,
+      "sha256": "74e9ee48e0c44cd3ab53573ccc8008cf1eefac99ec5d6cf9c1a828b2223dd2b3"
+    },
+    {
+      "path": "dungeon/wall_broken.gltf",
+      "bytes": 2992,
+      "sha256": "dbe92e94803622c436fb3aead68ede2c08056a96a04f70521f2de06d16e7f4e1"
+    },
+    {
+      "path": "dungeon/wall_broken.bin",
+      "bytes": 52128,
+      "sha256": "62f0c3611fdc8132f4b96eb9275ce9b12ee86b6564ab7688243461e62f818393"
+    },
+    {
+      "path": "dungeon/wall_pillar.gltf",
+      "bytes": 2977,
+      "sha256": "b12c23273629b4a1fbe866a2daac1e1ebbb377b10927e1c4c10c3add1b724a5a"
+    },
+    {
+      "path": "dungeon/wall_pillar.bin",
+      "bytes": 37000,
+      "sha256": "43a306ddb657a430993ddd39d44d1e4bf0ce1c2d9c69af6d8054ebbed4658ca2"
+    },
+    {
+      "path": "dungeon/wall_shelves.gltf",
+      "bytes": 2981,
+      "sha256": "2650bfb9a530a42b863f40a9f90e79788245e4e605c51598998813004d1d1bcc"
+    },
+    {
+      "path": "dungeon/wall_shelves.bin",
+      "bytes": 101780,
+      "sha256": "f0a9b066b164085d2e33a130288d3fd86caf936a642c27b519d810346909a8aa"
+    },
+    {
+      "path": "dungeon/wall_window_closed.gltf",
+      "bytes": 3012,
+      "sha256": "bf853dc8da3f446313e10ccb298b69ddfd12dd4d06f5efd600408ef23c45ba43"
+    },
+    {
+      "path": "dungeon/wall_window_closed.bin",
+      "bytes": 43920,
+      "sha256": "401fe5c22ad00e3ed7b1fba5af2cbd5a0b797d0710f9ac68d3438d355a3561d2"
+    },
+    {
+      "path": "dungeon/pillar.gltf",
+      "bytes": 2985,
+      "sha256": "e82b97258de31743aa7874abebd27764e4a48b19d686f6e1493ce8209ac894b0"
+    },
+    {
+      "path": "dungeon/pillar.bin",
+      "bytes": 8528,
+      "sha256": "6fc17e077a7f071f44aa24ee6dce92a719d910363cabfc17ea0cf849983d048f"
+    },
+    {
+      "path": "dungeon/pillar_decorated.gltf",
+      "bytes": 3039,
+      "sha256": "e37f204f4dc911c8b5a0f13121aa7857026cd2b6d5e9a665dc67bcc247680342"
+    },
+    {
+      "path": "dungeon/pillar_decorated.bin",
+      "bytes": 43960,
+      "sha256": "31146b0dbda9198f5cef7d94b2f02994c0aa2f7763b95a28198824b4ca4f1055"
+    },
+    {
+      "path": "dungeon/column.gltf",
+      "bytes": 3012,
+      "sha256": "2208960efa3f835a4dbd87e7ed942a81f57f7eb793388d5db65590c5936a8403"
+    },
+    {
+      "path": "dungeon/column.bin",
+      "bytes": 3208,
+      "sha256": "e82740f9fda6b695caf0c956c7d74ae31db307eaa344cdd75fe548fd0482387e"
+    },
+    {
+      "path": "dungeon/torch_mounted.gltf",
+      "bytes": 3060,
+      "sha256": "29f1cb66f59d63b8076ca412e83de474a01aa38f27ae974846ee993caf97e16d"
+    },
+    {
+      "path": "dungeon/torch_mounted.bin",
+      "bytes": 14180,
+      "sha256": "c627d80fa8b6256a887726d81880dbe88f0542eb740acada4cd6a9cbaa660ac8"
+    },
+    {
+      "path": "dungeon/torch_lit.gltf",
+      "bytes": 3045,
+      "sha256": "2962691576e45f5b80debe2ce35f99d9f929f9d013ad9f7bc8e96341beef48e5"
+    },
+    {
+      "path": "dungeon/torch_lit.bin",
+      "bytes": 11764,
+      "sha256": "1ac41275544c951d7db724b78452b5a27399718691b83de3c1ba727d8b9e5944"
+    },
+    {
+      "path": "dungeon/chest.gltf",
+      "bytes": 5111,
+      "sha256": "25c1770655f555e266aadbc1936f5608ae2832a328f183277309c82c549afb5d"
+    },
+    {
+      "path": "dungeon/chest.bin",
+      "bytes": 40496,
+      "sha256": "2c41c61df12691a7bdae510433588ce82bbf0593622b986ae2e0981f67e48ae3"
+    },
+    {
+      "path": "dungeon/chest_gold.gltf",
+      "bytes": 5143,
+      "sha256": "91d388b9bc142a37064d1ad0b3e096205b616ea4a84146873b20eb88deffbeef"
+    },
+    {
+      "path": "dungeon/chest_gold.bin",
+      "bytes": 80608,
+      "sha256": "b47929753acecb995bab5afa41233c0f87d78804c94878fc9977dc0390e9dbc4"
+    },
+    {
+      "path": "dungeon/barrel_large.gltf",
+      "bytes": 3057,
+      "sha256": "6a3b211d6ae6bfb028a0bbb836d5aec6d09c805c43dbd03c28543458243273cc"
+    },
+    {
+      "path": "dungeon/barrel_large.bin",
+      "bytes": 25768,
+      "sha256": "f6ed14f969f48ba104521223486e3be16e5b4efee6d369b61ff5fceb53bae4c7"
+    },
+    {
+      "path": "dungeon/barrel_small.gltf",
+      "bytes": 3059,
+      "sha256": "d87539ccfbb96cfbd50f060ba619c2dbbd2c24a51603da1c70356f3cf98478e5"
+    },
+    {
+      "path": "dungeon/barrel_small.bin",
+      "bytes": 14556,
+      "sha256": "06516a376dd32c1d43deb49507005f81b988c31138a21a1b46cf37553d15f9e3"
+    },
+    {
+      "path": "dungeon/barrel_small_stack.gltf",
+      "bytes": 3069,
+      "sha256": "d6ad379dbe2f58740d89657c16f8f2f87b573b364c3b835a84d8d40876003d65"
+    },
+    {
+      "path": "dungeon/barrel_small_stack.bin",
+      "bytes": 73520,
+      "sha256": "769f1eedc13fe052ced4a65c07540ab1444ca6507e8a92716ca30233ea6f4377"
+    },
+    {
+      "path": "dungeon/box_large.gltf",
+      "bytes": 3019,
+      "sha256": "03bf4a953d7b0a990d0757e5a765e542ce542d6ddd5757df976a920d6c6ab94c"
+    },
+    {
+      "path": "dungeon/box_large.bin",
+      "bytes": 11368,
+      "sha256": "df37123c30133988db4cf6c0b1b98dabd3b92778b42261f18979c0bd37158c96"
+    },
+    {
+      "path": "dungeon/box_small.gltf",
+      "bytes": 2972,
+      "sha256": "98acd9d7ee3aaa8649022e6c2d0e754c2f4189f92af5c4f5490d13c1a982cd8f"
+    },
+    {
+      "path": "dungeon/box_small.bin",
+      "bytes": 11368,
+      "sha256": "7eb8cdbe293befba6e98152e430ea8798a5d189ec0eea51de03f9bf3f5097174"
+    },
+    {
+      "path": "dungeon/box_stacked.gltf",
+      "bytes": 3065,
+      "sha256": "2519548191f7b1c120a3516cab0845e9a5553d79be46fc98ac95a76b585b3559"
+    },
+    {
+      "path": "dungeon/box_stacked.bin",
+      "bytes": 123440,
+      "sha256": "febbfa284448427eb92a54bc82d5406617b9dbb8edadc7b34acb80eda8db45bb"
+    },
+    {
+      "path": "dungeon/crates_stacked.gltf",
+      "bytes": 3070,
+      "sha256": "ffd45fe1637f6ced570b489771958034ae41f077debca69eafd7c825318062ab"
+    },
+    {
+      "path": "dungeon/crates_stacked.bin",
+      "bytes": 82068,
+      "sha256": "7ef3950564c1746f7f6dd0175903e6b76507351168dbb68e9516bb322ca6e48f"
+    },
+    {
+      "path": "dungeon/rubble_large.gltf",
+      "bytes": 3042,
+      "sha256": "ec76b40daae2426b59a9e8cd4078f71280fa73ce1eb8c58a4d58d59a6b581b50"
+    },
+    {
+      "path": "dungeon/rubble_large.bin",
+      "bytes": 43128,
+      "sha256": "688a0b95a2607ef536592ea2971301ed363767aa33ec93f9a3f79d074539fa64"
+    },
+    {
+      "path": "dungeon/rubble_half.gltf",
+      "bytes": 3045,
+      "sha256": "6afe02e2962410d95cd07dfdaea78c6dafd95eefeab3fdabe03d28b8f0200e68"
+    },
+    {
+      "path": "dungeon/rubble_half.bin",
+      "bytes": 21764,
+      "sha256": "b7bd410520c16c0bf0407ae562be28d44e8de84146363e13d5c2bd99edf0f9d1"
+    },
+    {
+      "path": "dungeon/banner_red.gltf",
+      "bytes": 3043,
+      "sha256": "b338f5e3c1f5ddfa377fa939132ac14dee0df623757fcc97e6ab15b040d18000"
+    },
+    {
+      "path": "dungeon/banner_red.bin",
+      "bytes": 6568,
+      "sha256": "81cebdf8aa6b9773fdf6650cb089692e9257adb8bc52f8533d2ff143835d5a6b"
+    },
+    {
+      "path": "dungeon/banner_patternA_red.gltf",
+      "bytes": 3070,
+      "sha256": "42c2caad0d644ddccbc901db086ef439788275bef92e24e66e006fe06572b362"
+    },
+    {
+      "path": "dungeon/banner_patternA_red.bin",
+      "bytes": 7700,
+      "sha256": "529ee144114cef8046da3226aa0aa1b12437c7654309dc038620b06c42444998"
+    },
+    {
+      "path": "dungeon/banner_thin_red.gltf",
+      "bytes": 3059,
+      "sha256": "b1589b00709b8e292afd25ad4eb2e6be539e5e24a1ba133ab932ce99781855f9"
+    },
+    {
+      "path": "dungeon/banner_thin_red.bin",
+      "bytes": 5460,
+      "sha256": "0e48acc899871c0644cf4dddd7230c80b916dc5b8febdf8d2e37c6273711b2af"
+    },
+    {
+      "path": "dungeon/coin_stack_small.gltf",
+      "bytes": 3073,
+      "sha256": "3fb1c65d7159d301d91a32fbd9124f9748fe1b4d7067b7ba456e72911ccc97f5"
+    },
+    {
+      "path": "dungeon/coin_stack_small.bin",
+      "bytes": 20800,
+      "sha256": "908a74246c8f155c74d81b670cb59723d9fe4c10fac715d4b0b20bea405b7e64"
+    },
+    {
+      "path": "dungeon/coin_stack_medium.gltf",
+      "bytes": 3083,
+      "sha256": "182f32116822b9c4d5ecfb76c76241276550671d84456f08b2cbdc3c6a58eb06"
+    },
+    {
+      "path": "dungeon/coin_stack_medium.bin",
+      "bytes": 46000,
+      "sha256": "191c35817b510aeb5da6e4dcbbc0f4a64c9ccbea70bf6e84ea0236adeea25ed9"
+    },
+    {
+      "path": "dungeon/candle_lit.gltf",
+      "bytes": 3030,
+      "sha256": "32cc99f79d823f146e9afd139e68df274cb815749723d094289889874464183f"
+    },
+    {
+      "path": "dungeon/candle_lit.bin",
+      "bytes": 4560,
+      "sha256": "d58b93ba54ac2dc41c5e69f96a1419c4276718a1a46112f47b79a927c8d60b41"
+    },
+    {
+      "path": "dungeon/candle_triple.gltf",
+      "bytes": 3039,
+      "sha256": "aaedcfa4c76bd509e808509e2affabaacea71af8287006a157789d75fcd4fef8"
+    },
+    {
+      "path": "dungeon/candle_triple.bin",
+      "bytes": 9924,
+      "sha256": "483a4ad1141b982a58f77d292bd2dfc81c654e20bf9d47698b23b8e61779530f"
+    },
+    {
+      "path": "dungeon/table_medium_broken.gltf",
+      "bytes": 3078,
+      "sha256": "9e7e7bdac73b7b60540ee4a0f9daa5b840b3ffc1beece3ca3e01a4da2b285634"
+    },
+    {
+      "path": "dungeon/table_medium_broken.bin",
+      "bytes": 16748,
+      "sha256": "02ea3a00e945f1fedc47e3e4071330f96fba040389aefc3456f422450cc70518"
+    },
+    {
+      "path": "dungeon/table_small.gltf",
+      "bytes": 3017,
+      "sha256": "87fae7c1e6ab9bb23e042ce193077deed0be9290e5542c347f8c20843973c74d"
+    },
+    {
+      "path": "dungeon/table_small.bin",
+      "bytes": 12288,
+      "sha256": "2cc177f41f8423995658bb27c538b4f8e3c411c3fdffc50b463e7cb9cdb10668"
+    },
+    {
+      "path": "dungeon/chair.gltf",
+      "bytes": 3039,
+      "sha256": "b1159fe4305e1a915d9fdb6a239985d474b4ef9e60d303baf850e70f3330ca33"
+    },
+    {
+      "path": "dungeon/chair.bin",
+      "bytes": 17956,
+      "sha256": "516dbc8e8a562f20b83b3100cc8e77c06641d684b4815480a90d043ca070265b"
+    },
+    {
+      "path": "dungeon/stool.gltf",
+      "bytes": 3021,
+      "sha256": "91ec3c60c2be3b7eda8f563bd2ef7482df6216dc3dc60eb705a2a113ebfbc1ff"
+    },
+    {
+      "path": "dungeon/stool.bin",
+      "bytes": 10888,
+      "sha256": "4cf7db61c1ca636b575ed3d4d9a6842051aac1ee3e2752820b4579c65446bacb"
+    },
+    {
+      "path": "dungeon/sword_shield_broken.gltf",
+      "bytes": 3079,
+      "sha256": "2b6910bc2d0f6a91a3a63c2428baf3a1c78a488705da524b623682b5cc10cbf6"
+    },
+    {
+      "path": "dungeon/sword_shield_broken.bin",
+      "bytes": 21736,
+      "sha256": "f7bb790eb5000e964ed8dc4ca086ab13c297fbffd27dfa25cf6d52ca0b279edc"
+    },
+    {
+      "path": "dungeon/keyring_hanging.gltf",
+      "bytes": 3069,
+      "sha256": "a75aa8ae9b46ee001466bf8e3b999724767d8efd98357a77b8e47dc675f71ea7"
+    },
+    {
+      "path": "dungeon/keyring_hanging.bin",
+      "bytes": 27216,
+      "sha256": "7e7dee01560a291b7031f07b486f6ea948c55268c73ff784ea7fd305a6cd9dfa"
+    },
+    {
+      "path": "dungeon/bottle_A_green.gltf",
+      "bytes": 3062,
+      "sha256": "0cd643e227fdb4369dd1cf85d34c58e6b6b605336c73384eb192d21cd6b98bd3"
+    },
+    {
+      "path": "dungeon/bottle_A_green.bin",
+      "bytes": 8256,
+      "sha256": "e82b591d9efb83c7bfc438c031ff865cb125dd54ddd1599d497c2d7fb6e25c99"
+    },
+    {
+      "path": "dungeon/trunk_medium_A.gltf",
+      "bytes": 3063,
+      "sha256": "a552b04652933ecc833bac27e657b227428bf7dc434e198a21ea70888a0aa88b"
+    },
+    {
+      "path": "dungeon/trunk_medium_A.bin",
+      "bytes": 9016,
+      "sha256": "e511988146568dd74b663da2f140789e87bce63d8e2cd1feba29c3ee867b9b62"
+    },
+    {
+      "path": "dungeon/dungeon_texture.png",
+      "bytes": 17047,
+      "sha256": "ceb331d6ed53273da5e26808560bca8496f8f6ebc12d83b570c0e317560f1d03"
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+import { render } from 'preact';
+import { Session } from './game/session.ts';
+import { clearSave } from './game/storage.ts';
+import { itemName } from './sim/index.ts';
+import type { SimEvent } from './sim/index.ts';
+import { Stage, pickQuality } from './render/stage.ts';
+import { App } from './ui/App.tsx';
+import type { Toast } from './ui/App.tsx';
+import { lootText } from './ui/format.ts';
+import './ui/style.css';
+
+const session = Session.boot();
+const canvas = document.getElementById('scene') as HTMLCanvasElement;
+const overlay = document.getElementById('floaters')!;
+const loading = document.getElementById('loading')!;
+const stage = new Stage(canvas, overlay, pickQuality());
+
+let toastId = 0;
+function toast(text: string, tone: string): void {
+  dispatchEvent(new CustomEvent<Toast>('portador-toast', { detail: { id: ++toastId, text, tone } }));
+}
+
+function toasts(events: SimEvent[]): void {
+  for (const e of events) {
+    if (e.t === 'aviso') toast(e.text, e.tone);
+    else if (e.t === 'saque') toast(`Achou: ${e.text}`, 'bom');
+    else if (e.t === 'voltou' && !e.died && session.world.report) toast(`Voltou com ${lootText(session.world.report.brought)}.`, 'bom');
+  }
+}
+
+function resize(): void {
+  stage.resize(innerWidth, innerHeight);
+}
+addEventListener('resize', resize);
+resize();
+addEventListener('portador-inset', (e) => {
+  const d = (e as CustomEvent<{ x: number; y: number; closeUp: boolean }>).detail;
+  stage.setInset(d.x, d.y, d.closeUp);
+});
+
+let last = performance.now();
+let errors = 0;
+function loop(now: number): void {
+  const dt = Math.min(0.1, (now - last) / 1000);
+  try {
+    frame(now - last, dt);
+  } catch (e) {
+    // Um erro no 3D não pode parar o jogo: a simulação segue e o quadro seguinte tenta de novo.
+    if (errors++ < 5) console.error(e);
+  }
+  last = now;
+  requestAnimationFrame(loop);
+}
+
+function frame(ms: number, dt: number): void {
+  const events = session.frame(ms);
+  if (events.length) toasts(events);
+  stage.frame(session.world, events, session.frac, dt, session.paused ? 1 : session.speed);
+}
+
+let saving = true;
+const save = () => saving && session.save();
+addEventListener('pagehide', save);
+document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && save());
+
+render(<App session={session} />, document.getElementById('ui')!);
+
+stage
+  .init((done, total) => (loading.textContent = `Carregando a Cripta… ${Math.round((done / total) * 100)}%`))
+  .then(() => {
+    loading.remove();
+    requestAnimationFrame(loop);
+  })
+  .catch((e) => {
+    loading.textContent = `Falhou ao carregar a arte: ${(e as Error).message}`;
+    console.error(e);
+  });
+
+// Atalhos de depuração (só no npm run dev). Com o painel oculto o requestAnimationFrame para:
+// portador.frames(n) roda quadros na mão.
+if (import.meta.env.DEV) {
+  Object.assign(window, {
+    portador: {
+      session,
+      stage,
+      itemName,
+      advance: (n: number) => session.advance(n),
+      /** Começa do zero (sem salvar o mundo atual ao sair). */
+      reset: () => {
+        saving = false;
+        clearSave();
+        location.reload();
+      },
+      frames: (n: number, ms = 1000 / 60) => {
+        for (let i = 0; i < n; i++) frame(ms, ms / 1000);
+      },
+    },
+  });
+}

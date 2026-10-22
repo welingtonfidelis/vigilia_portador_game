@@ -1,0 +1,24 @@
+# Vigília: O Portador da Chama
+
+RPG idle em 3D no navegador. Um herói desce sozinho à Cripta, luta contra grupos de esqueletos e sempre volta para a vila: vitorioso, ferido ou carregado. Você não controla a luta. Você escolhe o que ele veste, o que aprende, as regras que segue e até onde ele desce. A vila cresce com o que ele traz.
+
+![Luta no anel de contato](docs/img/luta-elite.jpg)
+
+- **Documentação única** (GDD, estado, arquitetura, arte e balanceamento): [`docs/VIGILIA-PORTADOR.md`](docs/VIGILIA-PORTADOR.md)
+- **Licenças da arte:** [`LICENSES.md`](LICENSES.md)
+
+## Rodar
+
+```bash
+npm install
+npm run art        # copia do pack KayKit baixado (fora do repositório) só as peças do manifesto
+npm run dev        # http://localhost:5173 · com --host, abre no celular pela rede
+npm test           # testes da simulação
+npm run balance    # balanceador: confere as metas do GDD (§2.12)
+```
+
+Stack: TypeScript, Vite, Three.js e Preact. A simulação (`src/sim`) é pura, determinística e serializada em JSON; o 3D só mostra o que ela decide.
+
+## Créditos
+
+Arte 3D: **KayKit**, de Kay Lousberg (www.kaylousberg.com), sob CC0 1.0. A estrutura do jogo nasceu do [Vigília](../vigilia).

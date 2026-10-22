@@ -28,6 +28,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); }
 #loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: Georgia, serif; font-size: 1.3rem; color: var(--gold); background: var(--bg); z-index: 50; }
 #ui { position: fixed; inset: 0; pointer-events: none; }
 #ui > * { pointer-events: auto; }
+/* Camadas que cobrem a cena (o cartão da viagem, a faixa do HUD e os avisos) deixam o mouse chegar nela. */
+#ui > .travel, #ui > .hud, #ui > .toasts { pointer-events: none; }
 
 h2, h3, h4 { font-family: Georgia, 'Times New Roman', serif; font-weight: normal; color: var(--gold); margin: 0.6em 0 0.35em; }
 h2 { font-size: 1.25rem; }

@@ -25,7 +25,7 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 - **A vila é uma cena própria:** prédios do Kenney por estado (ruína, obra, pronto, ampliado), casas por moradores, a entrada da Cripta e a fogueira onde o herói descansa sentado.
 - **Dia e noite:** fonte e lanternas acendem com o marco de 10 moradores.
-- **Câmera de observar:** arrastar e zoom.
+- **Câmera de observar:** arrastar, setas ou WASD movem; roda, pinça ou + e - dão zoom.
 - **Botão Vila/Herói** no HUD, para olhar a vila com o herói lá embaixo.
 - **Toque num prédio** abre a tela da vila.
 
@@ -975,7 +975,7 @@ O balanceador não muda, porque nenhum número muda.
 
 - **A entrada da Cripta ficou na borda sul,** virada para o leste, com o morro de pedra a oeste. A câmera vem do sudeste. Com a entrada ao norte, a vila ficava atrás da câmera, e com o arco virado para o norte o herói empurrava a porta escondido atrás da parede.
 - **A fogueira de vigília ficou ao lado da entrada da Cripta, e não no meio da praça.** Assim, levantar, correr e empurrar a porta cabem na saída da viagem, que subiu de 2,8 para 3,6 s.
-- **A câmera da vila tem uma vista de casa fixa,** que enquadra a praça, os prédios, a fogueira e a Cripta. Ela não segue o herói, exceto na tela de equipamento. Arrastar a solta, e o ◎ do HUD a traz de volta.
+- **A câmera da vila tem uma vista de casa fixa,** que enquadra a praça, os prédios, a fogueira e a Cripta. Ela não segue o herói, exceto na tela de equipamento. Arrastar (ou as setas e WASD) a solta, e o ◎ do HUD ou a tecla 0 a traz de volta. Pelo teclado, + e - dão zoom.
 - **O acampamento do M0 deixou de existir:** o herói descansa na vila.
 
 **Desempenho no computador:** 70 a 90 chamadas de desenho e cerca de 141 mil triângulos, contando a sombra, dentro do orçamento de 150 e 150 mil. Falta medir no celular.

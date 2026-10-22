@@ -18,6 +18,15 @@ import { visualFiles } from './visuals.ts';
 /** Vagas do anel, girado para a direita da porta: assim o herói aparece de três quartos para a câmera. */
 const RING_ANGLES = [-0.6, 0.55, 1.7];
 /** Na vila: onde o herói senta na fogueira e a frente da porta da Cripta. */
+/** Câmera da vila pelo teclado: [direita, frente, zoom] de cada tecla (+ aproxima, - afasta). */
+const TOWN_KEYS: Record<string, [number, number, number]> = {
+  ArrowRight: [1, 0, 0], KeyD: [1, 0, 0],
+  ArrowLeft: [-1, 0, 0], KeyA: [-1, 0, 0],
+  ArrowUp: [0, 1, 0], KeyW: [0, 1, 0],
+  ArrowDown: [0, -1, 0], KeyS: [0, -1, 0],
+  Minus: [0, 0, 1], NumpadSubtract: [0, 0, 1],
+  Equal: [0, 0, -1], NumpadAdd: [0, 0, -1],
+};
 const SEAT_POS = new THREE.Vector3(SEAT.x, 0, SEAT.z);
 const CRYPT_FRONT = new THREE.Vector3(CRYPT.x + 1.4, 0, CRYPT.z);
 const FIRE_POS = new THREE.Vector3(FIRE.x, 0, FIRE.z);
@@ -133,7 +142,16 @@ export class Stage {
     this.ready = true;
   }
 
-  /** Arrastar move a câmera da vila; roda e pinça dão zoom; um toque curto num prédio abre o painel dele. */
+  /**
+   * Teclas que movem a câmera da vila (setas ou WASD; + e - para o zoom), com a hora em que podem
+   * parar: null enquanto seguradas; um toque rápido ainda conta por 0,12 s.
+   */
+  private keys = new Map<string, { down: number; until: number | null }>();
+
+  /**
+   * Arrastar (ou setas e WASD) move a câmera da vila; roda, pinça e + e - dão zoom; 0 volta à vista
+   * de casa; um toque curto num prédio abre o painel dele.
+   */
   private bindTownInput(): void {
     const pts = new Map<number, { x: number; y: number }>();
     let moved = 0;
@@ -168,10 +186,7 @@ export class Stage {
       const right = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 0).setY(0).normalize();
       const fwd = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).setY(0).normalize();
       const k = 0.06 * this.townCam.zoom;
-      this.townCam.target.addScaledVector(right, -dx * k).addScaledVector(fwd, -dy * k);
-      this.townCam.target.x = THREE.MathUtils.clamp(this.townCam.target.x, -50, 50);
-      this.townCam.target.z = THREE.MathUtils.clamp(this.townCam.target.z, -50, 40);
-      this.townCam.free = true;
+      this.panTown(right.multiplyScalar(-dx * k).addScaledVector(fwd, -dy * k));
     });
     const up = (e: PointerEvent) => {
       if (!pts.has(e.pointerId)) return;
@@ -187,6 +202,49 @@ export class Stage {
       e.preventDefault();
       this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * Math.exp(e.deltaY * 0.0012), 0.45, 2.6);
     }, { passive: false });
+    const typing = (e: KeyboardEvent) => e.ctrlKey || e.metaKey || e.altKey || !!(e.target as HTMLElement).closest?.('input, select, textarea');
+    addEventListener('keydown', (e) => {
+      if (!this.showingTown || typing(e)) return;
+      if (e.key === '0') return this.recenter();
+      if (!TOWN_KEYS[e.code]) return;
+      if (!this.keys.has(e.code)) this.keys.set(e.code, { down: performance.now(), until: null });
+      e.preventDefault();
+    });
+    addEventListener('keyup', (e) => {
+      const k = this.keys.get(e.code);
+      if (!k) return;
+      if (performance.now() - k.down >= 120) this.keys.delete(e.code);
+      else k.until = k.down + 120;
+    });
+    addEventListener('blur', () => this.keys.clear());
+  }
+
+  /** Move o alvo da câmera da vila no chão, sem sair da vila. */
+  private panTown(d: THREE.Vector3): void {
+    this.townCam.target.add(d);
+    this.townCam.target.x = THREE.MathUtils.clamp(this.townCam.target.x, -50, 50);
+    this.townCam.target.z = THREE.MathUtils.clamp(this.townCam.target.z, -50, 40);
+    this.townCam.free = true;
+  }
+
+  /** Teclas seguradas: anda cerca de 20 m/s (mais com a câmera longe) e o zoom dobra em meio segundo. */
+  private keyTown(dt: number): void {
+    if (!this.keys.size) return;
+    let x = 0, y = 0, z = 0;
+    const now = performance.now();
+    for (const [code, k] of this.keys) {
+      if (k.until !== null && now > k.until) this.keys.delete(code);
+      const [kx, ky, kz] = TOWN_KEYS[code]!;
+      x += kx;
+      y += ky;
+      z += kz;
+    }
+    if (z) this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * Math.exp(z * dt * 1.4), 0.45, 2.6);
+    if (!x && !y) return;
+    const right = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 0).setY(0).normalize();
+    const fwd = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).setY(0).normalize();
+    const k = 20 * this.townCam.zoom * dt;
+    this.panTown(right.multiplyScalar(x * k).addScaledVector(fwd, -y * k));
   }
 
   /** Toque na vila: acha o ponto do chão e, se cair num lote de prédio, avisa a interface. */
@@ -544,6 +602,7 @@ export class Stage {
     let goal = this.heroPos.clone().add(new THREE.Vector3(0, this.closeUp ? 1.25 : 1.1, 0));
     if (showTown) {
       if (this.closeUp) this.townCam.free = false;
+      else this.keyTown(dt);
       // Vista de casa (praça, fogueira e Cripta no quadro); na tela de equipamento, perto do herói.
       if (!this.townCam.free) this.townCam.target.copy(HOME);
       goal = this.closeUp ? goal : this.townCam.target.clone().add(new THREE.Vector3(0, 1.1, 0));

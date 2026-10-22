@@ -148,7 +148,7 @@ function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World;
               {view.watching ? '⚔ Herói' : '⌂ Vila'}
             </button>
           )}
-          {view.townShown && <button onClick={view.recenter} title="Centralizar a câmera" aria-label="Centralizar a câmera">◎</button>}
+          {view.townShown && <button onClick={view.recenter} title="Voltar à vista da vila (0) · arraste, roda, setas ou WASD movem; + e - dão zoom" aria-label="Voltar à vista da vila">◎</button>}
           <button onClick={onMenu} title="Menu" aria-label="Menu">☰</button>
         </div>
       </div>

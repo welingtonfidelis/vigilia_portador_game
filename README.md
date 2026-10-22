@@ -11,11 +11,12 @@ RPG idle em 3D no navegador. Um herói desce sozinho à Cripta, luta contra grup
 
 ```bash
 npm install
-npm run art        # copia do pack KayKit baixado (fora do repositório) só as peças do manifesto
 npm run dev        # http://localhost:5173 · com --host, abre no celular pela rede
 npm test           # testes da simulação
 npm run balance    # balanceador: confere as metas do GDD (§2.12)
 ```
+
+A arte já vem no repositório, em `public/assets/kaykit/`: só as peças que o jogo usa, tiradas dos packs. `npm run art` serve apenas para trocar ou acrescentar peças. Ele recopia dos zips originais, baixados fora do repositório, o que está listado em `tools/art-manifest.ts`. As fontes e as licenças estão em `LICENSES.md`.
 
 Stack: TypeScript, Vite, Three.js e Preact. A simulação (`src/sim`) é pura, determinística e serializada em JSON; o 3D só mostra o que ela decide.
 

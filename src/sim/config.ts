@@ -51,13 +51,14 @@ export const BALANCE = {
   luckRarity: 0.005,
 
   // Morte e restos
-  deathBase: 0.85,
-  deathPerFloor: 0.035,
-  deathRarity: { comum: 0, rara: 0.05, epica: 0.1, lendaria: 0.25 } as Record<string, number>,
+  // Morrer custa caro: no andar 1, uma peça comum volta 55% das vezes; no andar 10, 19%.
+  deathBase: 0.55,
+  deathPerFloor: 0.04,
+  deathRarity: { comum: 0, rara: 0.03, epica: 0.06, lendaria: 0.15 } as Record<string, number>,
   deathLuck: 0.005,
-  deathCarter: 0.06,
-  deathMin: 0.1,
-  deathMax: 0.95,
+  deathCarter: 0.05,
+  deathMin: 0.05,
+  deathMax: 0.75,
   remainsDays: 3,
   remainsMax: 3,
   woundBase: 600,

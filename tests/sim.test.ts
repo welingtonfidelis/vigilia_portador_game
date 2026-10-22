@@ -186,12 +186,12 @@ describe('regra de morte', () => {
 
   it('a chance cai com a profundidade e sobe com raridade e carroceiro', () => {
     const w = createWorld(1);
-    expect(returnChance(w, 1, 'comum')).toBeCloseTo(0.85);
+    expect(returnChance(w, 1, 'comum')).toBeCloseTo(BALANCE.deathBase);
     expect(returnChance(w, 10, 'comum')).toBeLessThan(returnChance(w, 5, 'comum'));
     expect(returnChance(w, 10, 'lendaria')).toBeGreaterThan(returnChance(w, 10, 'rara'));
     const before = returnChance(w, 10, 'comum');
     w.village.buildings.carroceiro = 2;
-    expect(returnChance(w, 10, 'comum')).toBeCloseTo(before + 0.12);
+    expect(returnChance(w, 10, 'comum')).toBeCloseTo(before + 2 * BALANCE.deathCarter);
     expect(returnChance(w, 99, 'comum')).toBe(BALANCE.deathMin);
   });
 

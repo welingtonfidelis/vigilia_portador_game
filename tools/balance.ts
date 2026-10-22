@@ -136,7 +136,7 @@ const checks: Check[] = [
   { name: 'Luta média por sala (s)', value: f1(mean(runs.map((r) => r.roomSec))), ok: mean(runs.map((r) => r.roomSec)) >= 10 && mean(runs.map((r) => r.roomSec)) <= 35 },
   { name: 'Dano por sala comum (% da vida)', value: (mean(runs.map((r) => r.roomDmg)) * 100).toFixed(0), ok: mean(runs.map((r) => r.roomDmg)) >= 0.1 && mean(runs.map((r) => r.roomDmg)) <= 0.35 },
   { name: 'Luta de chefe (s)', value: f1(mean(runs.map((r) => r.bossSec).filter((x) => x > 0))), ok: (() => { const b = mean(runs.map((r) => r.bossSec).filter((x) => x > 0)); return b >= 45 && b <= 120; })() },
-  { name: 'Perda na morte (% do valor da mochila)', value: lost.length ? (mean(lost) * 100).toFixed(0) : '—', ok: lost.length > 0 && mean(lost) >= 0.25 && mean(lost) <= 0.55 },
+  { name: 'Perda na morte (% do valor da mochila)', value: lost.length ? (mean(lost) * 100).toFixed(0) : '—', ok: lost.length > 0 && mean(lost) >= 0.55 && mean(lost) <= 0.8 },
   { name: 'Restos recuperados', value: rec.length ? (mean(rec) * 100).toFixed(0) + '%' : '—', ok: rec.length === 0 || mean(rec) >= 0.5 },
   {
     name: 'Parede sem avanço antes do chefe 10 (mediana · pior, min)',

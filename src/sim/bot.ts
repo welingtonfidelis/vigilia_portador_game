@@ -64,10 +64,10 @@ export function botTick(w: World): void {
     const worst = w.village.stash.reduce((a, b) => (itemValue(b) < itemValue(a) ? b : a));
     sell(w, worst.id);
   }
-  // Desce até o andar mais fundo em que a "Força" da tela de equipamento passa de 0,9; depois de
-  // morrer no mais fundo, um andar acima.
+  // Desce até o andar mais fundo em que a "Força" da tela de equipamento chega a 1 (morrer custa
+  // caro: a mochila volta pela metade ou menos); depois de morrer no mais fundo, um andar acima.
   let start = h.deepest;
-  while (start > 1 && powerRatio(w, start) < 0.9) start--;
+  while (start > 1 && powerRatio(w, start) < 1) start--;
   const died = w.report?.died && w.report.floor >= h.deepest - 1;
   w.rules.descent.startFloor = Math.max(1, Math.min(start, h.deepest - (died ? 1 : 0)));
 }

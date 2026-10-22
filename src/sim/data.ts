@@ -1,4 +1,5 @@
 /** Dados puros: bases de itens, afixos, lendárias, inimigos, habilidades e prédios. */
+import { BALANCE } from './config.ts';
 import type { AffixId, BuildingId, EliteAffix, EnemyKind, Material, Rarity, SkillId, Slot, Weight } from './types.ts';
 
 export interface BaseDef {
@@ -201,7 +202,7 @@ export const BUILDINGS: Record<BuildingId, BuildingDef> = {
   carroceiro: {
     id: 'carroceiro', name: 'Carroceiro de resgate', max: 3, start: 0,
     cost: (n) => ({ gold: 120 * n * n, mats: { ferro: 10 * n }, people: n + 1 }),
-    effect: (n) => `+${6 * n}% na rolagem da morte; restos duram ${3 + n} dias`,
+    effect: (n) => `+${Math.round(BALANCE.deathCarter * 100 * n)}% na rolagem da morte; restos duram ${BALANCE.remainsDays + n} dias`,
   },
   curandeira: {
     id: 'curandeira', name: 'Curandeira', max: 3, start: 0,

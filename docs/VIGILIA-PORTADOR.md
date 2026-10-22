@@ -497,7 +497,7 @@ A vila é a outra metade da progressão. Ela cresce com o que o herói traz e, e
 | Ferreiro | 1–5 (começa no 1) | Teto de forja `2 × n`; forjar rara (n 2); reforjar (n 3) | `150 × n²` de ouro, `20 × n` de ferro e `2n` moradores |
 | Treinador | 0–6 (começa no 0) | Habilidades do ato n | `200 × n²` de ouro, `30 × n` de ossos e `2n − 2` moradores (o nível 1 não pede gente) |
 | Alquimista | 0–4 | +1 poção por nível; a poção cura +5% por nível | `100 × n²` de ouro, `15 × n` de ossos e `n` moradores |
-| Carroceiro de resgate | 0–3 | +6% na rolagem da morte; os restos duram +1 dia | `120 × n²` de ouro, `10 × n` de ferro e `n + 1` moradores |
+| Carroceiro de resgate | 0–3 | +5% na rolagem da morte; os restos duram +1 dia | `120 × n²` de ouro, `10 × n` de ferro e `n + 1` moradores |
 | Curandeira | 0–3 | O ferimento dura 25% menos por nível (no mínimo, 25% do tempo) | `120 × n²` de ouro, `20 × n` de ossos e `n` moradores |
 | Salão de Táticas | 0–4 | +1 regra de combate por nível | `150 × n²` de ouro e `2n` moradores |
 | Casas | Sobem sozinhas | Abrigam a gente resgatada; cada 4 moradores erguem uma casa nova no diorama | — |
@@ -507,7 +507,7 @@ A vila é a outra metade da progressão. Ela cresce com o que o herói traz e, e
 
 ### 10. Morte e regresso (regra completa)
 
-> **Proposta a validar com o usuário.**
+> **Ajustada com o usuário em 2026-10-22.** Ele achou "fácil demais lutar até cair e ainda conseguir levar muitos itens". As chances de trazer caíram bastante (abaixo), e os restos ficaram como estavam: no chão por um tempo, recuperáveis ou perdidos de vez. Ainda falta ele confirmar que a gente resgatada sempre volta.
 
 **1. Quando acontece.** A vida chega a 0 e nenhum efeito o segura, como Último Bastião ou uma lendária. Ele cai. A luta acaba e a descida também.
 
@@ -521,25 +521,26 @@ A vila é a outra metade da progressão. Ela cresce com o que o herói traz e, e
 - **Ouro e cada material:** não têm sorte de tudo ou nada. Volta a fração `chance` da pilha, arredondada para baixo, e o resto fica.
 
 ```
-chance = clamp( 0,85
-              − 0,035 × (andar − 1)               ← cai com a profundidade
-              + bônus da raridade                  ← comum 0 · rara +0,05 · épica +0,10 · lendária +0,25
+chance = clamp( 0,55
+              − 0,04 × (andar − 1)                ← cai com a profundidade
+              + bônus da raridade                  ← comum 0 · rara +0,03 · épica +0,06 · lendária +0,15
               + 0,005 × sorte                      ← sorte do herói
-              + 0,06 × nível do carroceiro,        ← prédio da vila
-              0,10, 0,95 )
+              + 0,05 × nível do carroceiro,        ← prédio da vila
+              0,05, 0,75 )
 ```
 
 Exemplos, sem sorte e sem carroceiro:
 
 | Andar | Comum | Rara | Épica | Lendária | Ouro e materiais |
 |---|---|---|---|---|---|
-| 1 | 85% | 90% | 95% | 95% | 85% |
-| 5 | 71% | 76% | 81% | 95% | 71% |
-| 10 | 54% | 59% | 64% | 79% | 54% |
-| 20 (Ato II) | 19% | 24% | 29% | 44% | 19% |
+| 1 | 55% | 58% | 61% | 70% | 55% |
+| 5 | 39% | 42% | 45% | 54% | 39% |
+| 10 | 19% | 22% | 25% | 34% | 19% |
+| 15 (Ato II) | 5% | 5% | 5% | 14% | 5% |
 
-- **A curva:** no fundo do ato atual, a morte leva quase metade da mochila. Dois atos abaixo do ponto confortável, leva quase tudo. É isso que segura o jogador de mandar o herói fundo demais.
-- **O carroceiro:** no nível 3, ele devolve +18 pontos, quase quatro andares de folga.
+- **A curva:** já no andar 1, a morte leva quase metade da mochila. No fundo do Ato I, leva quatro quintos. A partir do meio do Ato II, leva quase tudo. Lutar até cair deixa de compensar: o certo é voltar antes, pela regra ou pelo sino. Os restos dão a chance de buscar o que ficou.
+- **O carroceiro:** no nível 3, devolve +15 pontos, quase quatro andares de folga.
+- **Antes do ajuste** (primeira versão): eram 85% no andar 1 e 54% no 10, e o balanceador media 29% de perda por morte. Agora mede 64–65%.
 
 **5. O que não voltou fica no chão.** Vira uma **pilha de restos** marcada no andar e na sala onde ele caiu, com as peças, o ouro e os materiais que ficaram.
 
@@ -562,7 +563,7 @@ Exemplos, sem sorte e sem carroceiro:
 - **Baú cheio:** a peça que chega do resgate fica na mochila, até 10. Se passar disso, a pior derrete em ouro, que também entra na rolagem.
 - **Morrer na sala dos próprios restos:** a pilha antiga continua lá, e a nova é criada na mesma sala.
 - **Morrer na volta:** não acontece. A volta não tem luta.
-- **Lendária que caiu:** fica nos restos e, quando eles vencem, a crônica registra, como qualquer outra peça. Para não ser cruel demais, a lendária tem o bônus de +25%.
+- **Lendária que caiu:** fica nos restos e, quando eles vencem, a crônica registra, como qualquer outra peça. Para não ser cruel demais, a lendária tem o bônus de +15%.
 
 **Por que assim:**
 
@@ -591,7 +592,7 @@ Exemplos, sem sorte e sem carroceiro:
 - aprende as habilidades assim que dá;
 - constrói o prédio mais barato que estiver disponível;
 - aprimora a arma ou a armadura quando sobra ouro;
-- desce até o andar mais fundo em que a "Força" da tela de equipamento passa de 0,9, e volta um andar depois de morrer.
+- desce até o andar mais fundo em que a "Força" da tela de equipamento chega a 1, e volta um andar depois de morrer. Com a morte cara, descer onde a Força ainda é 0,9 fazia uma semente empacar 53 min.
 
 O balanceador sai com código ≠ 0 se alguma meta falhar.
 
@@ -602,7 +603,7 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 | Mortes | 0,5–2,5 por hora | Média nas 3 h |
 | Sala comum no andar certo | 10–35 s de luta e 10–35% da vida | Média das salas em que `poder/P(andar)` fica entre 0,8 e 1,2 |
 | Chefe | 45–120 s de luta | Média |
-| Perda na morte | 25–55% do valor da mochila | Média |
+| Perda na morte | 55–80% do valor da mochila | Média |
 | Restos recuperados | ≥ 50% das pilhas | Pilhas recuperadas ÷ criadas |
 | Parede | Mediana ≤ 30 min e pior semente ≤ 50 min sem avanço antes do chefe do andar 10 | Maior intervalo sem o andar mais fundo subir, por semente |
 | Vila no compasso | O teto da forja nunca passa do tier do mais fundo; nenhum prédio sem obra possível por mais de 15 min | Checagem a cada minuto |
@@ -611,20 +612,20 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 | Determinismo | Mesma semente dá o mesmo resultado; salvar e carregar a cada 10 min dá o mesmo mundo | Hash do estado |
 | Desempenho | 3 h de jogo simuladas em menos de 3 s | Relógio |
 
-**Resultado em 2026-10-22** (20 sementes a partir de 1000 · 30 a partir de 7000):
+**Resultado em 2026-10-22, depois da morte mais cara** (20 sementes a partir de 1000 · 30 a partir de 7000):
 
 | Meta | Faixa 1000 | Faixa 7000 |
 |---|---|---|
-| Chefe do andar 5 (mediana) | 32,7 min | 34,9 min |
-| Chefe do andar 10 (mediana) | 73,9 min | 75,6 min |
+| Chefe do andar 5 (mediana) | 28,3 min | 36,2 min |
+| Chefe do andar 10 (mediana) | 66,3 min | 77,8 min |
 | Sementes que vencem o andar 10 em 3 h | 20/20 | 30/30 |
-| Mortes por hora | 1,2 | 1,2 |
-| Luta por sala / dano por sala comum | 16,8 s / 16% | 16,9 s / 17% |
-| Luta de chefe | 50,8 s | 52,2 s |
-| Perda na morte (valor da mochila) | 29% | 29% |
-| Restos recuperados | 100% | 100% |
-| Parede (mediana · pior) | 18,7 · 35,5 min | 22,7 · 49,8 min |
-| Ouro parado na vitória do andar 10 | 0,7× | 0,4× |
+| Mortes por hora | 0,9 | 1,2 |
+| Luta por sala / dano por sala comum | 16,7 s / 16% | 16,0 s / 16% |
+| Luta de chefe | 51,1 s | 49,3 s |
+| Perda na morte (valor da mochila) | 64% | 65% |
+| Restos recuperados | 99% | 100% |
+| Parede (mediana · pior) | 18,1 · 41,5 min | 23,8 · 45,7 min |
+| Ouro parado na vitória do andar 10 | 0,9× | 0,9× |
 | Impasses · determinismo | 0 · igual | 0 · igual |
 | Desempenho | 0,07 s por semente | 0,07 s por semente |
 
@@ -713,7 +714,10 @@ As chamadas de desenho que sobram são dos personagens: 41 malhas com skin (9 do
 
    Os dois são CC0 também. Comprar é decisão do usuário.
 4. **Tom:** o KayKit é colorido e fofo. O protótipo escurece com luz: tochas quentes, névoa fria e vinheta. Falta confirmar se é esse o clima, ou se o jogo assume um tom mais leve que o do Vigília.
-5. **Pausa:** hoje as telas de equipamento e de habilidades seguram o herói na vila, e a de regras não pausa nada. Falta decidir se isso basta.
+5. **Vila manual ou automática** (pedido do usuário, para mais à frente): hoje o tempo na vila é automático. O herói descansa até a vida encher e desce sozinho, e o usuário achou isso bom para o modo automático. Mais tarde ele quer poder escolher entre o modo automático e o manual, em que o herói espera a ordem de descer.
+   - O núcleo já tem isso: é a regra da descida "Descer de novo depois de descansar". Desligada, o herói fica na vila até o botão "Descer agora".
+   - Falta virar um modo visível, por exemplo um botão Auto/Manual no HUD. Também falta decidir se o modo manual pausa o tempo ou só segura o herói.
+   - Hoje as telas de equipamento e de habilidades abertas também seguram o herói; a de regras não.
 6. **Medição no celular:** o envio automático do medidor não chegou do aparelho (2.14). Falta saber o modelo e repetir a medição num celular mais fraco, como o Moto G60.
 
 ---
@@ -870,3 +874,6 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - meta da parede por mediana e pior caso.
   - **Regras:** "recuar" virou fuga na hora; a segunda condição (E) vale desde o começo.
   - **M0 pronto:** protótipo jogável, 19 testes, balanceador com as 15 metas em duas faixas de sementes, medição no celular (133–136 fps).
+  - **Primeira conversa sobre o protótipo:**
+    - **Morte mais cara, a pedido do usuário:** base de 85% para 55%, 3,5 para 4 pontos por andar, bônus de raridade menores, teto de 75%. Os restos ficam como estavam. A meta de perda passou de 25–55% para 55–80%, e o jogador automático ficou mais cauteloso (Força 1).
+    - **Tempo na vila:** está bom no automático; o modo manual fica para depois (15.5).

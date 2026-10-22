@@ -27,6 +27,7 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 - **Quatro estágios,** como nas imagens de referência: destruída, reconstruída, melhorada e melhorada de novo. Eles mudam o chão, os telhados e os enfeites, e cada prédio continua com o próprio estado (ruína, obra, pronto ou ampliado).
 - **Dia e noite.**
 - **Câmera de observar:** arrastar, setas ou WASD movem; roda, pinça ou + e - dão zoom.
+- **Bichos, janelas e passarinhos (M2.3):** o cachorro, o gato e o pintinho (no máximo 3, só bichos de casa), as janelas que acendem à noite e os passarinhos de dia.
 - **Moradores (M2.2):** cada um tem nome, rosto, roupa e ofício, e segue uma rotina por hora (ferreiro, feirante, lenhador, carregador, crianças, músico e avô). Os marcos de vida trazem a feira, a lenha, a música e a festa do Senhor com as bandeirolas. Tocar num morador mostra o nome e o ofício.
 - **Botão Vila/Herói** no HUD, para olhar a vila com o herói lá embaixo.
 - **Toque num prédio** abre a tela da vila.
@@ -700,7 +701,7 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 |---|---|
 | **M0: protótipo vertical** (concluído) | Herói por partes, animações com crossfade, troca de arma e de armadura ao vivo, uma sala com esqueletos, combate pela simulação, telas de equipamento, habilidades e regras, regra de morte, testes e medição no celular |
 | **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
-| **M2: a vila viva** (M2.1 e M2.2 prontas, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
+| **M2: a vila viva** (pronto, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
 | M3: Atos II e III | Inimigos novos (packs KayKit de monstros, se houver, ou recolor dos esqueletos), armas do Fantasy Weapons Bits, habilidades novas e materiais novos |
 | M4: polimento | Som, interface de celular, acessibilidade e eventos |
 | M5: Atos IV a VI e as profundezas | Conteúdo e Eras |
@@ -1095,6 +1096,27 @@ O estágio 3 cheio passa do orçamento de 150 mil triângulos. Falta medir no ce
 - as janelas acesas à noite;
 - os passarinhos e o portão de caveira de boi.
 
+**Como ficou a M2.3 (2026-10-22): bichos, janelas e passarinhos**
+
+| | |
+|---|---|
+| ![O pintinho no feno](img/m2-3-pintinho.jpg) | ![O cachorro na praça](img/m2-3-cachorro.jpg) |
+| O pintinho ciscando em volta do feno | O cachorro passeando pela praça |
+| ![Janelas acesas](img/m2-3-janelas.jpg) | ![Passarinhos](img/m2-3-passarinhos.jpg) |
+| À noite, as janelas das casas acendem | Os passarinhos dando voltas por cima da ilha (no alto, à direita) |
+
+- **Bichos (Kenney Cube Pets 2.0, CC0):** a escolha do usuário foi só bichos de casa ou de fazenda, dentro da vila e no máximo 3.
+  - **Quem vem:** o cachorro e o pintinho chegam com 4 moradores, e o gato com 6. Eles se chamam Pipoca, Bigode e Pitoco; tocar num deles mostra o nome.
+  - **O dia de cada um:** o cachorro anda pela vila (de vez em quando corre) e dorme na porta do ferreiro. O gato cochila na beira da fonte (ou no degrau da curandeira, antes do estágio 3) e passeia pela praça ao entardecer. O pintinho cisca em volta do feno de dia.
+  - **Animações:** as do próprio glb (parado, andar, correr, comer).
+  - **Peso:** cada bicho tem uns 500 triângulos, e a sombra é redonda, como a dos moradores.
+- **Janelas acesas:** um painel morno colado do lado de fora do vidro, nas casas de pé, do anoitecer à 1 h (nem toda janela acende). As 160 janelas possíveis são desenhadas de uma vez só.
+- **Passarinhos:** dois bandos de 5 dando voltas por cima da ilha de dia, batendo as asas. Cada asa é um triângulo, e são duas chamadas de desenho para todos.
+- **O portão de caveira de boi** das imagens de referência ficou de fora: não existe nos packs, e o lugar dele virou a capela da Cripta.
+- **No celular,** as lanternas não têm luz de verdade: um brilho na lanterna e uma poça morna no chão. A resolução também se ajusta sozinha: abaixo de 45 fps, a densidade de pixels cai 0,25 por vez (até 1). Se baixar não ajudar, como no teto de 30 fps do Safari com o Modo de Pouca Energia, ela volta um passo e para.
+
+O pintinho, o cachorro e o gato aparecem pelo `?demo=vila` do servidor de desenvolvimento, que mostra a vila cheia sem mexer no save. 1 teste novo cobre os bichos (53 no total).
+
 ### 15. Decisões em aberto
 
 1. **Regra de morte** (2.10): validar os números e a ideia de que a gente resgatada sempre volta.
@@ -1296,6 +1318,11 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - sombra da vila a cada 5 quadros;
     - floresta mais densa, a pedido do usuário;
     - 9 testes dos moradores (52 no total).
+  - **M2.3 pronta:**
+    - os bichos do Kenney Cube Pets (cachorro, gato e pintinho, no máximo 3);
+    - as janelas acesas à noite e os passarinhos;
+    - no celular, lanternas sem luz de verdade e resolução automática;
+    - o `?demo=vila`, que mostra a vila cheia para medir no celular (o iPhone 16e ficou ok com o Modo de Pouca Energia desligado).
   - **Corpos dos inimigos espalhados:** quem morre escorrega um pouco para trás ao cair, para um lugar a pelo menos 1,3 m dos outros corpos e fora dos pés do herói. Antes, o próximo inimigo da mesma vaga caía exatamente em cima do anterior.
   - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
     - a vila é uma cena separada;

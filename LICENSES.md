@@ -1,6 +1,6 @@
 # Licenças da arte
 
-A arte 3D do Vigília: O Portador da Chama vem da família **KayKit**, de **Kay Lousberg** (https://kaylousberg.com, https://kaylousberg.itch.io). A exceção é a vila do M2, que vem de quatro kits do **Kenney** (https://kenney.nl): Fantasy Town, Graveyard, Castle e Survival, por decisão do usuário em 2026-10-22. Todos os packs usados estão sob **Creative Commons Zero v1.0 Universal (CC0 1.0)**: domínio público, uso livre (inclusive comercial) e sem crédito obrigatório. Mesmo assim, o jogo credita "Kay Lousberg, www.kaylousberg.com" e "Kenney, www.kenney.nl" no menu e no README.
+A arte 3D do Vigília: O Portador da Chama vem da família **KayKit**, de **Kay Lousberg** (https://kaylousberg.com, https://kaylousberg.itch.io). A exceção é a vila do M2, que vem de cinco kits do **Kenney** (https://kenney.nl): Fantasy Town, Graveyard, Castle, Survival e Cube Pets, por decisão do usuário em 2026-10-22. Todos os packs usados estão sob **Creative Commons Zero v1.0 Universal (CC0 1.0)**: domínio público, uso livre (inclusive comercial) e sem crédito obrigatório. Mesmo assim, o jogo credita "Kay Lousberg, www.kaylousberg.com" e "Kenney, www.kenney.nl" no menu e no README.
 
 O autor também pede que não se revendam cópias sem modificação nem se apresentem os modelos como próprios. Isso é um pedido, não uma condição da licença, e o projeto segue o pedido.
 
@@ -25,6 +25,7 @@ Download feito em **2026-10-22**, da versão **Free** de cada pack, pela página
 | Kenney Graveyard Kit | 5.0 | https://kenney.nl/assets/graveyard-kit | License: Creative Commons CC0 | "License: (Creative Commons Zero, CC0)", criado em 17-10-2025; crédito a "Kenney" ou "www.kenney.nl" opcional | `kenney_graveyard-kit_5.0.zip` → `kenney-graveyard-kit.zip` (diorama) | 3 623 408 B | `1a93613f2e5675f3310acf49ec9ef13ae7adeb756ac3b205bfb6cc9311a81062` |
 | Kenney Castle Kit | 2.0 | https://kenney.nl/assets/castle-kit | License: Creative Commons CC0 | "License: (Creative Commons Zero, CC0)", criado em 27-03-2024; crédito a "Kenney" ou "www.kenney.nl" opcional | `kenney_castle-kit.zip` → `kenney-castle-kit.zip` (diorama) | 2 232 589 B | `921f3f73927bb23106cae34bc21d5ab4b033a9fc120475e96f714a406e3169df` |
 | Kenney Survival Kit | 2.0 | https://kenney.nl/assets/survival-kit | License: Creative Commons CC0 | "License: (Creative Commons Zero, CC0)", criado em 03-04-2024; crédito a "Kenney" ou "www.kenney.nl" opcional | `kenney_survival-kit.zip` → `kenney-survival-kit.zip` (diorama) | 1 948 174 B | `c3586341b5932c87eb43d75d915434f47daed168b17ed36a03e8ca9977c7443e` |
+| Kenney Cube Pets | 2.0 | https://kenney.nl/assets/cube-pets | License: Creative Commons CC0 | "License: (Creative Commons Zero, CC0)", criado em 26-03-2026; crédito a "Kenney" ou "www.kenney.nl" opcional | `kenney_cube-pets_1.0.zip` → `kenney-cube-pets.zip` (M2.3) | 2 812 444 B | `b3bdc99a2ec92c687b875718c5d01e9231d2711ed0e2845f295b474bb42a1283` |
 
 Texto da licença (o mesmo em todos os `License.txt`):
 
@@ -49,6 +50,7 @@ A lista exata, com o tamanho e o SHA-256 de cada arquivo copiado, é gerada por 
 | Kenney Graveyard 5.0 | 45 peças em GLB mais a paleta: a capela da Cripta, lápides, covas, cerca de ferro, velas, cestos de fogo, postes de luz, destroços, fardos de feno, pedras e pinheiros (também os da floresta) |
 | Kenney Castle 2.0 | 26 peças em GLB mais a paleta: a torre do Salão de Táticas, ameias, bandeiras, estandartes, a balista e pedras |
 | Kenney Survival 2.0 | 44 peças em GLB mais a paleta: tendas, a fogueira de vigília, bancadas da forja, caixas, barris, estruturas de obra e mato |
+| Kenney Cube Pets 2.0 | Só o cachorro, o gato e o pintinho (`animal-dog`, `animal-cat`, `animal-chick`) mais a paleta: os bichos de casa da vila, no máximo 3 |
 | Resource Bits 1.0 | Pilhas de madeira, pedra, ferro e tecido e a tora (obras, ferreiro, carroceiro e fogueira) |
 | RPG Tools Bits 1.0 | Bigorna, rebolo, mapa e bússola (ferreiro e Salão de Táticas); o martelo do ferreiro e o machado do lenhador (M2.2) |
 | Furniture Bits 1.0 | Mesa, cadeira e cama (alquimista, curandeira e Salão de Táticas) |

@@ -61,6 +61,9 @@ const CASTLE = [
   'siege-ballista', 'rocks-large', 'rocks-small',
 ];
 
+/** Kenney Cube Pets 2.0: só os bichos de casa da vila, no máximo 3 (pedido do usuário). */
+const PETS = ['animal-dog', 'animal-cat', 'animal-chick'];
+
 /** Kenney Survival Kit 2.0: as barracas do carroceiro, a forja ao ar livre e a lenha. */
 const SURVIVAL = [
   'tent', 'tent-canvas', 'tent-canvas-half', 'campfire-pit', 'campfire-stand', 'workbench', 'workbench-anvil', 'workbench-grind', 'barrel',
@@ -174,8 +177,8 @@ export const PACKS: PackEntry[] = [
       { path: 'Textures', ext: '.png', files: ['colormap'], keepPath: 'Textures' },
     ],
   },
-  ...([['kenney-graveyard', GRAVEYARD], ['kenney-castle', CASTLE], ['kenney-survival', SURVIVAL]] as const).map(([name, files]): PackEntry => ({
-    // Kenney Graveyard, Castle e Survival (CC0): o diorama da vila (docs §14.3).
+  ...([['kenney-graveyard', GRAVEYARD], ['kenney-castle', CASTLE], ['kenney-survival', SURVIVAL], ['kenney-cube-pets', PETS]] as const).map(([name, files]): PackEntry => ({
+    // Kenney Graveyard, Castle, Survival e Cube Pets (CC0): o diorama da vila e os bichos (docs §14.3).
     out: name,
     dir: name,
     root: 'Models/GLB format',

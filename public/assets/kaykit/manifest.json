@@ -1617,6 +1617,26 @@
       "sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
     },
     {
+      "path": "kenney-cube-pets/animal-dog.glb",
+      "bytes": 119544,
+      "sha256": "c127d71ac8794f9710313bbb44800ae33a79f1182cf5c523c4233cc10a93851f"
+    },
+    {
+      "path": "kenney-cube-pets/animal-cat.glb",
+      "bytes": 165164,
+      "sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850"
+    },
+    {
+      "path": "kenney-cube-pets/animal-chick.glb",
+      "bytes": 125424,
+      "sha256": "86dd5f030c9341486313b35b9e827500c430274a83b5d683cab5b1f55bc1024d"
+    },
+    {
+      "path": "kenney-cube-pets/Textures/colormap.png",
+      "bytes": 10915,
+      "sha256": "2f6d0032e51c2d49b13b8e689d59eb39aa3ee6c32f2a1851213e11fc7593177d"
+    },
+    {
       "path": "dungeon/stairs.gltf",
       "bytes": 2990,
       "sha256": "40e14349e811d092c2e45b32197dde9f522d811f75e693537eb6fd3450249cd7"

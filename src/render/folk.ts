@@ -9,9 +9,9 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { SimplifyModifier } from 'three/examples/jsm/modifiers/SimplifyModifier.js';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {
-  OUTFITS, SPOTS, activeJob, doing, doors, lifeMarks, residentLabel, residents, route, strollPoint,
+  CHICK_YARD, OUTFITS, SPOTS, activeJob, doing, doors, lifeMarks, petDoing, pets, residentLabel, residents, route, strollPoint,
 } from '../game/townFolk.ts';
-import type { Doing, LifeMarks, Resident, Spot } from '../game/townFolk.ts';
+import type { Doing, LifeMarks, PetDoing, PetKind, Resident, Spot } from '../game/townFolk.ts';
 import { heightAt } from '../game/townPlan.ts';
 import type { HeadId, World } from '../sim/index.ts';
 import { Animator } from './animator.ts';
@@ -332,6 +332,168 @@ class Villager {
   }
 }
 
+/** Bichos de casa (Kenney Cube Pets): tamanho, passo, nome e o arquivo de cada um. */
+const PET_DEFS: Record<PetKind, { file: string; scale: number; walk: number; run: number; name: string }> = {
+  cachorro: { file: 'kenney-cube-pets/animal-dog.glb', scale: 0.42, walk: 1.5, run: 3.6, name: 'Pipoca, o cachorro' },
+  gato: { file: 'kenney-cube-pets/animal-cat.glb', scale: 0.32, walk: 1.1, run: 2.6, name: 'Bigode, o gato' },
+  pintinho: { file: 'kenney-cube-pets/animal-chick.glb', scale: 0.22, walk: 0.7, run: 1.4, name: 'Pitoco, o pintinho' },
+};
+
+/** Um bicho: anda pela rede (o pintinho só no cercadinho) e toca as animações do próprio glb. */
+class Pet {
+  readonly root = new THREE.Group();
+  readonly pos = new THREE.Vector3();
+  readonly kind: PetKind;
+  visible = false;
+  ready = false;
+  private mixer!: THREE.AnimationMixer;
+  private actions = new Map<string, THREE.AnimationAction>();
+  private current: THREE.AnimationAction | null = null;
+  private path: [number, number][] | null = null;
+  private leg = 0;
+  private run = false;
+  private arrive: (() => void) | null = null;
+  private key = '';
+  private anim = 'idle';
+  private waitUntil = 0;
+  private clock = 0;
+  private placed = false;
+  private facing = 0;
+
+  constructor(kind: PetKind) {
+    this.kind = kind;
+  }
+
+  async init(): Promise<void> {
+    const def = PET_DEFS[this.kind];
+    const g = await load(def.file);
+    const obj = g.scene.clone();
+    obj.scale.setScalar(def.scale);
+    obj.traverse((o) => ((o as THREE.Mesh).castShadow = false));
+    this.root.add(obj);
+    this.root.visible = false;
+    this.mixer = new THREE.AnimationMixer(obj);
+    for (const clip of g.animations) this.actions.set(clip.name, this.mixer.clipAction(clip));
+    this.ready = true;
+  }
+
+  private play(name: string): void {
+    const a = this.actions.get(name) ?? this.actions.get('idle');
+    if (!a || a === this.current) return;
+    a.reset().play();
+    if (this.current) this.current.crossFadeTo(a, 0.2, false);
+    this.current = a;
+  }
+
+  private show(on: boolean): void {
+    this.visible = on;
+    this.root.visible = on;
+  }
+
+  private go(to: [number, number], from: Spot, then: () => void, run: boolean, direct = false): void {
+    if (!this.visible) {
+      this.pos.set(from.x, heightAt(from.x, from.z), from.z);
+      this.show(true);
+    }
+    this.path = direct ? [[this.pos.x, this.pos.z], to] : route([this.pos.x, this.pos.z], to);
+    this.leg = 1;
+    this.run = run;
+    this.arrive = then;
+  }
+
+  private plan(d: PetDoing, home: Spot, pick: () => number): void {
+    const first = !this.placed;
+    switch (d.at) {
+      case 'casa':
+        return this.show(false);
+      case 'ponto':
+        if (first || !this.visible) {
+          this.pos.set(d.spot.x, heightAt(d.spot.x, d.spot.z), d.spot.z);
+          this.show(true);
+          this.path = null;
+          this.facing = d.spot.face;
+          this.anim = d.anim;
+          return;
+        }
+        this.go([d.spot.x, d.spot.z], home, () => {
+          this.facing = d.spot.face;
+          this.anim = d.anim;
+        }, false);
+        return;
+      case 'cisca': {
+        // Um ponto qualquer do cercadinho; chegando, cisca (come) um tempo.
+        const a = pick() * Math.PI * 2, r = pick() * CHICK_YARD.r;
+        const to: [number, number] = [CHICK_YARD.x + Math.cos(a) * r, CHICK_YARD.z + Math.sin(a) * r];
+        const yard = { x: CHICK_YARD.x, z: CHICK_YARD.z, face: 0 };
+        if (first || !this.visible) {
+          this.pos.set(to[0], 0, to[1]);
+          this.show(true);
+        }
+        this.go(to, yard, () => {
+          this.anim = pick() < 0.7 ? 'eat' : 'idle';
+          this.waitUntil = this.clock + 1.5 + pick() * 3;
+        }, false, true);
+        return;
+      }
+      case 'passeio': {
+        const to = strollPoint(d.area, pick);
+        if (first || !this.visible) {
+          this.pos.set(to[0], 0, to[1]);
+          this.show(true);
+        }
+        this.go(to, home, () => {
+          this.anim = pick() < 0.3 ? 'eat' : 'idle';
+          this.waitUntil = this.clock + 2 + pick() * 5;
+        }, d.run);
+        return;
+      }
+    }
+  }
+
+  update(dt: number, d: PetDoing, home: Spot, speed: number, pick: () => number): void {
+    this.clock += dt;
+    const key = d.at === 'ponto' ? `ponto:${d.spot.x},${d.spot.z}` : d.at;
+    if (key !== this.key) {
+      this.key = key;
+      this.waitUntil = 0;
+      this.plan(d, home, pick);
+    } else if (!this.path && this.waitUntil > 0 && this.clock >= this.waitUntil) {
+      this.waitUntil = 0;
+      this.plan(d, home, pick);
+    }
+    this.placed = true;
+    if (this.path) {
+      const def = PET_DEFS[this.kind];
+      const [tx, tz] = this.path[this.leg]!;
+      const dx = tx - this.pos.x, dz = tz - this.pos.z, gap = Math.hypot(dx, dz);
+      const step = (this.run ? def.run : def.walk) * Math.min(2, Math.max(1, speed)) * dt;
+      if (gap > 0.01) this.facing = turn(this.facing, Math.atan2(dx, dz), dt * 8);
+      if (gap <= step) {
+        this.pos.x = tx;
+        this.pos.z = tz;
+        if (++this.leg >= this.path.length) {
+          this.path = null;
+          const then = this.arrive;
+          this.arrive = null;
+          then?.();
+        }
+      } else {
+        this.pos.x += (dx / gap) * step;
+        this.pos.z += (dz / gap) * step;
+      }
+      this.pos.y = heightAt(this.pos.x, this.pos.z);
+    }
+    this.play(this.path ? (this.run ? 'run' : 'walk') : this.anim);
+    this.mixer.update(dt);
+    this.root.position.copy(this.pos);
+    this.root.rotation.y = this.facing;
+  }
+
+  get label(): string {
+    return PET_DEFS[this.kind].name;
+  }
+}
+
 function turn(from: number, to: number, k: number): number {
   let d = to - from;
   d = Math.atan2(Math.sin(d), Math.cos(d));
@@ -341,6 +503,7 @@ function turn(from: number, to: number, k: number): number {
 export class Folk {
   readonly group = new THREE.Group();
   private villagers = new Map<number, Villager>();
+  private pets = new Map<PetKind, Pet>();
   private clips!: Map<string, THREE.AnimationClip>;
   private blobs!: THREE.InstancedMesh;
   private cap: number;
@@ -357,7 +520,7 @@ export class Folk {
     this.clips = clips;
     // Sombra redonda embaixo de cada um (mais barata que a sombra de verdade dos bonecos).
     const blob = new THREE.CircleGeometry(0.5, 12).rotateX(-Math.PI / 2);
-    this.blobs = new THREE.InstancedMesh(blob, new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false }), this.cap);
+    this.blobs = new THREE.InstancedMesh(blob, new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false }), this.cap + 3);
     this.blobs.frustumCulled = false;
     this.group.add(this.blobs);
   }
@@ -381,9 +544,16 @@ export class Folk {
       v.root.removeFromParent();
       this.villagers.delete(n);
     }
+    // Bichos de casa (no máximo 3).
+    for (const kind of pets(w)) {
+      if (this.pets.has(kind)) continue;
+      const p = new Pet(kind);
+      this.pets.set(kind, p);
+      void p.init().then(() => this.group.add(p.root));
+    }
   }
 
-  update(w: World, hour: number, dt: number, speed: number, far: boolean): void {
+  update(w: World, hour: number, dt: number, speed: number, far: boolean, stage: number): void {
     this.think -= dt;
     if (!this.marks || this.think <= 0) {
       this.marks = lifeMarks(w);
@@ -405,6 +575,13 @@ export class Folk {
       mat.compose(new THREE.Vector3(v.pos.x, v.pos.y + 0.04, v.pos.z), new THREE.Quaternion(), new THREE.Vector3(s, 1, s));
       this.blobs.setMatrixAt(k++, mat);
     }
+    for (const p of this.pets.values()) {
+      if (!p.ready) continue;
+      p.update(dt, petDoing(p.kind, hour, stage), homes[0] ?? SPOTS.bigorna, speed, this.pick);
+      const s = p.visible ? (p.kind === 'pintinho' ? 0.35 : 0.55) : 0;
+      mat.compose(new THREE.Vector3(p.pos.x, p.pos.y + 0.04, p.pos.z), new THREE.Quaternion(), new THREE.Vector3(s, 1, s));
+      this.blobs.setMatrixAt(k++, mat);
+    }
     // Quem está parado no mesmo lugar abre espaço (empurrão leve entre os que estão na rua).
     const all = [...this.villagers.values()].filter((v) => v.ready && v.visible);
     for (let i = 0; i < all.length; i++) {
@@ -419,7 +596,7 @@ export class Folk {
         b.z += dz * push;
       }
     }
-    for (; k < this.cap; k++) this.blobs.setMatrixAt(k, mat.makeScale(0, 0, 0));
+    for (; k < this.cap + 3; k++) this.blobs.setMatrixAt(k, mat.makeScale(0, 0, 0));
     this.blobs.instanceMatrix.needsUpdate = true;
   }
 
@@ -433,6 +610,15 @@ export class Folk {
       const d = ray.ray.distanceSqToPoint(c);
       if (d < bd) [best, bd] = [v, d];
     }
+    let pet: Pet | null = null;
+    for (const p of this.pets.values()) {
+      if (!p.visible) continue;
+      c.copy(p.pos).add(new THREE.Vector3(0, 0.4, 0));
+      const d = ray.ray.distanceSqToPoint(c);
+      if (d < bd) [pet, bd] = [p, d];
+    }
+    const petFound = pet as Pet | null;
+    if (petFound) return { label: petFound.label, target: petFound.root };
     const found = best as Villager | null;
     if (!found) return null;
     return { label: residentLabel(found.res, this.marks ?? lifeMarks(w)), target: found.root };
@@ -452,6 +638,7 @@ export class Folk {
 }
 
 export const FOLK_FILES = [
+  ...Object.values(PET_DEFS).map((d) => d.file),
   'tools/hammer.gltf', 'tools/axe.gltf', 'mixed/guitar_A.gltf', 'kenney-survival/box.glb',
   'adventurers/Ranger.glb', 'adventurers/Rogue.glb',
 ];

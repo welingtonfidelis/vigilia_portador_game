@@ -16,6 +16,7 @@ import { BENCHES, DEPOT, FOLK_CAP, MARKET, SPOTS, WOODPILE, lifeMarks } from '..
 import type { LifeMarks } from '../game/townFolk.ts';
 import type { World } from '../sim/index.ts';
 import { load } from './assets.ts';
+import { Birds } from './birds.ts';
 import { FOLK_FILES, Folk } from './folk.ts';
 import { mergeStatic } from './dungeon.ts';
 import { paletteMaterial } from './palette.ts';
@@ -420,11 +421,13 @@ interface BuiltLot {
   group: THREE.Group;
   smoke: Emitter[];
   embers: Emitter[];
+  /** Janelas que acendem à noite (posição e rotação do brilho em cima de cada uma). */
+  windows: THREE.Matrix4[];
 }
 
 async function buildLot(lot: Lot, view: LotView, stage: TownStage): Promise<BuiltLot> {
   const group = new THREE.Group();
-  const out: BuiltLot = { group, smoke: [], embers: [] };
+  const out: BuiltLot = { group, smoke: [], embers: [], windows: [] };
   const r = rng(hash(lot.id) + stage);
   const tasks: Promise<unknown>[] = [];
   if (lot.style === 'tendas') tents(tasks, group, lot, view, stage, r, out);
@@ -507,6 +510,14 @@ function house(tasks: Promise<unknown>[], group: THREE.Group, lot: Lot, view: Lo
       const list = wood ? woodKinds : stoneKinds;
       const kind = door ? '-door' : list[Math.floor(r() * list.length)]!;
       add(wall(kind, wood), x, z, { rot: FACE_ROT[side], scale: K, y: f * K, pal });
+      // Brilho da janela à noite: um painel morno colado do lado de fora do vidro (nem toda casa
+      // acende todas as janelas).
+      if (kind.includes('window') && r() < 0.8) {
+        const rot = FACE_ROT[side], reach = 0.512 * K, small = kind.includes('small');
+        const at = new THREE.Vector3(x + Math.cos(rot) * reach, base + (f + (small ? 0.6 : 0.55)) * K, z - Math.sin(rot) * reach);
+        out.windows.push(new THREE.Matrix4().compose(at, new THREE.Quaternion().setFromEuler(new THREE.Euler(0, rot + Math.PI / 2, 0)),
+          new THREE.Vector3((small ? 0.14 : 0.2) * K, (small ? 0.18 : 0.3) * K, 1)));
+      }
     }
   }
   roofCells(floors * K, pal, stage >= 2);
@@ -854,6 +865,8 @@ export class Town {
   private lights: THREE.PointLight[] = [];
   private lamps: THREE.Vector3[] = [];
   private lampGlow!: THREE.Points;
+  private windowGlow!: THREE.InstancedMesh;
+  private birds = new Birds();
   private lampPools!: THREE.InstancedMesh;
   private ground!: { canvas: HTMLCanvasElement; tex: THREE.CanvasTexture; stage: number };
   private terrain: THREE.Mesh[] = [];
@@ -968,6 +981,11 @@ export class Town {
       new THREE.MeshBasicMaterial({ map: glow, color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 }), 4);
     this.lampPools.frustumCulled = false;
     this.group.add(this.lampGlow, this.lampPools);
+    this.windowGlow = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ color: 0xffc470, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }), 160);
+    this.windowGlow.count = 0;
+    this.windowGlow.frustumCulled = false;
+    this.group.add(this.windowGlow, this.birds.group);
     this.group.add(this.smoke.points, this.embers.points);
     this.ready = true;
   }
@@ -1028,11 +1046,15 @@ export class Town {
 
   private refreshEmitters(): void {
     const smoke: Emitter[] = [], embers: Emitter[] = [];
+    let k = 0;
     for (const s of this.lots.values()) {
       if (!s.built) continue;
       smoke.push(...s.built.smoke);
       embers.push(...s.built.embers);
+      for (const m of s.built.windows) if (k < 160) this.windowGlow.setMatrixAt(k++, m);
     }
+    this.windowGlow.count = k;
+    this.windowGlow.instanceMatrix.needsUpdate = true;
     this.smoke.setEmitters(smoke);
     this.embers.setEmitters(embers);
   }
@@ -1057,6 +1079,10 @@ export class Town {
       l.intensity = 14 * night;
     });
     (this.lampGlow.material as THREE.PointsMaterial).opacity = this.lamps.length ? 0.95 * night : 0;
+    // As janelas acendem ao anoitecer (quem mora lá está em casa) e apagam de madrugada.
+    const windows = hour >= 18.5 || hour < 1 ? Math.min(1, (night - 0.1) * 2) : 0;
+    (this.windowGlow.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 0.9 * windows);
+    this.windowGlow.visible = windows > 0;
     (this.lampPools.material as THREE.MeshBasicMaterial).opacity = this.lamps.length ? (COARSE ? 0.42 : 0.22) * night : 0;
     for (const m of this.fogLayers) (m.material as THREE.MeshBasicMaterial).color.copy(fog);
     // A fumaça pega a luz da hora: clara de dia, quase da cor do céu à noite.
@@ -1067,7 +1093,8 @@ export class Town {
     this.embers.material.uniforms.uScale!.value = pxScale;
     this.smoke.update(dt, 0.35);
     this.embers.update(dt, 0.2);
-    this.folk.update(w, hour, dt, speed, far);
+    this.folk.update(w, hour, dt, speed, far, this.stageOf(w));
+    this.birds.update(time, day);
     return day;
   }
 

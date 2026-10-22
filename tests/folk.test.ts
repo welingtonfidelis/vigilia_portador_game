@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BENCHES, DEPOT, MARKET, NODES, SPOTS, WOODPILE,
-  activeJob, doing, lifeMarks, resident, residentLabel, residents, route, strollPoint,
+  CHICK_YARD, activeJob, catNap, doing, lifeMarks, petDoing, pets, resident, residentLabel, residents, route, strollPoint,
 } from '../src/game/townFolk.ts';
 import { ISLAND, LOTS, PATHS, PLAZA, heightAt, inBox, lotBox } from '../src/game/townPlan.ts';
 import { BALANCE, createWorld, serialize } from '../src/sim/index.ts';
@@ -124,6 +124,27 @@ describe('moradores da vila', () => {
     for (let i = 0; i < 200; i++) {
       const [x, z] = strollPoint('praca', pick);
       expect(Math.hypot(x - PLAZA.x, z - PLAZA.z)).toBeGreaterThan(4.4);
+    }
+  });
+
+  it('no máximo 3 bichos de casa, que chegam com os moradores e seguem o dia', () => {
+    const w = createWorld(21);
+    expect(pets(w)).toEqual([]);
+    w.village.people = 4;
+    expect(pets(w)).toEqual(['cachorro', 'pintinho']);
+    w.village.people = 40;
+    expect(pets(w)).toEqual(['cachorro', 'pintinho', 'gato']);
+    expect(petDoing('pintinho', 10, 1)).toEqual({ at: 'cisca' });
+    expect(petDoing('pintinho', 23, 1)).toEqual({ at: 'casa' });
+    expect(petDoing('gato', 10, 3)).toMatchObject({ at: 'ponto', anim: 'idle' });
+    expect(petDoing('gato', 18, 3)).toMatchObject({ at: 'passeio', area: 'praca' });
+    expect(petDoing('cachorro', 2, 1)).toMatchObject({ at: 'ponto', anim: 'static' });
+    // O cercadinho do pintinho e o cochilo do gato ficam fora dos lotes e no chão da praça.
+    expect(inLot(CHICK_YARD.x, CHICK_YARD.z, -CHICK_YARD.r)).toBe(false);
+    for (const st of [1, 3]) {
+      const c = catNap(st);
+      expect(inLot(c.x, c.z, -0.5)).toBe(false);
+      expect(heightAt(c.x, c.z)).toBe(0);
     }
   });
 

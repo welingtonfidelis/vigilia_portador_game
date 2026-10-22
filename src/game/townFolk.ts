@@ -351,3 +351,49 @@ export function strollPoint(area: 'praca' | 'vila', pick: () => number): [number
   }
   return NODES[Math.floor(pick() * NODES.length)]!;
 }
+
+// ---------------------------------------------------------------------------------------------------
+// Bichos de casa (M2.3): no máximo 3 na vila, só domésticos (pedido do usuário).
+
+export type PetKind = 'cachorro' | 'gato' | 'pintinho';
+
+/** O pintinho cisca em volta do feno, entre o treinador e a curandeira (à vista da câmera). */
+export const CHICK_YARD = { x: -17.6, z: 16, r: 1.5 };
+/** Onde o gato cochila de dia: na beira da fonte (estágio 3) ou no degrau da curandeira. */
+export function catNap(stage: number): Spot {
+  if (stage >= 3) return { x: PLAZA.x + 4.3, z: PLAZA.z + 1.2, face: 0.4 };
+  const f = lotFront(LOTS.find((l) => l.kind === 'curandeira')!);
+  return { x: f.x + f.along[0] * 2.4 - f.out[0] * 1.2, z: f.z + f.along[1] * 2.4 - f.out[1] * 1.2, face: 0.6 };
+}
+
+/** Quem já chegou: o cachorro e o pintinho com 4 moradores, o gato com 6. */
+export function pets(w: World): PetKind[] {
+  const people = w.village.people;
+  const out: PetKind[] = [];
+  if (people >= 4) out.push('cachorro', 'pintinho');
+  if (people >= 6) out.push('gato');
+  return out;
+}
+
+export type PetDoing =
+  | { at: 'casa' }
+  | { at: 'ponto'; spot: Spot; anim: 'idle' | 'eat' | 'static' }
+  | { at: 'passeio'; area: 'praca' | 'vila'; run: boolean }
+  | { at: 'cisca' };
+
+/** O dia de cada bicho: o cachorro anda pela vila (e dorme na porta do ferreiro), o gato cochila
+ *  e passeia ao entardecer, o pintinho cisca de dia. */
+export function petDoing(kind: PetKind, hour: number, stage: number): PetDoing {
+  const night = hour < 6.5 || hour >= 21.5;
+  switch (kind) {
+    case 'cachorro':
+      if (night) return { at: 'ponto', spot: { ...SPOTS.bigorna, x: SPOTS.bigorna.x + 2.4 }, anim: 'static' };
+      return { at: 'passeio', area: hour >= 17 ? 'praca' : 'vila', run: hour % 3 < 0.6 };
+    case 'gato':
+      if (night) return { at: 'casa' };
+      if (hour < 16) return { at: 'ponto', spot: catNap(stage), anim: 'idle' };
+      return { at: 'passeio', area: 'praca', run: false };
+    case 'pintinho':
+      return night || hour >= 19 ? { at: 'casa' } : { at: 'cisca' };
+  }
+}

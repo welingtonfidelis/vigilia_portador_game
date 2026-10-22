@@ -108,6 +108,7 @@ export class Stage {
     this.overlay = overlay;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: quality.antialias, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(quality.dpr);
+    this.res.max = this.res.now = quality.dpr;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
@@ -240,6 +241,50 @@ export class Stage {
   }
 
   private shadowTick = 0;
+
+  /**
+   * Resolução automática: abaixo de 45 fps, a imagem perde 0,25 de densidade por vez (até 1); acima
+   * de 58, volta a subir. Se baixar não melhorou (é o teto de 30 fps do modo de pouca bateria do
+   * iPhone, por exemplo), volta um passo e para de mexer.
+   */
+  private res = { max: 1, now: 1, frames: 0, time: 0, lastFps: 0, pending: null as 'down' | 'up' | null, locked: false };
+
+  private adaptResolution(dt: number): void {
+    const r = this.res;
+    r.time += dt;
+    r.frames++;
+    if (r.time < 2.5) return;
+    const fps = r.frames / r.time;
+    r.time = 0;
+    r.frames = 0;
+    if (r.locked) return;
+    const apply = (dpr: number) => {
+      r.now = dpr;
+      this.renderer.setPixelRatio(dpr);
+      this.resize(this.size.w, this.size.h);
+    };
+    if (r.pending) {
+      const was = r.pending;
+      r.pending = null;
+      if (was === 'down' && fps < r.lastFps * 1.1) {
+        apply(Math.min(r.max, r.now + 0.25));
+        r.locked = true;
+      } else if (was === 'up' && fps < 50) {
+        apply(Math.max(1, r.now - 0.25));
+        r.locked = true;
+      }
+      r.lastFps = fps;
+      return;
+    }
+    r.lastFps = fps;
+    if (fps < 45 && r.now > 1) {
+      apply(Math.max(1, r.now - 0.25));
+      r.pending = 'down';
+    } else if (fps > 58 && r.now < r.max) {
+      apply(Math.min(r.max, r.now + 0.25));
+      r.pending = 'up';
+    }
+  }
 
   /** Distância da câmera ao foco no último quadro (o pan anda na mesma proporção). */
   private camDist = 30;
@@ -538,6 +583,7 @@ export class Stage {
     if (!this.ready) return;
     this.time += dt;
     this.lastWorld = w;
+    this.adaptResolution(dt);
     this.perf.begin();
     const travel = travelView(w, frac);
     // Qual cena: a vila com o herói nela (ou saindo para a Cripta), ou quando o jogador quer olhar

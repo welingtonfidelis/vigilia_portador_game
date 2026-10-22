@@ -63,7 +63,7 @@ export class PerfMeter {
     if (now - this.lastShow > 500) {
       this.lastShow = now;
       const s = this.stats();
-      this.el!.textContent = `${s.fps.toFixed(0)} fps · p95 ${s.p95.toFixed(1)} ms · cpu ${s.cpu.toFixed(1)} ms · ${s.calls} draws · ${(s.triangles / 1000).toFixed(1)}k tri · ${this.status}`;
+      this.el!.textContent = `${s.fps.toFixed(0)} fps · p95 ${s.p95.toFixed(1)} ms · cpu ${s.cpu.toFixed(1)} ms · ${s.calls} draws · ${(s.triangles / 1000).toFixed(1)}k tri · dpr ${this.renderer.getPixelRatio().toFixed(2)} · ${this.status}`;
     }
     // Primeiro envio com 8 s de medição; depois, a cada 15 s.
     const wait = this.sent === 0 ? 8000 : 15000;

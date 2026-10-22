@@ -800,6 +800,23 @@ async function buildDecor(stage: TownStage, marks: LifeMarks): Promise<{ group: 
   return { group: merged, smoke, embers, lanterns };
 }
 
+/** Celular (toque): menos luzes de verdade, que pesam em todo pixel da tela. */
+const COARSE = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+
+/** Textura de brilho redondo (branco no meio, transparente na borda). */
+function radialTexture(): THREE.CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const ctx = c.getContext('2d')!;
+  const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.35, 'rgba(255,255,255,0.45)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+}
+
 /** Pinheiro simples (tronco e três andares de cone, uns 60 triângulos) para o fundo da floresta. */
 function simplePine(): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = [];
@@ -835,6 +852,9 @@ export class Town {
   private fire!: THREE.PointLight;
   private flame!: THREE.Mesh;
   private lights: THREE.PointLight[] = [];
+  private lamps: THREE.Vector3[] = [];
+  private lampGlow!: THREE.Points;
+  private lampPools!: THREE.InstancedMesh;
   private ground!: { canvas: HTMLCanvasElement; tex: THREE.CanvasTexture; stage: number };
   private terrain: THREE.Mesh[] = [];
   private fogLayers: THREE.Mesh[] = [];
@@ -935,9 +955,19 @@ export class Town {
     this.group.add(this.fire);
     for (let k = 0; k < 4; k++) {
       const l = new THREE.PointLight(0xffc27a, 0, 16, 1.6);
+      l.visible = false;
       this.lights.push(l);
       this.group.add(l);
     }
+    // Brilho das lanternas sem custo de luz: a chama na cabeça (pontos) e uma poça morna no chão.
+    const glow = radialTexture();
+    this.lampGlow = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(new Array(12).fill(0), 3)),
+      new THREE.PointsMaterial({ map: glow, color: 0xffc27a, size: 2.2, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 }));
+    this.lampGlow.frustumCulled = false;
+    this.lampPools = new THREE.InstancedMesh(new THREE.CircleGeometry(4.5, 20).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ map: glow, color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 }), 4);
+    this.lampPools.frustumCulled = false;
+    this.group.add(this.lampGlow, this.lampPools);
     this.group.add(this.smoke.points, this.embers.points);
     this.ready = true;
   }
@@ -959,11 +989,20 @@ export class Town {
         this.decor.group?.removeFromParent();
         this.decor = { key: dkey, group: d.group, building: false, lanterns: d.lanterns };
         this.group.add(d.group);
+        this.lamps = d.lanterns;
         this.lights.forEach((l, k) => {
           const p = d.lanterns[k];
-          l.visible = !!p;
           if (p) l.position.copy(p);
         });
+        const pos = this.lampGlow.geometry.attributes.position as THREE.BufferAttribute;
+        const m = new THREE.Matrix4();
+        for (let k = 0; k < 4; k++) {
+          const p = d.lanterns[k];
+          pos.setXYZ(k, p?.x ?? 0, p ? p.y + 0.3 : -999, p?.z ?? 0);
+          this.lampPools.setMatrixAt(k, p ? m.makeTranslation(p.x, heightAt(p.x, p.z) + 0.05, p.z) : m.makeScale(0, 0, 0));
+        }
+        pos.needsUpdate = true;
+        this.lampPools.instanceMatrix.needsUpdate = true;
       });
     }
     let changed = false;
@@ -1010,7 +1049,15 @@ export class Town {
     const flick = 0.85 + 0.15 * Math.sin(time * 11) * Math.sin(time * 6.3);
     this.fire.intensity = (10 + 22 * (1 - day)) * flick;
     this.flame.scale.set(1, 0.85 + 0.25 * flick, 1);
-    for (const l of this.lights) l.intensity = 14 * (1 - day);
+    // Luz de verdade nas lanternas só à noite e só no computador (cada luz pesa em todo pixel do
+    // celular); o brilho e a poça no chão valem para todos.
+    const night = 1 - day;
+    this.lights.forEach((l, k) => {
+      l.visible = !COARSE && night > 0.05 && !!this.lamps[k];
+      l.intensity = 14 * night;
+    });
+    (this.lampGlow.material as THREE.PointsMaterial).opacity = this.lamps.length ? 0.95 * night : 0;
+    (this.lampPools.material as THREE.MeshBasicMaterial).opacity = this.lamps.length ? (COARSE ? 0.42 : 0.22) * night : 0;
     for (const m of this.fogLayers) (m.material as THREE.MeshBasicMaterial).color.copy(fog);
     // A fumaça pega a luz da hora: clara de dia, quase da cor do céu à noite.
     const lit = 0.28 + 0.72 * day;

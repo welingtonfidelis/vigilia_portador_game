@@ -86,6 +86,16 @@ stage
 // Atalhos de depuração (só no npm run dev). Com o painel oculto o requestAnimationFrame para:
 // portador.frames(n) roda quadros na mão.
 if (import.meta.env.DEV) {
+  // ?demo=vila mostra a vila cheia (estágio 3, os moradores no teto da tela e a manhã), só na tela e
+  // sem mexer no save: serve para medir o celular na cena mais pesada.
+  if (new URLSearchParams(location.search).get('demo') === 'vila') {
+    stage.town.hourOverride = 10;
+    stage.town.worldOverride = (w) => ({
+      ...w,
+      village: { ...w.village, people: 18, buildings: { ...w.village.buildings, ferreiro: 3, treinador: 2, alquimista: 3, curandeira: 2, carroceiro: 3, taticas: 3 } },
+      bossesBeaten: [...new Set([...w.bossesBeaten, 5, 10])],
+    });
+  }
   Object.assign(window, {
     portador: {
       session,

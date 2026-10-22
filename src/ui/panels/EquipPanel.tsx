@@ -50,6 +50,7 @@ export function EquipPanel({ session, w }: { session: Session; w: World }) {
         <span>Crítico <b>{pct(s.crit)}</b></span>
         {s.block > 0 && <span>Bloqueio <b>{pct(s.block)}</b></span>}
         {s.lifesteal > 0 && <span>Roubo de vida <b>{pct(s.lifesteal)}</b></span>}
+        {s.pierce > 0 && <span title="Fração da couraça dos inimigos das Minas que o golpe ignora">Perfuração <b>{pct(s.pierce)}</b></span>}
         <span title="Força ÷ o que o andar mais fundo pede: 1 é o andar certo">Força no andar {floor} <b class={now >= 1 ? 'up' : now >= 0.8 ? '' : 'down'}>{nf(now, 2)}</b></span>
       </div>
       {msg && <p class="note warn">{msg}</p>}

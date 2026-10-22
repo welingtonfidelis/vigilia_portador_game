@@ -1,3 +1,4 @@
+import { actTwoRules } from './rules.ts';
 import type { World } from './types.ts';
 import { SAVE_VERSION } from './world.ts';
 
@@ -36,6 +37,33 @@ const MIGRATIONS: Record<number, Migration> = {
     stats.senhorFights ??= 0;
     stats.senhorFightTicks ??= 0;
     stats.senhorPhase2Frac ??= 0;
+  },
+  // v2 → v3 (M3.1, o Ato II): ferro-negro, couraça dos inimigos, lentidão e atordoamento do herói e
+  // as duas regras de fábrica do Ato II (no fim da lista, se ainda não estiverem lá).
+  2: (w) => {
+    const fill = (mats: Record<string, number> | undefined) => {
+      if (mats) mats.ferro_negro ??= 0;
+    };
+    const village = w.village as { mats: Record<string, number> };
+    fill(village.mats);
+    const exp = w.exp as { bag: { mats: Record<string, number> } } | null;
+    fill(exp?.bag.mats);
+    for (const r of (w.remains as { loot: { mats: Record<string, number> } }[]) ?? []) fill(r.loot.mats);
+    const report = w.report as { brought?: { mats: Record<string, number> }; lost?: { mats: Record<string, number> } | null } | null;
+    fill(report?.brought?.mats);
+    fill(report?.lost?.mats ?? undefined);
+    const room = w.room as { enemies: Record<string, unknown>[] } | null;
+    for (const e of room?.enemies ?? []) {
+      e.armor ??= 0;
+      e.armorBreakUntil ??= 0;
+      e.comboAt ??= 0;
+    }
+    const hero = w.hero as Record<string, unknown>;
+    hero.slowUntil ??= 0;
+    hero.stunUntil ??= 0;
+    hero.swings ??= 0;
+    const rules = (w.rules as { combat: { skill: string | null }[] }).combat;
+    for (const r of actTwoRules()) if (!rules.some((x) => x.skill === r.skill)) rules.push(r);
   },
 };
 

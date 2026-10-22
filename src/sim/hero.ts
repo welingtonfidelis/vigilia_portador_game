@@ -1,4 +1,4 @@
-import { BALANCE, floorPower, xpToNext } from './config.ts';
+import { BALANCE, actOf, floorPower, xpToNext } from './config.ts';
 import { BASES } from './data.ts';
 import { affixValue, base, tierMult } from './items.ts';
 import type { Hero, Item, Slot, World } from './types.ts';
@@ -21,6 +21,8 @@ export interface HeroStats {
   twoHanded: boolean;
   /** 0..1: quanto do ferimento ainda pesa. */
   woundFrac: number;
+  /** Perfuração: fração da couraça dos inimigos que os golpes ignoram (Ato II). */
+  pierce: number;
 }
 
 export function hasLegend(equip: Partial<Record<Slot, Item>>, id: string): boolean {
@@ -30,7 +32,7 @@ export function hasLegend(equip: Partial<Record<Slot, Item>>, id: string): boole
 export function heroStats(w: World, equip: Partial<Record<Slot, Item>> = w.hero.equip): HeroStats {
   const h = w.hero;
   let hpPct = 0, dmgPct = 0, speedPct = 0, crit = BALANCE.baseCrit, armor = 0, block = 0, thorns = 0;
-  let lifesteal = 0, luck = 0, potionPct = 0, heavy = 0;
+  let lifesteal = 0, luck = 0, potionPct = 0, heavy = 0, pierce = 0;
   let weaponDmg = 5, weaponAps = 1, twoHanded = false;
   for (const item of Object.values(equip)) {
     if (!item) continue;
@@ -50,6 +52,7 @@ export function heroStats(w: World, equip: Partial<Record<Slot, Item>> = w.hero.
     dmgPct += b.dmgPct ?? 0;
     potionPct += b.potionPct ?? 0;
     speedPct += b.speedPct ?? 0;
+    pierce += b.pierce ?? 0;
     for (const a of item.affixes) {
       const v = affixValue(a, item.tier);
       if (a === 'afiado') crit += v;
@@ -60,14 +63,18 @@ export function heroStats(w: World, equip: Partial<Record<Slot, Item>> = w.hero.
       else if (a === 'sanguessuga') lifesteal += v;
       else if (a === 'afortunado') luck += v;
       else if (a === 'sereno') potionPct += v;
+      else if (a === 'perfurante') pierce += v;
     }
   }
   if (h.learned.includes('pele_de_ferro')) armor *= 1.2;
+  if (h.learned.includes('mao_pesada')) pierce += 0.15;
   lifesteal = Math.min(0.12, lifesteal) + (h.learned.includes('sede_de_sangue') ? 0.04 : 0);
   const woundFrac = h.wound ? h.wound.left / h.wound.total : 0;
   const maxHp = Math.round((BALANCE.heroBaseHp + BALANCE.heroHpPerLevel * (h.level - 1)) * (1 + hpPct) * (1 - BALANCE.woundHp * woundFrac));
   const dmg = weaponDmg * (1 + BALANCE.heroDmgPerLevel * (h.level - 1)) * (1 + dmgPct) * (1 - BALANCE.woundDmg * woundFrac);
-  const aps = weaponAps * (1 + speedPct) * (1 - BALANCE.heavyAttackSpeedPenalty * heavy);
+  // Puxado por um afogado, ataca 20% mais devagar.
+  const slowed = (h.slowUntil ?? 0) > w.tick ? 0.8 : 1;
+  const aps = weaponAps * (1 + speedPct) * (1 - BALANCE.heavyAttackSpeedPenalty * heavy) * slowed;
   const alch = w.village.buildings.alquimista;
   return {
     maxHp,
@@ -85,6 +92,7 @@ export function heroStats(w: World, equip: Partial<Record<Slot, Item>> = w.hero.
     heavy,
     twoHanded,
     woundFrac,
+    pierce: Math.min(BALANCE.pierceMax, pierce),
   };
 }
 
@@ -95,14 +103,17 @@ export function armorReduction(armor: number, floor: number): number {
 /** Força do herói num andar: média geométrica de dano por segundo e vida efetiva. */
 export function heroPower(s: HeroStats, floor: number): number {
   const red = armorReduction(s.armor, floor);
-  const dps = s.dmg * s.aps * (1 + s.crit * (BALANCE.critMult - 1));
+  // A couraça média do ato corta o dano; a perfuração devolve parte.
+  const c = (BALANCE.actArmor[actOf(floor) - 1] ?? BALANCE.actArmor[BALANCE.actArmor.length - 1]!) * (1 - s.pierce);
+  const dps = s.dmg * s.aps * (1 + s.crit * (BALANCE.critMult - 1)) * (1 - c / (c + BALANCE.couracaK));
   const ehp = (s.maxHp / (1 - red) / (1 - s.block * BALANCE.blockReduce)) * (1 + s.potionsMax * s.potionHeal * 0.5);
   return Math.sqrt(dps * ehp);
 }
 
 /** O que um andar pede: o mesmo cálculo para um grupo médio daquele andar. */
 export function floorDemand(floor: number): number {
-  return 90 * floorPower(floor);
+  const extra = BALANCE.actDemand[actOf(floor) - 1] ?? BALANCE.actDemand[BALANCE.actDemand.length - 1]!;
+  return 90 * floorPower(floor) * extra;
 }
 
 /** Razão força ÷ pedido: 1 é o andar certo; abaixo de 0,8 é fundo demais. */

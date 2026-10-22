@@ -2,12 +2,16 @@
 
 export type Slot = 'arma' | 'secundaria' | 'elmo' | 'peitoral' | 'perneiras' | 'capa' | 'amuleto';
 export type Rarity = 'comum' | 'rara' | 'epica' | 'lendaria';
-export type AffixId = 'afiado' | 'brutal' | 'veloz' | 'robusto' | 'guardiao' | 'sanguessuga' | 'afortunado' | 'sereno';
+export type AffixId = 'afiado' | 'brutal' | 'veloz' | 'robusto' | 'guardiao' | 'sanguessuga' | 'afortunado' | 'sereno' | 'perfurante';
 export type Weight = 'leve' | 'medio' | 'pesado' | 'nenhum';
-export type Material = 'ossos' | 'ferro';
-export type SkillId = 'golpe_amplo' | 'investida' | 'segundo_folego' | 'grito' | 'pele_de_ferro' | 'sede_de_sangue';
+export type Material = 'ossos' | 'ferro' | 'ferro_negro';
+export type SkillId =
+  | 'golpe_amplo' | 'investida' | 'segundo_folego' | 'grito' | 'pele_de_ferro' | 'sede_de_sangue'
+  | 'golpe_escudo' | 'quebra_couraca' | 'mao_pesada' | 'pele_umida';
 export type BuildingId = 'ferreiro' | 'treinador' | 'alquimista' | 'carroceiro' | 'curandeira' | 'taticas';
-export type EnemyKind = 'lacaio' | 'guerreiro' | 'ladino' | 'mago' | 'capitao' | 'senhor';
+export type EnemyKind =
+  | 'lacaio' | 'guerreiro' | 'ladino' | 'mago' | 'capitao' | 'senhor'
+  | 'mineiro' | 'afogado' | 'golem' | 'lanterneiro' | 'capataz' | 'couraca';
 export type EliteAffix = 'blindado' | 'vampirico' | 'furioso' | 'veloz';
 export type RoomKind = 'combate' | 'elite' | 'bau' | 'prisioneiro' | 'santuario' | 'chefe';
 export type HeadId = 'Knight' | 'Barbarian' | 'Mage' | 'Ranger' | 'Rogue' | 'Rogue_Hooded';
@@ -58,6 +62,12 @@ export interface Enemy {
   phase: number;
   /** Já foi erguido dos mortos uma vez (não levanta de novo nem dá saque). */
   revived: boolean;
+  /** Couraça própria (Ato II): corta o dano do herói por `C / (C + 25)`, depois da perfuração. */
+  armor: number;
+  /** Quebra-Couraça: a couraça vale metade até este tick. */
+  armorBreakUntil: number;
+  /** A Couraça Submersa na fase 2 bate duas vezes seguidas: o segundo impacto, se houver. */
+  comboAt: number;
 }
 
 export type HeroActionKind = 'golpe' | 'habilidade' | 'pocao' | 'fuga';
@@ -93,7 +103,7 @@ export interface Room {
   exitTo?: 'fundo' | 'volta';
 }
 
-export type CondId = 'vida_abaixo' | 'anel_min' | 'fundo_min' | 'alvo_elite' | 'pocoes_max' | 'sempre';
+export type CondId = 'vida_abaixo' | 'anel_min' | 'fundo_min' | 'alvo_elite' | 'alvo_couraca' | 'pocoes_max' | 'sempre';
 export type RuleAction = 'pocao' | 'habilidade' | 'recuar';
 
 export interface Rule {
@@ -142,6 +152,12 @@ export interface Hero {
   cooldowns: Partial<Record<SkillId, number>>;
   wound: Wound | null;
   gritoUntil: number;
+  /** Puxado por um afogado: −20% de velocidade de ataque até este tick. */
+  slowUntil: number;
+  /** Atordoado pelo Capataz: não começa ação até este tick. */
+  stunUntil: number;
+  /** Golpes dados (a Âncora Partida ignora a couraça a cada quarto). */
+  swings: number;
   action: HeroAction | null;
   /** Andar mais fundo alcançado. */
   deepest: number;

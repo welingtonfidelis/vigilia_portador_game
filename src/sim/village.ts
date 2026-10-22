@@ -1,7 +1,7 @@
 /** Vila: obras, forja, imposto dos moradores, descanso e ferimento (docs/VIGILIA-PORTADOR.md §2.9). */
 import { chronicle, dayOf } from './chronicle.ts';
 import { BALANCE } from './config.ts';
-import { AFFIXES, AFFIX_IDS, BASES, BUILDINGS } from './data.ts';
+import { AFFIXES, AFFIX_IDS, BASES, BUILDINGS, MATERIAL_NAMES } from './data.ts';
 import type { Cost } from './data.ts';
 import { startDescent } from './expedition.ts';
 import { heroStats } from './hero.ts';
@@ -22,8 +22,8 @@ export function lacking(w: World, c: Cost): string | null {
   if (v.people < c.people) return `faltam ${c.people - v.people} moradores`;
   if (v.gold < c.gold) return `faltam ${c.gold - v.gold} de ouro`;
   for (const [m, n] of Object.entries(c.mats)) {
-    const have = v.mats[m as 'ossos' | 'ferro'];
-    if (have < (n ?? 0)) return `faltam ${(n ?? 0) - have} de ${m}`;
+    const have = v.mats[m as Material] ?? 0;
+    if (have < (n ?? 0)) return `faltam ${(n ?? 0) - have} de ${MATERIAL_NAMES[m as Material]}`;
   }
   return null;
 }
@@ -31,7 +31,7 @@ export function lacking(w: World, c: Cost): string | null {
 function pay(w: World, c: Cost): void {
   const v = w.village;
   v.gold -= c.gold;
-  for (const [m, n] of Object.entries(c.mats)) v.mats[m as 'ossos' | 'ferro'] -= n ?? 0;
+  for (const [m, n] of Object.entries(c.mats)) v.mats[m as Material] = (v.mats[m as Material] ?? 0) - (n ?? 0);
 }
 
 export function build(w: World, id: BuildingId): string | null {
@@ -76,6 +76,8 @@ export function forge(w: World, baseId: string, rarity: ForgeRarity, affix: Affi
   const v = w.village;
   if (v.forge) return 'a forja está ocupada';
   if (!BASES[baseId]) return 'base desconhecida';
+  const minFloor = BASES[baseId]!.minFloor ?? 1;
+  if (w.hero.deepest < minFloor) return `o ferreiro só conhece essa arma depois do andar ${minFloor}`;
   if (rarity === 'rara' && v.buildings.ferreiro < 2) return 'forjar rara pede o ferreiro nível 2';
   if (rarity === 'epica' && v.buildings.ferreiro < 4) return 'forjar épica pede o ferreiro nível 4';
   if (rarity === 'comum' && baseId === 'amuleto') return 'o amuleto só tem afixos: forje raro';

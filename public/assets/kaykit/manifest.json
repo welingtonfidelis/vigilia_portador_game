@@ -262,6 +262,61 @@
       "sha256": "5301a06866ba3be68dcc14cc429bd6d0f69004b72884283715d7e233f2e9782e"
     },
     {
+      "path": "weapons/hammer_A.gltf",
+      "bytes": 3042,
+      "sha256": "499544e3488326e5d51851c05a1fd77b515fe10e6c00ff54150e17feabd3b5ea"
+    },
+    {
+      "path": "weapons/hammer_A.bin",
+      "bytes": 23240,
+      "sha256": "da08cee13731cc62eebb987c709ec7220a5d5ee95076ba89b5206d3d68a80cd1"
+    },
+    {
+      "path": "weapons/hammer_B.gltf",
+      "bytes": 3043,
+      "sha256": "90ed7353fefc6b63d8f3dac157f966205b7a5ffbeb1556a230dd6e69f04c8d82"
+    },
+    {
+      "path": "weapons/hammer_B.bin",
+      "bytes": 28976,
+      "sha256": "3c60075409aad2202fb33709bc872773f04af0d987eb8aca888186109c5def6b"
+    },
+    {
+      "path": "weapons/hammer_C.gltf",
+      "bytes": 3045,
+      "sha256": "238cddce1fededc0833a7b4b7fd08e41013893728afd5df05ee8c4c9352cb439"
+    },
+    {
+      "path": "weapons/hammer_C.bin",
+      "bytes": 32400,
+      "sha256": "f41f00fccda5d8aef905dc8828e2a5ccccc4971056fe1d92fe80e1325aff9fa3"
+    },
+    {
+      "path": "weapons/spear_A.gltf",
+      "bytes": 3045,
+      "sha256": "7299baf7d4f948b7839d616746c791fa57af74a9ccb8903692715f1fd8c947e4"
+    },
+    {
+      "path": "weapons/spear_A.bin",
+      "bytes": 52736,
+      "sha256": "2fff457925f370c4e4ef7bfb7434bcefcc054a96c569c653be8df5687931c59d"
+    },
+    {
+      "path": "weapons/halberd.gltf",
+      "bytes": 3044,
+      "sha256": "0b9d3f0c56525c181b6088f652caf2eec25216d9ec5abdb59646582392ef791e"
+    },
+    {
+      "path": "weapons/halberd.bin",
+      "bytes": 64112,
+      "sha256": "9a1f589764623a8b8289abcf97d242f352a134bc8274bc14ed77d984bfb04015"
+    },
+    {
+      "path": "weapons/weapons_bits_texture.png",
+      "bytes": 17508,
+      "sha256": "c153429a49928594b00b53c07c4ab3d6352087b7f5df6c272d4aedfdb99a40be"
+    },
+    {
       "path": "tools/anvil.gltf",
       "bytes": 2977,
       "sha256": "6878db53dfdceac3970dd881808f02f38ea06c59cb3dbfe9ae3a463123d7499a"
@@ -370,6 +425,16 @@
       "path": "tools/lantern.bin",
       "bytes": 32952,
       "sha256": "3980d1cb56a3b96bfd294ee6b4ca752fb3f5afbcaae68eec674a0f3d99f0e788"
+    },
+    {
+      "path": "tools/pickaxe.gltf",
+      "bytes": 3032,
+      "sha256": "4f3777249fdb9551a546ba66b997f948992787e4b5394ebe13cc1d7bf344a98b"
+    },
+    {
+      "path": "tools/pickaxe.bin",
+      "bytes": 20968,
+      "sha256": "9466b3b3c20eb0b555288af934800c39d9ff36568f2e8c7af2a9c2bf9b73ebc2"
     },
     {
       "path": "tools/tools_bits_texture.png",
@@ -565,6 +630,16 @@
       "path": "mixed/umbrella_green.bin",
       "bytes": 27472,
       "sha256": "b3b43dadea0a4022d1681d6144bedb6445aa378cccc991b5575ae673699f0bcc"
+    },
+    {
+      "path": "mixed/mining_helmet.gltf",
+      "bytes": 5621,
+      "sha256": "dfa96e533a8c41809b2c78f997889e86d03ddc74a39d6711283301122f990ff9"
+    },
+    {
+      "path": "mixed/mining_helmet.bin",
+      "bytes": 37460,
+      "sha256": "8d5f35d790568578e326b3a19c97dbfbdc8eb32f034d554cea5a41153bcadbcd"
     },
     {
       "path": "mixed/kaykit_texture_A.png",

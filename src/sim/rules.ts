@@ -45,6 +45,10 @@ function condHolds(w: World, s: HeroStats, cond: CondId, param: number): boolean
       const t = pickTarget(inReach(w), w.rules.descent.target);
       return !!t && (!!t.elite || isBoss(t.kind));
     }
+    case 'alvo_couraca': {
+      const t = pickTarget(inReach(w), w.rules.descent.target);
+      return !!t && t.armor > 0 && t.armorBreakUntil <= w.tick;
+    }
     case 'pocoes_max':
       return h.potions <= param;
     case 'sempre':
@@ -60,6 +64,9 @@ export function skillReady(w: World, s: HeroStats, id: SkillId): boolean {
   if (id === 'golpe_amplo' || id === 'grito') return inReach(w).length > 0;
   if (id === 'investida') return inBack(w).length > 0;
   if (id === 'segundo_folego') return h.hp < s.maxHp;
+  // Golpe de Escudo pede escudo e alguém no anel; Quebra-Couraça, alguém de couraça inteira.
+  if (id === 'golpe_escudo') return !!h.equip.secundaria && inReach(w).length > 0;
+  if (id === 'quebra_couraca') return inReach(w).some((e) => e.armor > 0 && e.armorBreakUntil <= w.tick);
   return true;
 }
 
@@ -92,6 +99,15 @@ export function defaultCombatRules(): Rule[] {
     { on: true, cond: 'fundo_min', param: 1, cond2: null, param2: 0, action: 'habilidade', skill: 'investida' },
     { on: true, cond: 'vida_abaixo', param: 50, cond2: null, param2: 0, action: 'habilidade', skill: 'segundo_folego' },
     { on: true, cond: 'anel_min', param: 3, cond2: null, param2: 0, action: 'habilidade', skill: 'grito' },
+    ...actTwoRules(),
+  ];
+}
+
+/** As regras de fábrica do Ato II (valem com o Salão de Táticas nos níveis 3 e 4). */
+export function actTwoRules(): Rule[] {
+  return [
+    { on: true, cond: 'alvo_couraca', param: 0, cond2: null, param2: 0, action: 'habilidade', skill: 'quebra_couraca' },
+    { on: true, cond: 'anel_min', param: 3, cond2: null, param2: 0, action: 'habilidade', skill: 'golpe_escudo' },
   ];
 }
 
@@ -114,6 +130,7 @@ export const COND_NAMES: Record<CondId, string> = {
   anel_min: 'Inimigos no anel, pelo menos',
   fundo_min: 'Inimigos no fundo, pelo menos',
   alvo_elite: 'Alvo é elite ou chefe',
+  alvo_couraca: 'Alvo com couraça inteira',
   pocoes_max: 'Poções restantes, no máximo',
   sempre: 'Sempre',
 };

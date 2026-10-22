@@ -135,6 +135,7 @@ function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World;
           <span title="Ouro">◉ {nf(v.gold)}</span>
           <span title="Ossos">🦴 {nf(v.mats.ossos)}</span>
           <span title="Ferro">⛓ {nf(v.mats.ferro)}</span>
+          {(v.mats.ferro_negro > 0 || w.hero.deepest >= 11) && <span title="Ferro-negro">◆ {nf(v.mats.ferro_negro ?? 0)}</span>}
           <span title="Moradores">☺ {v.people}</span>
         </div>
         <div class="speed">

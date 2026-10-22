@@ -2,7 +2,7 @@
  * Luta de uma sala: um herói contra um grupo, com o anel de contato (3 vagas de corpo a corpo),
  * golpes com preparação e impacto e as regras do jogador decidindo cada ação.
  */
-import { BALANCE, floorPower } from './config.ts';
+import { BALANCE, actOf, floorInAct, floorPower, groupSize } from './config.ts';
 import { ENEMIES, SKILLS, isBoss } from './data.ts';
 import { armorReduction, hasLegend, heroStats } from './hero.ts';
 import type { HeroStats } from './hero.ts';
@@ -18,7 +18,8 @@ export type KillHook = (w: World, e: Enemy, ev: SimEvent[]) => void;
 export function makeEnemy(w: World, kind: EnemyKind, floor: number, elite: EliteAffix | null, delay: number): Enemy {
   const d = ENEMIES[kind];
   const p = floorPower(floor);
-  const hp = Math.round(d.hp * p * (elite ? BALANCE.eliteHp : 1));
+  const act = actOf(floor) - 1;
+  const hp = Math.round(d.hp * p * (BALANCE.actEnemyHp[act] ?? 1) * (elite ? BALANCE.eliteHp : 1));
   const interval = Math.round(d.interval * (elite === 'veloz' ? 0.7 : 1));
   return {
     id: w.nextId++,
@@ -26,7 +27,7 @@ export function makeEnemy(w: World, kind: EnemyKind, floor: number, elite: Elite
     elite,
     hp,
     maxHp: hp,
-    dmg: d.dmg * p * (elite ? BALANCE.eliteDmg : 1),
+    dmg: d.dmg * p * (BALANCE.actEnemyDmg[act] ?? 1) * (elite ? BALANCE.eliteDmg : 1),
     interval,
     state: d.ranged ? 'fundo' : 'fila',
     slot: -1,
@@ -38,22 +39,51 @@ export function makeEnemy(w: World, kind: EnemyKind, floor: number, elite: Elite
     diedAt: 0,
     phase: 1,
     revived: false,
+    armor: d.armor ?? 0,
+    armorBreakUntil: 0,
+    comboAt: 0,
   };
+}
+
+/** Quem vem nos grupos de cada ato, conforme o andar dentro do ato. */
+function groupTable(floor: number): EnemyKind[] {
+  const n = floorInAct(floor);
+  if (actOf(floor) >= 2) {
+    const t: EnemyKind[] = ['mineiro', 'mineiro', 'mineiro', 'afogado'];
+    if (n >= 2) t.push('afogado');
+    if (n >= 3) t.push('golem');
+    if (n >= 4) t.push('lanterneiro');
+    if (n >= 7) t.push('golem');
+    return t;
+  }
+  const t: EnemyKind[] = ['lacaio', 'lacaio', 'lacaio', 'guerreiro'];
+  if (floor >= 2) t.push('ladino', 'mago');
+  if (floor >= 4) t.push('guerreiro', 'mago');
+  return t;
+}
+
+/** O bando que o chefe chama quando sobra pouca escolta. */
+function minionOf(floor: number): EnemyKind {
+  return actOf(floor) >= 2 ? 'mineiro' : 'lacaio';
 }
 
 /** Grupo da sala: cresce com o andar; elite e chefe entram no começo da fila. */
 export function spawnGroup(w: World, floor: number, kind: RoomKind, delay: number): Enemy[] {
   if (kind === 'santuario') return [];
-  const n = kind === 'bau' ? 2 + Math.floor(floor / 4) : Math.min(BALANCE.groupMax, BALANCE.groupBase + Math.floor(floor / 2));
-  const table: EnemyKind[] = ['lacaio', 'lacaio', 'lacaio', 'guerreiro'];
-  if (floor >= 2) table.push('ladino', 'mago');
-  if (floor >= 4) table.push('guerreiro', 'mago');
+  const act = actOf(floor);
+  const n = kind === 'bau' ? 2 + Math.floor(floorInAct(floor) / 4) + (act - 1) : groupSize(floor);
+  const table = groupTable(floor);
   const list: Enemy[] = [];
-  // O andar 10 de cada ato é do Senhor da Cripta; o 5, do Capitão.
-  if (kind === 'chefe') list.push(makeEnemy(w, floor % 10 === 0 ? 'senhor' : 'capitao', floor, null, delay));
+  // O andar 10 de cada ato é do chefe do ato (Senhor da Cripta, Couraça Submersa); o 5, do menor.
+  if (kind === 'chefe') {
+    const last = floorInAct(floor) === 10;
+    const boss: EnemyKind = act >= 2 ? (last ? 'couraca' : 'capataz') : last ? 'senhor' : 'capitao';
+    list.push(makeEnemy(w, boss, floor, null, delay));
+  }
   if (kind === 'elite') {
     const affix = pick(w, ['blindado', 'vampirico', 'furioso', 'veloz'] as const);
-    list.push(makeEnemy(w, pick(w, ['guerreiro', 'ladino'] as const), floor, affix, delay));
+    const elites: readonly EnemyKind[] = act >= 2 ? ['mineiro', 'afogado'] : ['guerreiro', 'ladino'];
+    list.push(makeEnemy(w, pick(w, elites), floor, affix, delay));
   }
   const count = kind === 'chefe' ? Math.max(2, n - 2) : n;
   for (let i = 0; i < count; i++) list.push(makeEnemy(w, pick(w, table), floor, null, delay));
@@ -116,7 +146,13 @@ function heroArmor(w: World, s: HeroStats): number {
 
 function hitHero(w: World, room: Room, e: Enemy, s: HeroStats, special: boolean, ev: SimEvent[]): void {
   const h = w.hero;
+  const d = ENEMIES[e.kind];
   let dmg = e.dmg * (special ? 2 : 1);
+  // A luz do lanterneiro (enquanto ele vive) faz os outros baterem mais.
+  if (!d.aura) {
+    const light = room.enemies.find((x) => x.state !== 'morto' && ENEMIES[x.kind].aura);
+    if (light) dmg *= 1 + ENEMIES[light.kind].aura!;
+  }
   if (e.elite === 'furioso' && e.hp < e.maxHp / 2) dmg *= 1.5;
   if (h.gritoUntil > w.tick && e.state === 'anel') dmg *= 0.65;
   if (room.fearUntil > w.tick) dmg *= 0.8;
@@ -130,6 +166,13 @@ function hitHero(w: World, room: Room, e: Enemy, s: HeroStats, special: boolean,
   }
   if (e.elite === 'vampirico') e.hp = Math.min(e.maxHp, e.hp + dmg * 0.3);
   h.hp -= dmg;
+  // O afogado puxa: −20% de velocidade de ataque por 3 s (metade com Pele Úmida).
+  if (d.slows) h.slowUntil = Math.max(h.slowUntil, w.tick + (h.learned.includes('pele_umida') ? 15 : 30));
+  // O golpe especial do Capataz atordoa por 1 s e interrompe o que o herói preparava.
+  if (special && e.kind === 'capataz') {
+    h.stunUntil = w.tick + 10;
+    if (h.action && !h.action.applied) h.action = null;
+  }
   ev.push({ t: 'heroiAcertado', tick: w.tick, enemy: e.id, dmg: Math.round(dmg), blocked });
 }
 
@@ -140,9 +183,16 @@ function enemiesAct(w: World, room: Room, s: HeroStats, ev: SimEvent[]): void {
       e.windup = null;
       continue;
     }
+    // Segundo impacto da Couraça Submersa na fase 2.
+    if (e.comboAt && w.tick >= e.comboAt) {
+      e.comboAt = 0;
+      hitHero(w, room, e, s, false, ev);
+      if (w.hero.hp <= 0) return;
+    }
     if (e.windup) {
       if (w.tick >= e.windup.impact) {
         if (!e.windup.cast) hitHero(w, room, e, s, e.windup.special, ev);
+        if (!e.windup.cast && !e.windup.special && e.kind === 'couraca' && e.phase === 2) e.comboAt = w.tick + 4;
         e.windup = null;
         if (w.hero.hp <= 0) return;
       }
@@ -156,10 +206,10 @@ function enemiesAct(w: World, room: Room, s: HeroStats, ev: SimEvent[]): void {
       e.nextSpecial = w.tick + (e.phase === 2 && d.phase2 ? d.phase2.specialEvery : d.specialEvery);
       e.nextAttack = w.tick + e.interval;
       ev.push({ t: 'inimigoGolpe', tick: w.tick, enemy: e.id, special: true });
-      // Reforço (2 lacaios) quando sobra pouca escolta.
-      if (e.kind === 'capitao' || conjurer) {
+      // Reforço (2 do bando do ato) quando sobra pouca escolta.
+      if (e.kind === 'capitao' || e.kind === 'capataz' || conjurer) {
         const escort = room.enemies.filter((x) => x.state !== 'morto' && !isBoss(x.kind)).length;
-        if (escort < 3) for (let i = 0; i < 2; i++) room.enemies.push(makeEnemy(w, 'lacaio', room.floor, null, 10));
+        if (escort < 3) for (let i = 0; i < 2; i++) room.enemies.push(makeEnemy(w, minionOf(room.floor), room.floor, null, 10));
       }
       continue;
     }
@@ -208,9 +258,36 @@ function enterPhase2(w: World, room: Room, e: Enemy, ev: SimEvent[]): void {
   }
 }
 
-function damageEnemy(w: World, e: Enemy, raw: number, s: HeroStats, ev: SimEvent[], kill: KillHook): void {
+/**
+ * A Couraça Submersa abaixo de metade da vida: endurece (+30% de couraça), bate mais forte e passa a
+ * bater duas vezes seguidas.
+ */
+function harden(w: World, room: Room, e: Enemy, ev: SimEvent[]): void {
+  const p2 = ENEMIES.couraca.phase2!;
+  e.phase = 2;
+  e.armor *= 1.3;
+  e.dmg = p2.dmg * floorPower(room.floor) * (BALANCE.actEnemyDmg[actOf(room.floor) - 1] ?? 1);
+  e.interval = p2.interval;
+  e.windup = null;
+  e.stunUntil = w.tick + 15;
+  e.nextAttack = w.tick + 15 + e.interval;
+  e.nextSpecial = w.tick + 15 + p2.specialEvery;
+  room.phase2At = w.tick;
+  ev.push({ t: 'fase', tick: w.tick, enemy: e.id });
+  ev.push({ t: 'aviso', tick: w.tick, text: 'A Couraça Submersa endurece e bate duas vezes!', tone: 'ruim' });
+}
+
+/** Quanto da couraça do inimigo ainda corta o golpe, depois da perfuração e da Quebra-Couraça. */
+export function couracaCut(w: World, e: Enemy, pierce: number): number {
+  if (e.armor <= 0) return 0;
+  const c = e.armor * (w.tick < e.armorBreakUntil ? 0.5 : 1) * (1 - pierce);
+  return c / (c + BALANCE.couracaK);
+}
+
+function damageEnemy(w: World, e: Enemy, raw: number, s: HeroStats, ev: SimEvent[], kill: KillHook, ignoreArmor = false): void {
   if (e.state === 'morto') return;
   let dmg = raw;
+  if (!ignoreArmor) dmg *= 1 - couracaCut(w, e, s.pierce);
   const crit = chance(w, s.crit);
   if (crit) dmg *= BALANCE.critMult;
   let blocked = false;
@@ -221,6 +298,7 @@ function damageEnemy(w: World, e: Enemy, raw: number, s: HeroStats, ev: SimEvent
   if (e.elite === 'blindado') dmg *= 0.65;
   e.hp -= dmg;
   if (e.kind === 'senhor' && e.phase === 1 && e.hp > 0 && e.hp <= e.maxHp / 2) enterPhase2(w, w.room!, e, ev);
+  if (e.kind === 'couraca' && e.phase === 1 && e.hp > 0 && e.hp <= e.maxHp / 2) harden(w, w.room!, e, ev);
   if (s.lifesteal > 0) w.hero.hp = Math.min(s.maxHp, w.hero.hp + dmg * s.lifesteal);
   ev.push({ t: 'acerto', tick: w.tick, target: e.id, dmg: Math.round(dmg), crit, blocked });
   if (e.hp <= 0) {
@@ -240,7 +318,13 @@ function applyAction(w: World, room: Room, s: HeroStats, ev: SimEvent[], kill: K
   const policy = w.rules.descent.target;
   if (a.kind === 'golpe') {
     let t = room.enemies.find((e) => e.id === a.target && e.state === 'anel') ?? pickTarget(inReach(w), policy);
-    if (t) damageEnemy(w, t, s.dmg, s, ev, kill);
+    if (t) {
+      h.swings++;
+      // Âncora Partida: o quarto golpe ignora a couraça. Picareta do Capataz: cada golpe atordoa 0,5 s.
+      const anchor = hasLegend(h.equip, 'ancora_partida') && h.swings % 4 === 0;
+      if (hasLegend(h.equip, 'picareta_capataz')) t.stunUntil = Math.max(t.stunUntil, w.tick + 5);
+      damageEnemy(w, t, s.dmg, s, ev, kill, anchor);
+    }
   } else if (a.kind === 'pocao') {
     const heal = s.maxHp * s.potionHeal;
     h.hp = Math.min(s.maxHp, h.hp + heal);
@@ -268,12 +352,25 @@ function applyAction(w: World, room: Room, s: HeroStats, ev: SimEvent[], kill: K
       ev.push({ t: 'cura', tick: w.tick, amount: Math.round(heal) });
     } else if (a.skill === 'grito') {
       h.gritoUntil = w.tick + 60;
+    } else if (a.skill === 'golpe_escudo') {
+      for (const t of inReach(w)) {
+        t.stunUntil = Math.max(t.stunUntil, w.tick + 15);
+        t.windup = null;
+        damageEnemy(w, t, s.dmg * 0.4, s, ev, kill);
+      }
+    } else if (a.skill === 'quebra_couraca') {
+      const t = room.enemies.find((e) => e.id === a.target && e.state === 'anel') ?? pickTarget(inReach(w), policy);
+      if (t) {
+        t.armorBreakUntil = w.tick + 60;
+        damageEnemy(w, t, s.dmg, s, ev, kill);
+      }
     }
   }
 }
 
 function startAction(w: World, s: HeroStats, ev: SimEvent[]): void {
   const h = w.hero;
+  if (w.tick < h.stunUntil) return;
   const choice = chooseAction(w, s);
   if (!choice) return;
   const t = w.tick;

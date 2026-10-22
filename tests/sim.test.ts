@@ -205,7 +205,7 @@ describe('regra de morte', () => {
     expect(w.hero.wound.left).toBe(400);
     w.phase = 'descendo';
     w.phaseEnd = w.tick + 1e6;
-    w.exp = { floor: 1, room: 0, bag: { gold: 0, mats: { ossos: 0, ferro: 0 }, items: [], people: 0 }, started: 0, recall: false, leaving: null, kills: 0 };
+    w.exp = { floor: 1, room: 0, bag: { gold: 0, mats: { ossos: 0, ferro: 0, ferro_negro: 0 }, items: [], people: 0 }, started: 0, recall: false, leaving: null, kills: 0 };
     advance(w, 100);
     expect(w.hero.wound.left).toBe(400);
   });

@@ -52,12 +52,12 @@ A lista exata, com o tamanho e o SHA-256 de cada arquivo copiado, é gerada por 
 | Kenney Survival 2.0 | 44 peças em GLB mais a paleta: tendas, a fogueira de vigília, bancadas da forja, caixas, barris, estruturas de obra e mato |
 | Kenney Cube Pets 2.0 | Só o cachorro, o gato e o pintinho (`animal-dog`, `animal-cat`, `animal-chick`) mais a paleta: os bichos de casa da vila, no máximo 3 |
 | Resource Bits 1.0 | Pilhas de madeira, pedra, ferro e tecido e a tora (obras, ferreiro, carroceiro e fogueira) |
-| RPG Tools Bits 1.0 | Bigorna, rebolo, mapa e bússola (ferreiro e Salão de Táticas); o martelo do ferreiro e o machado do lenhador (M2.2) |
+| RPG Tools Bits 1.0 | Bigorna, rebolo, mapa e bússola (ferreiro e Salão de Táticas); o martelo do ferreiro e o machado do lenhador (M2.2); a picareta do mineiro e a lanterna do lanterneiro (M3.1) |
 | Furniture Bits 1.0 | Mesa, cadeira e cama (alquimista, curandeira e Salão de Táticas) |
-| Mixed Bag 1 | Flores (alquimista, curandeira e casas); o violão do músico e a tenda de circo da festa (M2.2) |
+| Mixed Bag 1 | Flores (alquimista, curandeira e casas); o violão do músico e a tenda de circo da festa (M2.2); o capacete de mineiro (M3.1) |
 | Character Animations 1.1 (M2) | Mais os conjuntos `Rig_Medium_Simulation` (sentar, acenar, comemorar) e `Rig_Medium_Tools` (martelar, rachar lenha, segurar) |
 | Adventurers 2.0 (M2.2) | Os moradores usam o corpo do Ranger e do Rogue, com a roupa recolorida no jogo, e as cabeças dos cinco rostos |
-| Fantasy Weapons Bits 1.0 | Ainda não usado no M0 (reservado para as armas dos atos seguintes) |
+| Fantasy Weapons Bits 1.0 | `hammer_A` a `C`, `spear_A` e `halberd`: o martelo, a lança e a alabarda do Ato II, e os martelos do golem e do Capataz (M3.1) |
 
 ## Fora da família (nenhum por enquanto)
 

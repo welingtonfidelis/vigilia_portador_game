@@ -73,10 +73,10 @@ const SURVIVAL = [
   'rock-c', 'patch-grass', 'patch-grass-large', 'grass', 'grass-large', 'floor-old',
 ];
 
-const TOOLS = ['anvil', 'grindstone', 'map', 'compass_base', 'blueprint', 'bucket_metal', 'axe', 'hammer', 'saw', 'shovel', 'lantern'];
+const TOOLS = ['anvil', 'grindstone', 'map', 'compass_base', 'blueprint', 'bucket_metal', 'axe', 'hammer', 'saw', 'shovel', 'lantern', 'pickaxe'];
 const RESOURCE = ['Wood_Log_Stack', 'Wood_Planks_Stack_Medium', 'Stone_Bricks_Stack_Medium', 'Iron_Bars_Stack_Small', 'Textiles_Stack_Small', 'Pallet_Wood', 'Wood_Log_A'];
 const FURNITURE = ['table_medium', 'chair_A_wood', 'bed_single_A', 'chair_stool_wood', 'shelf_A_small'];
-const MIXED = ['flax_flower_A', 'flax_flower_B', 'guitar_A', 'circus_tent', 'umbrella_green'];
+const MIXED = ['flax_flower_A', 'flax_flower_B', 'guitar_A', 'circus_tent', 'umbrella_green', 'mining_helmet'];
 
 export const PACKS: PackEntry[] = [
   {
@@ -124,6 +124,15 @@ export const PACKS: PackEntry[] = [
       // Só o alvo e o suporte de armas do treinador (ampliados). Os prédios do Hexagon perderam para o
       // Kenney no teste lado a lado (docs §3.1) e não entram no jogo.
       { path: 'Assets/gltf/decoration/props', ext: '.gltf', files: ['target', 'weaponrack'] },
+    ],
+  },
+  {
+    // KayKit Fantasy Weapons Bits 1.0: as armas do Ato II (martelo, lança e alabarda), M3.1.
+    out: 'weapons',
+    dir: 'weapons',
+    root: 'KayKit_FantasyWeaponsBits_1.0_FREE',
+    groups: [
+      { path: 'Assets/gltf', ext: '.gltf', files: ['hammer_A', 'hammer_B', 'hammer_C', 'spear_A', 'halberd'] },
     ],
   },
   {

@@ -23,11 +23,24 @@ export const BALANCE = {
   villageRegenPerTick: 0.006,
   /** Armadura: redução = A / (A + armorK × P(andar)). */
   armorK: 25,
+  /** Couraça dos inimigos do Ato II: corta o dano do herói por C / (C + couracaK), depois da perfuração. */
+  couracaK: 18,
+  /** Couraça média de um grupo de cada ato (para a "Força" da tela de equipamento). */
+  actArmor: [0, 17],
+  /** O que cada ato pede a mais além de P(andar) na "Força" (lentidão, aura e chefes com truques). */
+  actDemand: [1, 1],
+  /** Vida e dano dos inimigos de cada ato, além de P(andar): o Ato II já pesa pela couraça e pelos truques. */
+  actEnemyHp: [1, 0.92],
+  actEnemyDmg: [1, 0.74],
+  pierceMax: 0.8,
+  /** Buscar os restos só desce até eles com a Força do andar pelo menos nisto ("fundo demais" abaixo). */
+  fetchMinRatio: 0.8,
 
   // Abismo
   floorPowerBase: 1.16,
   floorsPerAct: 10,
-  maxFloor: 10,
+  /** Fundo do abismo por enquanto: o fim do Ato II (M3.1). */
+  maxFloor: 20,
   roomsBase: 4,
   groupBase: 3,
   groupMax: 8,
@@ -46,7 +59,7 @@ export const BALANCE = {
   stashSize: 24,
 
   // Saque
-  itemChance: { lacaio: 0.06, guerreiro: 0.06, ladino: 0.06, mago: 0.06, capitao: 1 } as Record<string, number>,
+  itemChance: { lacaio: 0.06, guerreiro: 0.06, ladino: 0.06, mago: 0.06, mineiro: 0.06, afogado: 0.06, lanterneiro: 0.06, golem: 0.1, capitao: 1 } as Record<string, number>,
   eliteItemChance: 0.4,
   tierDownChance: 0.2,
   luckItemChance: 0.01,
@@ -87,15 +100,31 @@ export function floorPower(floor: number): number {
   return Math.pow(BALANCE.floorPowerBase, floor - 1);
 }
 
-/** Tier das peças de um andar: ⌈andar/2⌉ + 5 × (ato − 1). */
-export function floorTier(floor: number): number {
-  const act = Math.floor((floor - 1) / BALANCE.floorsPerAct);
-  const inAct = floor - act * BALANCE.floorsPerAct;
-  return Math.ceil(inAct / 2) + 5 * act;
+/** Ato do andar (1 a 10 é o Ato I, 11 a 20 o Ato II…). */
+export function actOf(floor: number): number {
+  return Math.floor((floor - 1) / BALANCE.floorsPerAct) + 1;
 }
 
+/** Andar dentro do ato (1 a 10). */
+export function floorInAct(floor: number): number {
+  return floor - (actOf(floor) - 1) * BALANCE.floorsPerAct;
+}
+
+/** Tier das peças de um andar: ⌈andar/2⌉ + 5 × (ato − 1). */
+export function floorTier(floor: number): number {
+  return Math.ceil(floorInAct(floor) / 2) + 5 * (actOf(floor) - 1);
+}
+
+/** Salas por andar: 4 + ⌊andar no ato / 3⌋ (cada ato recomeça a conta); depois do primeiro ato, mais 1, e mais 1 na segunda metade. */
 export function roomsOnFloor(floor: number): number {
-  return BALANCE.roomsBase + Math.floor(floor / 3);
+  const n = floorInAct(floor);
+  const extra = actOf(floor) >= 2 ? 2 : 0;
+  return BALANCE.roomsBase + Math.floor(n / 3) + extra;
+}
+
+/** Inimigos por grupo: 3 + ⌊andar no ato / 2⌋, até 8 (cada ato recomeça a conta). */
+export function groupSize(floor: number): number {
+  return Math.min(BALANCE.groupMax, BALANCE.groupBase + Math.floor(floorInAct(floor) / 2));
 }
 
 export function isBossFloor(floor: number): boolean {

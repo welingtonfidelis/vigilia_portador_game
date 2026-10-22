@@ -48,6 +48,10 @@ export const BASE_VISUALS: Record<string, Visual | null> = {
   adaga: { kind: 'rigid', file: 'adventurers/dagger.gltf', bone: 'handslot.r' },
   espadao: { kind: 'rigid', file: 'adventurers/sword_2handed.gltf', bone: 'handslot.r' },
   machado_grande: { kind: 'rigid', file: 'adventurers/axe_2handed.gltf', bone: 'handslot.r' },
+  // Ato II (Fantasy Weapons Bits).
+  martelo: { kind: 'rigid', file: 'weapons/hammer_A.gltf', bone: 'handslot.r' },
+  lanca: { kind: 'rigid', file: 'weapons/spear_A.gltf', bone: 'handslot.r' },
+  alabarda: { kind: 'rigid', file: 'weapons/halberd.gltf', bone: 'handslot.r' },
   escudo_redondo: { kind: 'rigid', file: 'adventurers/shield_round.gltf', bone: 'handslot.l' },
   escudo_torre: { kind: 'rigid', file: 'adventurers/shield_square.gltf', bone: 'handslot.l' },
   escudo_espinhos: { kind: 'rigid', file: 'adventurers/shield_spikes.gltf', bone: 'handslot.l' },

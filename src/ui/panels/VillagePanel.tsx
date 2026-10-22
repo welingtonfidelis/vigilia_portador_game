@@ -1,9 +1,6 @@
 import { useState } from 'preact/hooks';
 import type { Session } from '../../game/session.ts';
-import {
-  AFFIXES, AFFIX_IDS, BALANCE, BASES, BUILDINGS, BUILDING_IDS, SLOT_NAMES, commands, floorTier, forgeCap, forgeCost, lacking, nextCost,
-  reforgeCost,
-} from '../../sim/index.ts';
+import { AFFIXES, AFFIX_IDS, BALANCE, BASES, BUILDINGS, BUILDING_IDS, MATERIAL_NAMES, SLOT_NAMES, commands, floorTier, forgeCap, forgeCost, lacking, nextCost, reforgeCost } from '../../sim/index.ts';
 import type { AffixId, Cost, ForgeRarity, World } from '../../sim/index.ts';
 import { RARITY_CLASS, duration, itemTitle, nf } from '../format.ts';
 
@@ -28,7 +25,7 @@ export function VillagePanel({ session, w }: { session: Session; w: World }) {
   const smith = v.buildings.ferreiro;
   const chosen = rarity === 'comum' ? null : affix;
   const forgeTime = rarity === 'epica' ? BALANCE.epicForgeTicks : rarity === 'rara' ? BALANCE.rareForgeTicks : BALANCE.forgeTicks;
-  const matName = { ossos: 'ossos', ferro: 'ferro', ambos: 'ossos e ferro' };
+  const matName: Record<string, string> = { ...MATERIAL_NAMES, ambos: 'ossos e ferro' };
   return (
     <div class="village">
       <p class="note">

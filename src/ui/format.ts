@@ -28,6 +28,7 @@ export function itemLines(item: Item): string[] {
   if (b.dmgPct) lines.push(`+${nf(b.dmgPct * 100)}% de dano`);
   if (b.potionPct) lines.push(`+${nf(b.potionPct * 100)}% de cura das poções`);
   if (b.speedPct) lines.push(`+${nf(b.speedPct * 100)}% de velocidade de ataque`);
+  if (b.pierce) lines.push(`${nf(b.pierce * 100)}% de perfuração`);
   for (const a of item.affixes) lines.push(`${AFFIXES[a].name}: ${AFFIXES[a].desc(affixValue(a, item.tier))}`);
   if (item.legend) lines.push(`★ ${LEGENDS[item.legend]!.effect}`);
   return lines;
@@ -42,6 +43,7 @@ export function lootText(l: Loot): string {
   if (l.gold) parts.push(`${nf(l.gold)} de ouro`);
   if (l.mats.ossos) parts.push(`${nf(l.mats.ossos)} ossos`);
   if (l.mats.ferro) parts.push(`${nf(l.mats.ferro)} de ferro`);
+  if (l.mats.ferro_negro) parts.push(`${nf(l.mats.ferro_negro)} de ferro-negro`);
   if (l.people) parts.push(`${l.people} ${l.people === 1 ? 'pessoa' : 'pessoas'}`);
   if (l.items.length) parts.push(`${l.items.length} ${l.items.length === 1 ? 'peça' : 'peças'}`);
   return parts.length ? parts.join(', ') : 'nada';

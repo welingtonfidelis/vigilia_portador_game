@@ -15,8 +15,12 @@ interface EnemyLook {
   /** Fase 2 do chefe (outra animação de golpe). */
   attack2?: string;
   special2?: string;
-  /** Aura própria (o Senhor da Cripta). */
+  /** Aura própria (o Senhor da Cripta, o lanterneiro). */
   aura?: number;
+  /** Cor multiplicada no atlas (a ferrugem dos mineiros, o azul dos afogados, o ferro-negro do golem). */
+  tint?: number;
+  /** Peça presa ao osso da cabeça (o capacete de mineiro). */
+  head?: string;
 }
 
 const LOOKS: Record<EnemyKind, EnemyLook> = {
@@ -29,6 +33,19 @@ const LOOKS: Record<EnemyKind, EnemyLook> = {
     file: 'skeletons/Skeleton_Mage.glb', right: 'skeletons/Skeleton_Staff.gltf', scale: 1.6, attack: 'Ranged_Magic_Spellcasting',
     special: 'Ranged_Magic_Summon', attack2: 'Melee_2H_Attack_Slice', special2: 'Melee_2H_Attack_Chop', aura: 0x9b6bff,
   },
+  // Ato II: as Minas Inundadas (recolor dos esqueletos; a cara final vem na M3.2).
+  mineiro: { file: 'skeletons/Skeleton_Minion.glb', right: 'tools/pickaxe.gltf', head: 'mixed/mining_helmet.gltf', scale: 1, attack: 'Melee_1H_Attack_Chop', tint: 0xd8a27a },
+  afogado: { file: 'skeletons/Skeleton_Rogue.glb', right: 'skeletons/Skeleton_Blade.gltf', scale: 0.95, attack: 'Melee_1H_Attack_Stab', tint: 0x86c2c4 },
+  golem: { file: 'skeletons/Skeleton_Warrior.glb', right: 'weapons/hammer_B.gltf', scale: 1.5, attack: 'Melee_2H_Attack_Chop', tint: 0xa8b2bf },
+  lanterneiro: { file: 'skeletons/Skeleton_Mage.glb', right: 'tools/lantern.gltf', scale: 1, attack: 'Ranged_Magic_Shoot', tint: 0xc9b98a, aura: 0xffc27a },
+  capataz: {
+    file: 'skeletons/Skeleton_Warrior.glb', right: 'weapons/hammer_A.gltf', head: 'mixed/mining_helmet.gltf', scale: 1.6,
+    attack: 'Melee_1H_Attack_Chop', special: 'Melee_2H_Attack_Chop', tint: 0xc0906a,
+  },
+  couraca: {
+    file: 'skeletons/Skeleton_Warrior.glb', right: 'skeletons/Skeleton_Axe.gltf', left: 'skeletons/Skeleton_Shield_Large_A.gltf', scale: 2,
+    attack: 'Melee_1H_Attack_Chop', special: 'Melee_2H_Attack_Chop', attack2: 'Melee_2H_Attack_Slice', tint: 0x86a0aa,
+  },
 };
 
 const ELITE_COLOR: Record<EliteAffix, number> = { blindado: 0x8fb4ff, vampirico: 0xff4060, furioso: 0xff8a2a, veloz: 0x7dffb0 };
@@ -39,6 +56,7 @@ export function enemyFiles(): string[] {
     s.add(l.file);
     if (l.right) s.add(l.right);
     if (l.left) s.add(l.left);
+    if (l.head) s.add(l.head);
   }
   return [...s];
 }
@@ -75,7 +93,21 @@ export class EnemyActor {
       }
     });
     // O capitão usa o elmo; os guerreiros comuns, não (assim o elmo de osso é troféu do chefe).
-    if (this.kind === 'guerreiro') model.getObjectByName('Skeleton_Warrior_Helmet')?.removeFromParent();
+    if (this.kind === 'guerreiro' || this.kind === 'golem' || this.look.head) model.getObjectByName('Skeleton_Warrior_Helmet')?.removeFromParent();
+    if (this.look.tint) {
+      const tint = new THREE.Color(this.look.tint);
+      model.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (!m.isMesh) return;
+        const mat = (m.material as THREE.MeshStandardMaterial).clone();
+        mat.color.multiply(tint);
+        m.material = mat;
+      });
+    }
+    if (this.look.head) {
+      const helmet = (await load(this.look.head)).scene.clone();
+      bones.get('head')?.add(helmet);
+    }
     for (const [side, file] of [['handslot.r', this.look.right], ['handslot.l', this.look.left]] as const) {
       if (!file) continue;
       const w = await load(file);

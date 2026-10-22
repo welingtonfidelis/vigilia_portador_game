@@ -2,12 +2,17 @@
  * Balanceador: o jogador automático joga várias sementes e o relatório confere as metas de
  * docs/VIGILIA-PORTADOR.md §2.12. Sai com código 1 se alguma meta falhar.
  *
- *   npm run balance -- [--seeds 20] [--hours 3] [--from 1000] [--verbose]
+ *   npm run balance -- [--seeds 20] [--hours 7] [--from 1000] [--verbose]
+ *
+ * As metas do Ato I olham até a primeira vitória sobre o Senhor (andar 10); as do Ato II, dali até
+ * a primeira vitória sobre a Couraça Submersa (andar 20). Algumas sementes jogam de novo sem
+ * perfuração, para medir quanto ela pesa nas Minas.
  */
 import { botTick } from '../src/sim/bot.ts';
+import type { BotOptions } from '../src/sim/bot.ts';
 import { BALANCE } from '../src/sim/config.ts';
 import { BUILDING_IDS, checksum, createWorld, deserialize, nextCost, powerRatio, serialize, step } from '../src/sim/index.ts';
-import type { SimEvent, World } from '../src/sim/index.ts';
+import type { SimEvent, Stats, World } from '../src/sim/index.ts';
 
 const args = process.argv.slice(2);
 const num = (flag: string, d: number) => {
@@ -15,7 +20,8 @@ const num = (flag: string, d: number) => {
   return i >= 0 ? Number(args[i + 1]) : d;
 };
 const SEEDS = num('--seeds', 20);
-const HOURS = num('--hours', 3);
+const HOURS = num('--hours', 7);
+const PIERCELESS = Math.min(6, SEEDS);
 const VERBOSE = args.includes('--verbose');
 const FROM = num('--from', 1000);
 const TICKS = HOURS * 3600 * BALANCE.ticksPerSecond;
@@ -45,10 +51,33 @@ interface Run {
   level: number;
   ratioAtDeepest: number;
   hash: string;
+  /** Ato II: do Senhor até a Couraça (ou até o fim da corrida). */
+  boss15: number | null;
+  boss20: number | null;
+  act2Hours: number;
+  act2Deaths: number;
+  act2RoomSec: number;
+  act2Rooms: number;
+  act2BossSec: number | null;
+  couracaSec: number | null;
+  couracaPhase2: number | null;
+  act2StallMin: number;
+  act2StallFloor: number;
 }
 
-function runSeed(seed: number): Run {
+/** Diferença entre dois retratos das estatísticas (o que aconteceu entre eles). */
+function delta(a: Stats, b: Stats): Stats {
+  const out = { ...b } as Record<string, unknown>;
+  for (const [k, v] of Object.entries(b)) if (typeof v === 'number') out[k] = v - ((a as unknown as Record<string, number>)[k] ?? 0);
+  return out as unknown as Stats;
+}
+
+function runSeed(seed: number, bot: BotOptions = {}): Run {
   let w: World = createWorld(seed);
+  let atBoss10: Stats | null = null;
+  let atBoss20: Stats | null = null;
+  let act2Stall = 0;
+  let act2StallFloor = 0;
   let forgeOk = true;
   let impasses = 0;
   let lastDeep = 1;
@@ -61,8 +90,17 @@ function runSeed(seed: number): Run {
   for (let t = 0; t < TICKS; t++) {
     ev.length = 0;
     step(w, ev);
-    if (w.phase === 'vila' && (prevPhase !== 'vila' || w.tick % 20 === 0)) botTick(w);
+    if (w.phase === 'vila' && (prevPhase !== 'vila' || w.tick % 20 === 0)) botTick(w, bot);
     prevPhase = w.phase;
+    if (!atBoss10 && w.bossesBeaten.includes(10)) atBoss10 = structuredClone(w.stats);
+    if (!atBoss20 && w.bossesBeaten.includes(20)) atBoss20 = structuredClone(w.stats);
+    if (atBoss10 && !atBoss20) {
+      const gap = w.tick - Math.max(lastDeepTick, w.stats.bossFirst['10'] ?? 0);
+      if (gap > act2Stall) {
+        act2Stall = gap;
+        act2StallFloor = lastDeep;
+      }
+    }
     if (goldIdle === null && w.bossesBeaten.includes(10)) {
       const costs = BUILDING_IDS.map((id) => nextCost(w, id)?.gold).filter((g): g is number => g !== undefined);
       goldIdle = costs.length ? w.village.gold / Math.min(...costs) : 0;
@@ -81,7 +119,11 @@ function runSeed(seed: number): Run {
     // A cada 10 min, salva e carrega: o mundo tem de continuar igual.
     if (w.tick % (10 * MIN) === 0) w = deserialize(serialize(w));
   }
-  const s = w.stats;
+  // Ato I: até o Senhor (o resto da corrida já é Ato II). Ato II: do Senhor até a Couraça.
+  const s = atBoss10 ?? w.stats;
+  const a2 = atBoss10 ? delta(atBoss10, atBoss20 ?? w.stats) : null;
+  const b10 = w.stats.bossFirst['10'] ?? null;
+  const end2 = w.stats.bossFirst['20'] ?? TICKS;
   return {
     seed,
     boss5: s.bossFirst['5'] ?? null,
@@ -104,6 +146,17 @@ function runSeed(seed: number): Run {
     level: w.hero.level,
     ratioAtDeepest: powerRatio(w, w.hero.deepest),
     hash: checksum(JSON.stringify(w)),
+    boss15: w.stats.bossFirst['15'] ?? null,
+    boss20: w.stats.bossFirst['20'] ?? null,
+    act2Hours: b10 === null ? 0 : (end2 - b10) / 36000,
+    act2Deaths: a2?.deaths ?? 0,
+    act2RoomSec: a2 && a2.rooms ? a2.fightTicks / a2.rooms / 10 : 0,
+    act2Rooms: a2?.rooms ?? 0,
+    act2BossSec: a2 && a2.bossFights ? a2.bossFightTicks / a2.bossFights / 10 : null,
+    couracaSec: a2 && a2.senhorFights ? a2.senhorFightTicks / a2.senhorFights / 10 : null,
+    couracaPhase2: a2 && a2.senhorFights ? a2.senhorPhase2Frac / a2.senhorFights : null,
+    act2StallMin: act2Stall / MIN,
+    act2StallFloor,
   };
 }
 
@@ -119,14 +172,17 @@ const t0 = performance.now();
 const runs: Run[] = [];
 for (let i = 0; i < SEEDS; i++) runs.push(runSeed(FROM + i));
 const ms = performance.now() - t0;
+// As mesmas sementes de novo, sem perfuração (nada de martelo, alabarda, Perfurante nem Quebra-Couraça).
+const blunt: Run[] = [];
+for (let i = 0; i < PIERCELESS; i++) blunt.push(runSeed(FROM + i, { noPierce: true }));
 // Determinismo: a mesma semente de novo.
 const again = runSeed(FROM);
 
 if (VERBOSE) {
-  console.log('semente  chefe5  chefe10  mortes  fundo  nível  razão  sala(s)  dano  chefe(s)  perda  restos  parede');
+  console.log('semente  chefe5  chefe10  chefe15  chefe20  mortes  fundo  nível  razão  sala(s)  dano  chefe(s)  perda  restos  parede  parede2(andar)');
   for (const r of runs) {
     console.log(
-      `${r.seed}     ${r.boss5 ? f1(r.boss5 / MIN) : '—'}    ${r.boss10 ? f1(r.boss10 / MIN) : '—'}     ${r.deaths}      ${r.deepest}     ${r.level}     ${r.ratioAtDeepest.toFixed(2)}   ${f1(r.roomSec)}     ${(r.roomDmg * 100).toFixed(0)}%   ${f1(r.bossSec)}     ${r.lossFrac === null ? '—' : (r.lossFrac * 100).toFixed(0) + '%'}   ${r.remainsRatio === null ? '—' : (r.remainsRatio * 100).toFixed(0) + '%'}   ${f1(r.maxStallMin)}`,
+      `${r.seed}     ${r.boss5 ? f1(r.boss5 / MIN) : '—'}    ${r.boss10 ? f1(r.boss10 / MIN) : '—'}    ${r.boss15 ? f1(r.boss15 / MIN) : '—'}    ${r.boss20 ? f1(r.boss20 / MIN) : '—'}     ${r.deaths}      ${r.deepest}     ${r.level}     ${r.ratioAtDeepest.toFixed(2)}   ${f1(r.roomSec)}     ${(r.roomDmg * 100).toFixed(0)}%   ${f1(r.bossSec)}     ${r.lossFrac === null ? '—' : (r.lossFrac * 100).toFixed(0) + '%'}   ${r.remainsRatio === null ? '—' : (r.remainsRatio * 100).toFixed(0) + '%'}   ${f1(r.maxStallMin)}   ${f1(r.act2StallMin)} (${r.act2StallFloor})`,
     );
   }
 }
@@ -141,7 +197,11 @@ const checks: Check[] = [
   { name: 'Chefe do andar 5 (mediana, min)', value: f1(median(boss5) / MIN), ok: boss5.length > 0 && median(boss5) / MIN >= 20 && median(boss5) / MIN <= 40 },
   { name: 'Chefe do andar 10 (mediana, min)', value: f1(median(boss10) / MIN), ok: boss10.length > 0 && median(boss10) / MIN >= 60 && median(boss10) / MIN <= 100 },
   { name: 'Sementes que venceram o andar 10', value: `${boss10.length}/${runs.length}`, ok: boss10.length >= 0.9 * runs.length },
-  { name: 'Mortes por hora', value: f1(mean(runs.map((r) => r.deaths)) / HOURS), ok: mean(runs.map((r) => r.deaths)) / HOURS >= 0.5 && mean(runs.map((r) => r.deaths)) / HOURS <= 2.5 },
+  (() => {
+    // Até o Senhor (ou a corrida toda, para quem não chegou).
+    const perHour = mean(runs.map((r) => r.deaths / ((r.boss10 ?? TICKS) / 36000)));
+    return { name: 'Mortes por hora (Ato I)', value: f1(perHour), ok: perHour >= 0.5 && perHour <= 2.5 };
+  })(),
   { name: 'Luta média por sala (s)', value: f1(mean(runs.map((r) => r.roomSec))), ok: mean(runs.map((r) => r.roomSec)) >= 10 && mean(runs.map((r) => r.roomSec)) <= 35 },
   { name: 'Dano por sala comum (% da vida)', value: (mean(runs.map((r) => r.roomDmg)) * 100).toFixed(0), ok: mean(runs.map((r) => r.roomDmg)) >= 0.1 && mean(runs.map((r) => r.roomDmg)) <= 0.35 },
   { name: 'Luta de chefe (s)', value: f1(mean(runs.map((r) => r.bossSec).filter((x) => x > 0))), ok: (() => { const b = mean(runs.map((r) => r.bossSec).filter((x) => x > 0)); return b >= 45 && b <= 120; })() },
@@ -173,6 +233,46 @@ const checks: Check[] = [
   { name: 'Impasses (lutas > 300 s)', value: String(runs.reduce((s, r) => s + r.impasses, 0)), ok: runs.every((r) => r.impasses === 0) },
   { name: 'Determinismo (mesma semente, saves a cada 10 min)', value: again.hash === runs[0]!.hash ? 'igual' : 'DIFERENTE', ok: again.hash === runs[0]!.hash },
   { name: `Desempenho (${HOURS} h por semente, s)`, value: (ms / SEEDS / 1000).toFixed(2), ok: ms / SEEDS / 1000 < HOURS },
+  // Ato II: as Minas Inundadas.
+  (() => {
+    const xs = runs.filter((r) => r.boss10 !== null && r.boss15 !== null).map((r) => (r.boss15! - r.boss10!) / MIN);
+    return { name: 'Ato II · Capataz (andar 15) depois do Senhor (mediana, min)', value: f1(median(xs)), ok: xs.length > 0 && median(xs) >= 45 && median(xs) <= 100 };
+  })(),
+  (() => {
+    const xs = runs.filter((r) => r.boss10 !== null && r.boss20 !== null).map((r) => (r.boss20! - r.boss10!) / 36000);
+    return { name: 'Ato II · Couraça (andar 20) depois do Senhor (mediana, h)', value: f1(median(xs)), ok: xs.length > 0 && median(xs) >= 2 && median(xs) <= 3 };
+  })(),
+  {
+    name: `Ato II · sementes que venceram o andar 20 em ${HOURS} h`,
+    value: `${runs.filter((r) => r.boss20 !== null).length}/${runs.length}`,
+    ok: runs.filter((r) => r.boss20 !== null).length >= 0.8 * runs.length,
+  },
+  (() => {
+    const xs = runs.filter((r) => r.act2Hours > 0.5).map((r) => r.act2Deaths / r.act2Hours);
+    return { name: 'Ato II · mortes por hora', value: f1(mean(xs)), ok: xs.length > 0 && mean(xs) >= 0.5 && mean(xs) <= 2.5 };
+  })(),
+  (() => {
+    const xs = runs.filter((r) => r.act2Rooms > 0).map((r) => r.act2RoomSec);
+    return { name: 'Ato II · luta média por sala (s)', value: f1(mean(xs)), ok: xs.length > 0 && mean(xs) >= 10 && mean(xs) <= 35 };
+  })(),
+  (() => {
+    const xs = runs.map((r) => r.couracaSec).filter((x): x is number => x !== null);
+    return { name: 'Ato II · luta com a Couraça Submersa (s)', value: f1(mean(xs)), ok: xs.length > 0 && mean(xs) >= 60 && mean(xs) <= 150 };
+  })(),
+  (() => {
+    const sharp = mean(runs.slice(0, PIERCELESS).filter((r) => r.act2Rooms > 0).map((r) => r.act2RoomSec));
+    const dull = mean(blunt.filter((r) => r.act2Rooms > 0).map((r) => r.act2RoomSec));
+    return { name: 'Ato II · sem perfuração, as salas levam (×)', value: `${(dull / sharp).toFixed(2)}`, ok: dull / sharp >= 1.15 };
+  })(),
+  (() => {
+    // O Ato II dura o dobro do I: a parede segue a mesma proporção (mediana ≤ 45 e pior ≤ 90 min).
+    const xs = runs.filter((r) => r.boss10 !== null).map((r) => r.act2StallMin);
+    return {
+      name: 'Ato II · parede sem avanço (mediana · pior, min)',
+      value: `${f1(median(xs))} · ${f1(Math.max(...xs))}`,
+      ok: xs.length > 0 && median(xs) <= 45 && Math.max(...xs) <= 90,
+    };
+  })(),
 ];
 
 console.log(`\nO Portador da Chama · balanceador · ${SEEDS} sementes × ${HOURS} h (jogador automático)\n`);

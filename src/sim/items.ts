@@ -1,5 +1,5 @@
-import { BALANCE, floorTier } from './config.ts';
-import { AFFIXES, AFFIX_IDS, BASES, CLOTH_BANDS, LEGENDS, METAL_BANDS, RARITY_AFFIXES, tierBand } from './data.ts';
+import { BALANCE, actOf, floorTier } from './config.ts';
+import { AFFIXES, AFFIX_IDS, BASES, CLOTH_BANDS, LEGENDS, MATERIALS, METAL_BANDS, RARITY_AFFIXES, tierBand } from './data.ts';
 import type { BaseDef } from './data.ts';
 import { chance, pick, rand, weighted } from './rng.ts';
 import type { AffixId, Item, Loot, Rarity, World } from './types.ts';
@@ -69,11 +69,17 @@ export function rollRarity(w: World, floor: number, minimum: Rarity, luck: numbe
 export function dropItem(w: World, floor: number, minimum: Rarity, luck: number): Item {
   let tier = floorTier(floor);
   if (tier > 1 && chance(w, BALANCE.tierDownChance)) tier -= 1;
-  const ids = Object.keys(BASES).filter((id) => id !== 'elmo_osso' || floor >= 4);
+  const ids = Object.keys(BASES).filter((id) => (id !== 'elmo_osso' || floor >= 4) && floor >= (BASES[id]!.minFloor ?? 1));
   const baseId = pick(w, ids);
   const rarity = baseId === 'amuleto' && minimum === 'comum' ? 'rara' : rollRarity(w, floor, minimum, luck);
-  return makeItem(w, baseId, tier, rarity, `Andar ${floor} da Cripta`);
+  return makeItem(w, baseId, tier, rarity, `Andar ${floor} ${ACT_PLACES[actOf(floor) - 1] ?? 'do abismo'}`);
 }
+
+/** Onde fica cada ato ("Andar 14 das Minas"). */
+export const ACT_PLACES = ['da Cripta', 'das Minas', 'dos Fungos'];
+
+/** Valor de cada material em ouro (para o "valor da mochila"). */
+const MAT_VALUE: Record<string, number> = { ossos: 3, ferro: 5, ferro_negro: 12 };
 
 /** Valor em ouro de uma peça (venda, derretimento e o "valor da mochila" do balanceador). */
 export function itemValue(item: Item): number {
@@ -82,17 +88,20 @@ export function itemValue(item: Item): number {
 }
 
 export function lootValue(l: Loot): number {
-  return l.gold + l.mats.ossos * 3 + l.mats.ferro * 5 + l.items.reduce((s, i) => s + itemValue(i), 0);
+  return l.gold + MATERIALS.reduce((s, m) => s + (l.mats[m] ?? 0) * (MAT_VALUE[m] ?? 1), 0) + l.items.reduce((s, i) => s + itemValue(i), 0);
+}
+
+export function emptyMats(): Record<(typeof MATERIALS)[number], number> {
+  return Object.fromEntries(MATERIALS.map((m) => [m, 0])) as Record<(typeof MATERIALS)[number], number>;
 }
 
 export function emptyLoot(): Loot {
-  return { gold: 0, mats: { ossos: 0, ferro: 0 }, items: [], people: 0 };
+  return { gold: 0, mats: emptyMats(), items: [], people: 0 };
 }
 
 export function addLoot(into: Loot, from: Loot): void {
   into.gold += from.gold;
-  into.mats.ossos += from.mats.ossos;
-  into.mats.ferro += from.mats.ferro;
+  for (const m of MATERIALS) into.mats[m] = (into.mats[m] ?? 0) + (from.mats[m] ?? 0);
   into.items.push(...from.items);
   into.people += from.people;
 }

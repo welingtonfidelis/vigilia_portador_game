@@ -8,6 +8,7 @@ const HAS_PARAM: Record<CondId, { min: number; max: number; unit: string } | nul
   anel_min: { min: 1, max: 3, unit: '' },
   fundo_min: { min: 1, max: 4, unit: '' },
   alvo_elite: null,
+  alvo_couraca: null,
   pocoes_max: { min: 0, max: 7, unit: '' },
   sempre: null,
 };
@@ -102,7 +103,7 @@ export function RulesPanel({ session, w }: { session: Session; w: World }) {
         </label>
         <label class="check"><input type="checkbox" checked={d.repeat} onChange={(e) => setD({ repeat: (e.target as HTMLInputElement).checked })} /> Descer de novo depois de descansar</label>
         <label class="check"><input type="checkbox" checked={d.waitWound} onChange={(e) => setD({ waitWound: (e.target as HTMLInputElement).checked })} /> Esperar o ferimento sarar</label>
-        <label class="check"><input type="checkbox" checked={d.fetchRemains} onChange={(e) => setD({ fetchRemains: (e.target as HTMLInputElement).checked })} /> Buscar os restos (desce ao andar da pilha mais nova)</label>
+        <label class="check"><input type="checkbox" checked={d.fetchRemains} onChange={(e) => setD({ fetchRemains: (e.target as HTMLInputElement).checked })} /> Buscar os restos (desce ao andar da pilha mais nova, se a Força der)</label>
       </div>
     </div>
   );

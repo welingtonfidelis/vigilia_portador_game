@@ -1,15 +1,15 @@
 /** Descida, salas, saque, volta, morte, rolagem do que volta e restos (docs/VIGILIA-PORTADOR.md §2.1 e §2.10). */
 import { chronicle } from './chronicle.ts';
-import { BALANCE, floorPower, isBossFloor, roomsOnFloor } from './config.ts';
+import { BALANCE, actOf, floorPower, isBossFloor, roomsOnFloor } from './config.ts';
 import { spawnGroup, stepFight } from './combat.ts';
-import { ENEMIES, isBoss } from './data.ts';
-import { gainXp, heroStats } from './hero.ts';
+import { ENEMIES, MATERIALS, isBoss } from './data.ts';
+import { gainXp, heroStats, powerRatio } from './hero.ts';
 import { addLoot, dropItem, emptyLoot, itemName, itemValue, jitter, lootValue, makeLegend } from './items.ts';
 import { chance, int, rand, weighted } from './rng.ts';
 import type { Enemy, Item, Loot, Rarity, ReturnReport, RoomKind, SimEvent, World } from './types.ts';
 
 /** A primeira vitória em cada chefe deixa a lendária dele: o elmo do Capitão, a espada do Senhor. */
-const LEGEND_BY_BOSS_FLOOR: Record<number, string> = { 5: 'coroa_capitao', 10: 'vigia_partida' };
+const LEGEND_BY_BOSS_FLOOR: Record<number, string> = { 5: 'coroa_capitao', 10: 'vigia_partida', 15: 'picareta_capataz', 20: 'ancora_partida' };
 
 export function roomKind(w: World, floor: number, index: number): RoomKind {
   if (index === roomsOnFloor(floor) - 1 && isBossFloor(floor)) return 'chefe';
@@ -49,13 +49,15 @@ function onKill(w: World, e: Enemy, ev: SimEvent[]): void {
   if (e.revived) return;
   exp.bag.gold += jitter(w, d.gold * p * (e.elite ? 2 : 1));
   exp.bag.mats.ossos += int(w, d.bones[0], d.bones[1]);
-  // O guerreiro deixa ferro velho da armadura.
+  // O guerreiro deixa ferro velho da armadura; os bichos das Minas, ferro-negro.
   if (e.kind === 'guerreiro' && chance(w, 0.3)) exp.bag.mats.ferro += 1;
+  if (d.drops && !isBoss(e.kind) && chance(w, d.drops[3])) exp.bag.mats[d.drops[0]] += int(w, d.drops[1], d.drops[2]);
   if (gainXp(w, Math.round(d.xp * Math.pow(p, 0.8) * (e.elite ? 2.5 : 1)))) {
     chronicle(w, `${w.hero.name} chegou ao nível ${w.hero.level}.`, 'bom', ev);
   }
   if (isBoss(e.kind)) {
     exp.bag.mats.ferro += 10;
+    if (d.drops) exp.bag.mats[d.drops[0]] += int(w, d.drops[1], d.drops[2]);
     exp.bag.people += 2;
     const first = !w.bossesBeaten.includes(floor);
     if (first) {
@@ -65,7 +67,7 @@ function onKill(w: World, e: Enemy, ev: SimEvent[]): void {
       if (legend) {
         const item = makeLegend(w, legend, Math.ceil(floor / 2), `${d.name}, andar ${floor}`);
         bagItem(w, item, ev);
-        chronicle(w, `${d.name} caiu no andar ${floor}. Nos ossos dele, ${itemName(item)}.`, 'lenda', ev);
+        chronicle(w, `${d.name} caiu no andar ${floor}. ${actOf(floor) === 1 ? 'Nos ossos dele' : 'Na ferrugem dele'}, ${itemName(item)}.`, 'lenda', ev);
       }
     }
     bagItem(w, dropItem(w, floor, 'epica', s.luck), ev);
@@ -101,9 +103,12 @@ export function startDescent(w: World, ev: SimEvent[]): boolean {
   if (w.phase !== 'vila') return false;
   const r = w.rules.descent;
   let floor = Math.max(1, Math.min(r.startFloor, w.hero.deepest));
+  // Buscar os restos desce até a pilha mais nova, mas não se o andar for "fundo demais" (Força abaixo
+  // de 0,8): restos caídos aos pés de um chefe forte esperam o herói crescer, em vez de puxá-lo para
+  // morrer no mesmo lugar outra vez.
   if (r.fetchRemains && w.remains.length > 0) {
     const newest = w.remains[w.remains.length - 1]!;
-    if (newest.floor <= w.hero.deepest) floor = newest.floor;
+    if (newest.floor <= w.hero.deepest && powerRatio(w, newest.floor) >= BALANCE.fetchMinRatio) floor = newest.floor;
   }
   w.exp = { floor, room: 0, bag: emptyLoot(), started: w.tick, recall: false, leaving: null, kills: 0 };
   w.phase = 'descendo';
@@ -164,14 +169,14 @@ function die(w: World, ev: SimEvent[]): void {
   const frac = returnChance(w, floor, null);
   brought.gold = Math.floor(bag.gold * frac);
   lost.gold = bag.gold - brought.gold;
-  for (const m of ['ossos', 'ferro'] as const) {
-    brought.mats[m] = Math.floor(bag.mats[m] * frac);
-    lost.mats[m] = bag.mats[m] - brought.mats[m];
+  for (const m of MATERIALS) {
+    brought.mats[m] = Math.floor((bag.mats[m] ?? 0) * frac);
+    lost.mats[m] = (bag.mats[m] ?? 0) - brought.mats[m];
   }
   // A gente resgatada foge na frente e chama o carroceiro: sempre volta.
   brought.people = bag.people;
   exp.bag = brought;
-  const hasLoss = lost.items.length > 0 || lost.gold > 0 || lost.mats.ossos > 0 || lost.mats.ferro > 0;
+  const hasLoss = lost.items.length > 0 || lost.gold > 0 || MATERIALS.some((m) => lost.mats[m] > 0);
   if (hasLoss) {
     const carter = w.village.buildings.carroceiro;
     const pile = {
@@ -213,8 +218,7 @@ function arrive(w: World, ev: SimEvent[]): void {
   const bag = exp.bag;
   const report = w.pending ?? newReport(w, false, 'voltou');
   v.gold += bag.gold;
-  v.mats.ossos += bag.mats.ossos;
-  v.mats.ferro += bag.mats.ferro;
+  for (const m of MATERIALS) v.mats[m] = (v.mats[m] ?? 0) + (bag.mats[m] ?? 0);
   if (bag.people > 0) {
     v.people += bag.people;
     chronicle(w, `${bag.people === 1 ? 'Uma pessoa resgatada chegou' : `${bag.people} pessoas resgatadas chegaram`} à vila.`, 'bom', ev);
@@ -272,7 +276,7 @@ function roomCleared(w: World, ev: SimEvent[]): void {
     if (room.kind === 'chefe') {
       w.stats.bossFightTicks += ticks;
       w.stats.bossFights++;
-      if (room.enemies.some((e) => e.kind === 'senhor')) {
+      if (room.enemies.some((e) => e.kind === 'senhor' || e.kind === 'couraca')) {
         w.stats.senhorFights++;
         w.stats.senhorFightTicks += ticks;
         w.stats.senhorPhase2Frac += room.phase2At && ticks > 0 ? (room.phase2At - room.fightStart) / ticks : 1;
@@ -285,6 +289,7 @@ function roomCleared(w: World, ev: SimEvent[]): void {
   if (room.kind === 'bau') {
     exp.bag.gold += jitter(w, 20 * floorPower(room.floor));
     exp.bag.mats.ferro += int(w, 3, 6);
+    if (actOf(room.floor) >= 2) exp.bag.mats.ferro_negro += int(w, 2, 4);
     const legendary = room.floor >= 6 && chance(w, 0.03) && !hasItemAnywhere(w, 'juramento_ferro');
     bagItem(w, legendary ? makeLegend(w, 'juramento_ferro', Math.ceil(room.floor / 2), `Baú do andar ${room.floor}`) : dropItem(w, room.floor, 'rara', s.luck), ev);
   }
@@ -320,7 +325,7 @@ export function leaveReason(w: World): { text: string; floorEnd: boolean } | nul
   if (exp.room + 1 >= roomsOnFloor(exp.floor)) {
     if (r.mode === 'ficar') return { text: `andar ${exp.floor} concluído`, floorEnd: true };
     if (r.mode === 'ate' && exp.floor >= r.untilFloor) return { text: 'chegou ao andar planejado', floorEnd: true };
-    if (exp.floor >= BALANCE.maxFloor) return { text: 'fundo da cripta', floorEnd: true };
+    if (exp.floor >= BALANCE.maxFloor) return { text: 'fundo do abismo', floorEnd: true };
   }
   return null;
 }

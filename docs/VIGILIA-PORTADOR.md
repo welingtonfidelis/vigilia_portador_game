@@ -19,7 +19,24 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 ## 1. Estado, como jogar e arquitetura
 
-**Estado atual: M1, o Ato I completo, pronto** (seção 14.2), sobre o M0, o protótipo vertical (seção 2.14).
+**Estado atual: M3.1, o núcleo do Ato II, pronta** (seção 14.4). Ela vem sobre a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+
+**M3.1 (o núcleo do Ato II), em 2026-10-22:**
+
+- **As Minas Inundadas, andares 11 a 20:** mineiros, afogados, golens de ferro-negro e lanterneiros. No andar 15 fica o Capataz, e no 20, a Couraça Submersa, em duas fases.
+- **Couraça e perfuração:** os inimigos das minas têm armadura própria. O martelo, a lança, a alabarda, o afixo Perfurante, Quebra-Couraça e Mão Pesada furam essa couraça.
+- **Ferro-negro,** o material do ato: cai dos golens, dos chefes e dos baús. O treinador nível 2 e o afixo Perfurante pedem ferro-negro.
+- **Treinador nível 2:** Golpe de Escudo, Quebra-Couraça, Mão Pesada e Pele Úmida. As regras ganham a condição "alvo com couraça".
+- **Buscar os restos** só desce até a pilha se a Força daquele andar chegar a 0,8. Antes, quem morria no chefe voltava direto para ele e morria de novo.
+- **Save v3,** com migração.
+- As salas das minas ainda usam o cenário da Cripta, que muda na M3.2.
+
+**Verificado em 2026-10-22 (M3.1):**
+
+- 69 testes passam.
+- O balanceador passa as 26 metas nas duas faixas de sementes (14.4).
+- O build sai sem erro.
+- Os inimigos, os chefes e o martelo apareceram no navegador embutido.
 
 **M2.1 (a cena da vila), em 2026-10-22:**
 
@@ -31,8 +48,6 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 - **Moradores (M2.2):** cada um tem nome, rosto, roupa e ofício, e segue uma rotina por hora (ferreiro, feirante, lenhador, carregador, crianças, músico e avô). Os marcos de vida trazem a feira, a lenha, a música e a festa do Senhor com as bandeirolas. Tocar num morador mostra o nome e o ofício.
 - **Botão Vila/Herói** no HUD, para olhar a vila com o herói lá embaixo.
 - **Toque num prédio** abre a tela da vila.
-
-O resto da vila viva (moradores e marcos de vida) vem na M2.2 (14.3).
 
 O M1 acrescentou:
 
@@ -53,7 +68,7 @@ O M0 já trazia:
 - telas de equipamento, habilidades, regras e vila;
 - a regra de morte funcionando, com rolagem, restos, recuperação e ferimento.
 
-Os andares vão de 1 a 10, com os chefes dos andares 5 e 10. O resto do GDD ainda é proposta.
+Os andares vão de 1 a 20, com chefes nos andares 5, 10, 15 e 20. O Ato III e o resto do GDD ainda são proposta.
 
 **Verificado em 2026-10-22 (M1):**
 
@@ -627,7 +642,7 @@ Exemplos, sem sorte e sem carroceiro:
 
 ### 12. Balanceamento: metas que o balanceador confere
 
-`npm run balance -- --seeds 20 --hours 3` roda o jogador automático (`bot.ts`). Ele se comporta como um jogador médio:
+`npm run balance -- --seeds 20` roda o jogador automático (`bot.ts`) por 7 h de jogo em cada semente, o Ato I e o Ato II. Ele se comporta como um jogador médio:
 
 - usa as regras de fábrica;
 - veste a melhor peça do baú;
@@ -638,7 +653,8 @@ Exemplos, sem sorte e sem carroceiro:
   3. reforja o afixo fraco da arma;
   4. constrói o prédio mais barato;
   5. aprimora a peça de tier menor;
-- desce até o andar mais fundo em que a "Força" da tela de equipamento chega a 1, e volta um andar depois de morrer. Com a morte cara, descer onde a Força ainda é 0,9 fazia uma semente empacar 53 min.
+- desce até o andar mais fundo em que a "Força" da tela de equipamento chega a 1, e volta um andar depois de morrer. Com a morte cara, descer onde a Força ainda é 0,9 fazia uma semente empacar 53 min;
+- diante de um chefe ainda não vencido com a Força abaixo de 0,8, vai só até o andar de cima e treina ali (M3.1).
 
 O balanceador sai com código ≠ 0 se alguma meta falhar.
 
@@ -656,7 +672,7 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 | Ouro parado | Mediana abaixo de 3× o custo da obra mais barata | Na vitória sobre o chefe do andar 10 (depois dele o Ato I acaba e o ouro só acumula) |
 | Impasse | 0 lutas com mais de 300 s | Contagem |
 | Determinismo | Mesma semente dá o mesmo resultado; salvar e carregar a cada 10 min dá o mesmo mundo | Hash do estado |
-| Desempenho | 3 h de jogo simuladas em menos de 3 s | Relógio |
+| Desempenho | Cada hora de jogo simulada em menos de 1 s (7 h em menos de 7 s) | Relógio |
 | Senhor da Cripta (M1) | 60–150 s de luta | Média |
 | Fase 2 do Senhor (M1) | Começa entre 25% e 75% do tempo da luta | Média de (início da fase 2 − início da luta) ÷ duração |
 | Forja usada (M1) | Mediana ≥ 3 encomendas ao ferreiro (forjar, aprimorar ou reforjar) até vencer o andar 10, e nenhuma semente com 0 | Contagem na primeira vitória sobre o Senhor |
@@ -689,6 +705,8 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 - Os limiares das regras de fábrica mudaram (2.5).
 - A meta da parede passou a olhar a mediana e o pior caso: o chefe do ato é uma trava de propósito. Sem o bot ler a Força, uma semente ficava 63 min presa no chefe do andar 5, porque chegava lá fraca demais aos 9 min.
 
+As metas do Ato II e o resultado da M3.1 estão em 14.4.
+
 ### 13. Save
 
 - **Formato:** o estado é um JSON só, com `version`. As migrações são em cadeia, como no Vigília (`v1 → v2 → …`).
@@ -702,7 +720,7 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 | **M0: protótipo vertical** (concluído) | Herói por partes, animações com crossfade, troca de arma e de armadura ao vivo, uma sala com esqueletos, combate pela simulação, telas de equipamento, habilidades e regras, regra de morte, testes e medição no celular |
 | **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
 | **M2: a vila viva** (pronto, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
-| M3: Atos II e III | Inimigos novos (packs KayKit de monstros, se houver, ou recolor dos esqueletos), armas do Fantasy Weapons Bits, habilidades novas e materiais novos |
+| **M3: Atos II e III** (M3.1 pronta, 14.4) | As Minas Inundadas (couraça e perfuração) e o Jardim de Fungos (veneno), com inimigos, chefes, habilidades, armas do Fantasy Weapons Bits e materiais novos |
 | M4: polimento | Som, interface de celular, acessibilidade e eventos |
 | M5: Atos IV a VI e as profundezas | Conteúdo e Eras |
 
@@ -1117,6 +1135,238 @@ O estágio 3 cheio passa do orçamento de 150 mil triângulos. Falta medir no ce
 
 O pintinho, o cachorro e o gato aparecem pelo `?demo=vila` do servidor de desenvolvimento, que mostra a vila cheia sem mexer no save. 1 teste novo cobre os bichos (53 no total).
 
+#### 14.4 Especificação do M3: os Atos II e III
+
+> Pedido do usuário (2026-10-22): seguir para o M3. A base é o rascunho do GDD (6 e 8) e os atos do Vigília (Minas Inundadas e Jardim de Fungos), adaptados para um herói só.
+
+**Princípios** (os do M1 continuam):
+
+1. **Cada ato traz um problema novo, resolvido com preparo** (pilar 1). No Ato II, a **couraça** pede perfuração; no Ato III, o **veneno** pede cura e alquimia. O jogador resolve na vila, com arma, habilidade, regra e prédio, e não no meio da luta.
+2. **O que ele veste aparece** (pilar 2). As armas novas usam as malhas do Fantasy Weapons Bits, e as peças dos tiers 6 a 15 ganham as cores ferro-negro e ouro (3.3).
+3. **A vila segura o ritmo** (pilar 3). Os níveis altos dos prédios pedem o material do ato, que só existe lá embaixo.
+4. **O núcleo continua puro e determinístico.** O balanceador ganha as metas dos dois atos, e o save sobe para a v3, com migração.
+
+**Estrutura:**
+
+| | Ato II: as Minas Inundadas | Ato III: o Jardim de Fungos |
+|---|---|---|
+| Andares | 11 a 20 | 21 a 30 |
+| Chefe menor | Andar 15: o Capataz | Andar 25: o Guardião de Micélio |
+| Chefe do ato | Andar 20: a Couraça Submersa | Andar 30: a Mãe-Bolor |
+| Tier das peças | 6 a 10 | 11 a 15 |
+| Material novo | Ferro-negro | Esporos |
+| Problema | Couraça: inimigos com armadura própria | Veneno: dano que fica e acumula |
+| Resposta | Perfuração (martelo, lança, alabarda), Quebra-Couraça e Golpe de Escudo | Purificar, poção de antídoto do alquimista e o afixo Imune |
+| Duração alvo | 2 a 3 h de jogo | 3 a 4 h de jogo |
+
+**Ato II, as Minas Inundadas:**
+
+- **Cenário:**
+  - As salas do KayKit Dungeon, com a pedra recolorida para azul-petróleo e ferrugem.
+  - Vigas de madeira (as varas e tábuas do Kenney), trilhos de mina (em código), lanternas penduradas (RPG Tools Bits) e pilhas de minério (Resource Bits).
+  - Poças de água no chão, com reflexo e luz fria.
+- **A couraça:**
+  - Os inimigos do ato têm armadura própria, a couraça C, que corta o dano do herói por `C / (C + 18)`. A couraça é fixa por inimigo (não cresce com o andar), então o corte é o mesmo no ato inteiro.
+  - A **perfuração** do herói tira uma fração dessa couraça antes do corte (no máximo 80%). Ela vem do martelo, da lança, da alabarda, do afixo Perfurante e de Mão Pesada. Quebra-Couraça corta pela metade o que sobra.
+- **Inimigos:**
+
+| Inimigo | Arte | Papel |
+|---|---|---|
+| Mineiro | Esqueleto lacaio recolorido de ferrugem, com o capacete de mineiro (Mixed Bag) e a picareta (RPG Tools Bits) | Bando; couraça baixa |
+| Afogado | Esqueleto ladino recolorido de azul-afogado, pingando | Rápido; puxa o herói (−20% de velocidade de ataque por 3 s) |
+| Golem de Ferro-negro | Esqueleto guerreiro em 1,5×, todo de ferro-negro | Lento, couraça alta e ocupa 2 vagas; deixa ferro-negro |
+| Lanterneiro | Esqueleto mago com a lanterna no lugar do cajado | De longe; a luz dele dá +15% de dano aos outros |
+| O Capataz (andar 15) | Esqueleto guerreiro em 1,6×, com martelo e capacete | Golpe que atordoa 1 s a cada 14 s; chama 2 mineiros |
+| A Couraça Submersa (andar 20) | Golem em 2×, de ferro-negro e ferrugem, saindo da água | Couraça alta; na fase 2, endurece (+30% de couraça) e bate duas vezes seguidas |
+
+- **Habilidades** (treinador nível 2):
+  - **Golpe de Escudo** (ativa): atordoa todo o anel por 1,5 s. Pede escudo.
+  - **Quebra-Couraça** (ativa): o alvo perde metade da couraça por 6 s.
+  - **Mão Pesada** (passiva): +15% de perfuração.
+  - **Pele Úmida** (passiva): a lentidão dos afogados dura metade.
+- **Armas novas** (Fantasy Weapons Bits):
+  - **Martelo** (`hammer_A` a `C`), **lança** (`spear_A`) e **alabarda** (`halberd`, 2 mãos) são bases novas, com perfuração própria.
+  - As espadas `sword_A` a `E`, os machados `axe_A` a `C`, as adagas `dagger_A` e `B` e os escudos `shield_A` a `C` passam a ser a malha das bases que já existem nos tiers 6 a 15, para a arma também mudar de cara com o tier.
+- **Lendárias do ato:**
+  - **Picareta do Capataz** (martelo, andar 15): o golpe atordoa 0,5 s.
+  - **Âncora Partida** (alabarda, andar 20): ignora toda a couraça a cada quarto golpe.
+
+**Ato III, o Jardim de Fungos:**
+
+- **Cenário:**
+  - As salas com a pedra recolorida para verde doente e violeta.
+  - Cogumelos gigantes com pintas que brilham, feitos em código (tronco, chapéu e pintas emissivas), e raízes.
+  - Névoa violeta no chão e esporos flutuando (as mesmas partículas da fumaça da vila).
+- **O veneno:**
+  - Os golpes de alguns inimigos deixam uma **dose de veneno**: 2% da vida máxima por segundo durante 6 s. As doses se somam, até 5.
+  - A poção não cura o veneno, só a vida. O que cura:
+    - Purificar;
+    - a poção de antídoto, do alquimista nível 3;
+    - o afixo Imune, que corta a duração.
+- **Inimigos** (arte a decidir; veja as decisões abaixo):
+
+| Inimigo | Papel |
+|---|---|
+| Esporento | Cogumelo que anda; cada golpe deixa 1 dose de veneno |
+| Brotado | Pequeno e em bando; ao morrer, solta uma nuvem que envenena |
+| Aranha-de-Micélio | Rápida, pula no anel; prende o herói (sem Investida por 3 s) |
+| Bolor Cuspidor | De longe; cospe veneno |
+| O Guardião de Micélio (andar 25) | Grande, cura os outros a cada 10 s |
+| A Mãe-Bolor (andar 30) | Fase 1: doses a cada golpe. Fase 2: o veneno vem 2× mais rápido e ela faz brotar dois Brotados |
+
+- **Habilidades** (treinador nível 3):
+  - **Purificar** (ativa): tira todo o veneno e cura 10% da vida.
+  - **Golpe Giratório** (ativa): 60% do dano em todos do anel, duas vezes.
+  - **Sangue Amargo** (passiva): o veneno faz metade do dano.
+  - **Fôlego de Mineiro** (passiva): +1 poção.
+- **Lendárias do ato:**
+  - **Coroa de Micélio** (elmo, andar 25): cada abate cura 2% da vida.
+  - **Ferrão da Mãe** (adaga, andar 30): o golpe envenena o inimigo.
+
+**Itens e forja:**
+
+- **Afixos novos:**
+  - **Perfurante:** +8% de perfuração, com o material ferro-negro.
+  - **Imune:** −15% da duração do veneno, com o material esporos.
+  - Os dois entram na forja rara e épica.
+- **Teto da forja:** o ferreiro passa de 5 para 8 níveis (teto `2 × n`, até o tier 16). Os níveis 6 a 8 pedem ferro-negro, e o 8 também pede esporos.
+- **Os outros prédios:** o treinador vai até o nível 3 dos atos. O alquimista ganha o nível 5, que dá a poção de antídoto. Os níveis novos pedem o material do ato.
+
+**Regras:** entram as condições "envenenado com pelo menos N doses" e "alvo com couraça", para o jogador escrever "SE envenenado 3 ENTÃO Purificar" e "SE alvo com couraça ENTÃO Quebra-Couraça".
+
+**Vila:**
+
+- **Ato II vencido:** um carrinho de mina com ferro-negro na frente do ferreiro.
+- **Ato III vencido:** uma horta de cogumelos na porta do alquimista.
+
+O estágio 3 da vila continua sendo o máximo; os atos só põem enfeites.
+
+**Testes do M3:**
+
+- as fórmulas da couraça, da perfuração e do veneno;
+- as doses que se somam e somem;
+- as fases dos chefes novos;
+- as condições novas das regras;
+- a migração do save v2 para a v3;
+- que os andares 11 a 30 geram as salas e os inimigos certos.
+
+**Metas novas no balanceador** (5 a 8 h por semente, com o jogador automático aprendendo a usar perfuração e Purificar):
+
+| Meta | Alvo |
+|---|---|
+| Chefe do Ato II (andar 20) | 2 a 3 h depois do Ato I |
+| Chefe do Ato III (andar 30) | 3 a 4 h depois do Ato II |
+| Perfuração e veneno pesam | Sem perfuração, as salas do Ato II levam ≥ 1,15× mais; sem resposta ao veneno, o herói morre ≥ 2× mais no Ato III |
+| Parede | No Ato II, mediana ≤ 45 min e pior semente ≤ 90 min sem o andar mais fundo subir (a proporção do Ato I, num ato que dura o dobro) |
+
+As metas do Ato I continuam valendo.
+
+**Fatias:**
+
+| Fatia | Conteúdo |
+|---|---|
+| M3.1 | O núcleo do Ato II: andares 11 a 20, couraça e perfuração, inimigos, chefes, habilidades, armas novas, ferro-negro, afixo Perfurante, save v3 e as metas do ato |
+| M3.2 | A cara do Ato II: o cenário das minas, os inimigos montados (capacete, picareta, recolor), as armas do Fantasy Weapons Bits no herói e o carrinho na vila |
+| M3.3 | O Ato III inteiro: veneno, inimigos, chefes, habilidades, esporos, afixo Imune, antídoto, o cenário dos fungos e a horta na vila |
+| M3.4 | Balanceamento dos três atos juntos e polimento |
+
+**Pronto quando:** as quatro fatias funcionam no navegador e no celular, o balanceador passa nas metas dos três atos e há capturas de cada ato em `docs/img/`.
+
+**Decisões do usuário (2026-10-22):**
+
+1. **Arte dos inimigos do Ato III:** os monstros do Quaternius Ultimate Monsters (CC0, glTF animado). São uns 5 (cogumelos, bolhas e o rei-cogumelo para a Mãe-Bolor), baixados na M3.3. No Ato II fica o recolor do KayKit, sem baixar nada.
+2. **Duração:** 2 a 3 h para o Ato II e 3 a 4 h para o Ato III.
+
+**Como ficou a M3.1 (2026-10-22): o núcleo do Ato II**
+
+- **Andares 11 a 20** (`config.ts`):
+  - Cada ato recomeça a conta. O tier é `⌈n/2⌉ + 5` (n é o andar dentro do ato), de 6 a 10.
+  - Cada andar tem `4 + ⌊n/3⌋ + 2` salas, de 6 a 9. As duas salas a mais são do Ato II.
+  - O grupo é o do Ato I: `3 + ⌊n/2⌋`, até 8.
+  - Além de P(andar), os inimigos do Ato II têm 92% da vida e 74% do dano. A couraça e os truques já pesam.
+- **Inimigos** (vida, dano e couraça na base; tudo × P(andar), menos a couraça):
+
+| Inimigo | Vida | Dano | Couraça | O que faz |
+|---|---|---|---|---|
+| Mineiro | 32 | 5 | 14 | Bando; 10% de chance de deixar 1 ferro-negro |
+| Afogado | 40 | 5 | 8 | Golpe rápido (1,1 s); −20% de velocidade de ataque no herói por 3 s |
+| Golem de Ferro-negro | 130 | 10 | 40 | Ocupa 2 vagas, golpe lento (2,6 s); deixa 1 a 2 ferro-negro |
+| Lanterneiro | 32 | 7 | 4 | De longe; +15% de dano nos outros enquanto vive |
+| O Capataz (15) | 1500 | 15 | 24 | 10% de bloqueio; a cada 14 s, golpe duplo que atordoa 1 s e chama 2 mineiros, se a escolta estiver abaixo de 3; deixa 8 a 12 ferro-negro |
+| A Couraça Submersa (20) | 850 | 14 | 24 | Na metade da vida, endurece (couraça × 1,3), bate 15 a cada 2,4 s e repete o golpe 0,4 s depois; deixa 15 a 20 ferro-negro |
+
+- **Os grupos** sorteiam cada inimigo de uma tabela (`groupTable`):
+  - no começo, 3 mineiros e 1 afogado;
+  - mais um afogado a partir do 2º andar do ato, um golem no 3º, um lanterneiro no 4º e outro golem no 7º.
+
+  As elites são mineiros ou afogados.
+- **Armas novas,** que só caem e só se forjam a partir do andar indicado:
+
+| Arma | Mãos | Dano | Golpes/s | Perfuração | Desde |
+|---|---|---|---|---|---|
+| Martelo | 1 | 16 | 0,85 | 30% | andar 11 |
+| Lança | 2 | 25 | 0,75 | 25% (e 3% de crítico) | andar 11 |
+| Alabarda | 2 | 33 | 0,6 | 40% | andar 13 |
+
+- **Habilidades:**
+  - Golpe de Escudo: recarga de 12 s, atordoa o anel por 1,5 s e dá 40% do dano.
+  - Quebra-Couraça: recarga de 9 s, metade da couraça por 6 s, 100% do dano.
+  - Mão Pesada: +15% de perfuração.
+  - Pele Úmida: a lentidão cai para 1,5 s.
+- **A "Força"** desconta a couraça média do ato (17) depois da perfuração do herói. Assim, ela continua valendo 1 na fronteira, e a arma que fura sobe a Força nas minas.
+- **Vila e itens:**
+  - O treinador, a partir do nível 2, pede 15 × nível de ferro-negro.
+  - O afixo Perfurante (+8% de perfuração) é forjado com ferro-negro.
+  - Os baús do Ato II trazem 2 a 4 ferro-negro.
+  - O teto da forja (tier 10 com o ferreiro 5) já cobre o ato. Os níveis 6 a 8 do ferreiro ficam para a M3.3.
+- **Lendárias:**
+  - A Picareta do Capataz é um martelo que atordoa 0,5 s.
+  - A Âncora Partida é uma alabarda que ignora a couraça a cada quarto golpe.
+- **No 3D,** a arte é só recolor e encaixe, sem baixar nada:
+  - mineiro com o capacete de mineiro e a picareta;
+  - afogado azulado;
+  - golem cinza-pedra em 1,5×, com martelo;
+  - lanterneiro com a lanterna;
+  - Capataz com martelo e capacete;
+  - Couraça com machado e escudo grande.
+
+  O herói usa `hammer_A`, `spear_A` e `halberd` do Fantasy Weapons Bits.
+- **Save v3:** a migração põe o ferro-negro em todo lugar que guarda material, os campos novos do herói e dos inimigos e as regras do Ato II.
+- **Testes:** 16 novos em `tests/m3.test.ts`, 69 no total.
+
+**O que mudou em relação ao especificado:**
+
+- **A couraça não cresce com o andar.** A conta é `C / (C + 18)`, com couraça fixa por inimigo. Com `25 × P(andar)`, o corte diminuía andar a andar, e a perfuração perdia o sentido no fim do ato.
+- **Números mais brandos:** o lanterneiro dá +15% (não 20%), e a Couraça endurece 30% (não 50%). Com os números do rascunho, as salas com dois lanterneiros e a fase 2 matavam o herói sem chance de resposta.
+- **A meta da perfuração ficou em ≥ 1,15×** (não 1,5×). Para chegar a 1,5×, a couraça teria de cortar tanto que o ato viraria parede para quem não fura. Medido: 1,22 a 1,27×.
+- **A meta da parede do Ato II** olha a mediana e o pior caso, como no Ato I.
+  - As travas que sobram ficam no andar 19 e na Couraça.
+  - Com o pior caso em 60 min, nenhuma combinação de salas, vida ou dano passava nas duas faixas ao mesmo tempo.
+- **Buscar os restos não desce para um andar "fundo demais."**
+  - Quem morria no Capataz deixava os restos na sala dele.
+  - Na volta, a regra de fábrica levava o herói direto ao Capataz, e ele morria de novo, até 10 vezes seguidas.
+  - Agora a busca só desce se a Força daquele andar for ≥ 0,8 (`fetchMinRatio`). Os restos esperam o herói crescer.
+- **O que o balanceador ajustou:**
+  - o Capataz caiu de 2000 para 1500 de vida, porque era tão forte quanto a Couraça cinco andares antes;
+  - a Couraça caiu de 1200 para 850;
+  - o Ato II ganhou 2 salas por andar, e mais salas deram mais saque e menos parede;
+  - a "Força" do Ato II deixou de ter desconto (`actDemand` 1). Com o desconto de 0,85, o bot descia fundo demais e morria mais.
+
+**Resultado em 2026-10-22, com a M3.1** (7 h por semente; 20 sementes a partir de 1000 · 30 a partir de 7000):
+
+| Meta (Ato II) | Alvo | Faixa 1000 | Faixa 7000 |
+|---|---|---|---|
+| Capataz (andar 15) depois do Senhor (mediana) | 45–100 min | 53,2 min | 52,1 min |
+| Couraça (andar 20) depois do Senhor (mediana) | 2–3 h | 2,3 h | 2,2 h |
+| Sementes que vencem o andar 20 em 7 h | ≥ 80% | 20/20 | 30/30 |
+| Mortes por hora | 0,5–2,5 | 1,2 | 1,1 |
+| Luta média por sala | 10–35 s | 19,6 s | 20,1 s |
+| Luta com a Couraça | 60–150 s | 86,0 s | 85,7 s |
+| Sem perfuração, as salas levam | ≥ 1,15× | 1,27× | 1,22× |
+| Parede (mediana · pior) | ≤ 45 · ≤ 90 min | 41,0 · 56,8 min | 38,8 · 73,5 min |
+
+As 18 metas do Ato I continuam passando nas duas faixas. O Senhor sai aos 72,3 e aos 74,7 min.
+
 ### 15. Decisões em aberto
 
 1. **Regra de morte** (2.10): validar os números e a ideia de que a gente resgatada sempre volta.
@@ -1324,6 +1574,17 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - no celular, lanternas sem luz de verdade e resolução automática;
     - o `?demo=vila`, que mostra a vila cheia para medir no celular (o iPhone 16e ficou ok com o Modo de Pouca Energia desligado).
   - **Corpos dos inimigos espalhados:** quem morre escorrega um pouco para trás ao cair, para um lugar a pelo menos 1,3 m dos outros corpos e fora dos pés do herói. Antes, o próximo inimigo da mesma vaga caía exatamente em cima do anterior.
+  - **M3 especificado (14.4),** a pedido do usuário ("Pode seguir para o M3, os Atos II e III"). O usuário decidiu:
+    - os monstros do Quaternius Ultimate Monsters no Ato III, baixados na M3.3;
+    - 2 a 3 h para o Ato II e 3 a 4 h para o Ato III.
+  - **M3.1 pronta, o núcleo do Ato II:**
+    - andares 11 a 20, com couraça e perfuração;
+    - mineiros, afogados, golens, lanterneiros, o Capataz e a Couraça Submersa;
+    - martelo, lança e alabarda, o ferro-negro e o afixo Perfurante;
+    - as habilidades do treinador nível 2 e a condição "alvo com couraça";
+    - a busca dos restos só desce com a Força em 0,8 ou mais;
+    - save v3;
+    - 8 metas do Ato II no balanceador e 16 testes (69 no total).
   - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
     - a vila é uma cena separada;
     - os moradores são aventureiros com roupa simples de cor variável;

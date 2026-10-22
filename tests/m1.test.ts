@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { spawnGroup, stepFight } from '../src/sim/combat.ts';
 import { BALANCE } from '../src/sim/config.ts';
 import { makeItem } from '../src/sim/items.ts';
-import { catchUp, checksum, commands, createWorld, deserialize, forgeCap, forgeCost, reforgeCost, serialize, step } from '../src/sim/index.ts';
+import { SAVE_VERSION, catchUp, checksum, commands, createWorld, deserialize, forgeCap, forgeCost, reforgeCost, serialize, step } from '../src/sim/index.ts';
 import type { Enemy, SimEvent, World } from '../src/sim/index.ts';
 
 function rich(w: World): void {
@@ -18,7 +18,7 @@ function senhorRoom(seed = 5): World {
   w.hero.deepest = 10;
   w.hero.level = 40;
   w.hero.hp = 1e5;
-  w.exp = { floor: 10, room: 6, bag: { gold: 0, mats: { ossos: 0, ferro: 0 }, items: [], people: 0 }, started: 0, recall: false, leaving: null, kills: 0 };
+  w.exp = { floor: 10, room: 6, bag: { gold: 0, mats: { ossos: 0, ferro: 0, ferro_negro: 0 }, items: [], people: 0 }, started: 0, recall: false, leaving: null, kills: 0 };
   w.room = {
     floor: 10, index: 6, kind: 'chefe', enemies: spawnGroup(w, 10, 'chefe', 0), phase: 'luta', phaseEnd: 0, look: 1,
     fightStart: w.tick, fearUntil: 0, hpAtStart: w.hero.hp, phase2At: 0,
@@ -141,6 +141,11 @@ describe('Senhor da Cripta', () => {
   });
 });
 
+/** JSON com as chaves em ordem alfabética (o mesmo conteúdo dá o mesmo texto). */
+function canonical(v: unknown): string {
+  return JSON.stringify(v, (_k, x) => (x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : 1))) : x));
+}
+
 describe('save v2 e relatório da ausência', () => {
   it('migra um save v1 (sem fase, ressurreição e contadores novos)', () => {
     const w = senhorRoom(9);
@@ -154,7 +159,7 @@ describe('save v2 e relatório da ausência', () => {
     for (const k of ['forged', 'upgraded', 'senhorFights', 'senhorFightTicks', 'senhorPhase2Frac']) delete v1.stats[k];
     const body = JSON.stringify(v1);
     const back = deserialize(JSON.stringify({ v: 1, sum: checksum(body), body }));
-    expect(back.version).toBe(2);
+    expect(back.version).toBe(SAVE_VERSION);
     expect(back.room!.phase2At).toBe(0);
     expect(back.room!.enemies.every((e) => e.phase === 1 && e.revived === false)).toBe(true);
     expect(back.stats.forged).toBe(0);
@@ -165,7 +170,8 @@ describe('save v2 e relatório da ausência', () => {
       step(back);
       step(fresh);
     }
-    expect(checksum(JSON.stringify(back))).toBe(checksum(JSON.stringify(fresh)));
+    // Compara o conteúdo (com as chaves em ordem): a migração põe os campos novos no fim do objeto.
+    expect(checksum(canonical(back))).toBe(checksum(canonical(fresh)));
   });
 
   it('o relatório da ausência traz peças, níveis, obras e a crônica do período', () => {

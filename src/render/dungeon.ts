@@ -46,8 +46,8 @@ function torchLight(x: number, y: number, z: number): THREE.PointLight {
   return l;
 }
 
-/** Monta a sala. `kind` muda os enfeites (baú, santuário, prisioneiro); `remains` põe a pilha caída. */
-export async function buildRoom(look: number, kind: RoomKind | 'vila', remains: boolean): Promise<BuiltRoom> {
+/** Monta a sala. `kind` muda os enfeites (baú, santuário, prisioneiro); `remains` põe a pilha caída. A vila é outra cena (town.ts). */
+export async function buildRoom(look: number, kind: RoomKind, remains: boolean): Promise<BuiltRoom> {
   const group = new THREE.Group();
   const torches: THREE.PointLight[] = [];
   const r = rng(look);
@@ -66,24 +66,23 @@ export async function buildRoom(look: number, kind: RoomKind | 'vila', remains: 
     group.add(o);
     return o;
   };
-  const camp = kind === 'vila';
   const tasks: Promise<unknown>[] = [];
   // Piso 4 × 4 de 4 m.
   for (const x of [-6, -2, 2, 6]) {
     for (const z of [-6, -2, 2, 6]) {
-      const name = camp ? 'floor_dirt_large' : 'floor_tile_large';
+      const name = 'floor_tile_large';
       r();
       tasks.push(put(name, x, z, Math.floor(r() * 4) * (Math.PI / 2)));
     }
   }
   // Parede do fundo (z = −8) com a porta dos inimigos em x = 2.
   for (const x of [-6, -2, 2, 6]) {
-    const name = x === ENEMY_DOOR.x ? 'wall_doorway' : camp ? 'wall' : (['wall', 'wall', 'wall_cracked', 'wall_arched', 'wall_shelves', 'wall_window_closed'] as const)[Math.floor(r() * 6)]!;
+    const name = x === ENEMY_DOOR.x ? 'wall_doorway' : (['wall', 'wall', 'wall_cracked', 'wall_arched', 'wall_shelves', 'wall_window_closed'] as const)[Math.floor(r() * 6)]!;
     tasks.push(put(name, x, -8));
   }
   // Parede da esquerda (x = −8) com a porta do herói em z = 2.
   for (const z of [-6, -2, 2, 6]) {
-    const name = z === HERO_DOOR.z ? 'wall_doorway' : r() < 0.25 && !camp ? 'wall_cracked' : 'wall';
+    const name = z === HERO_DOOR.z ? 'wall_doorway' : r() < 0.25 ? 'wall_cracked' : 'wall';
     tasks.push(put(name, -8, z, Math.PI / 2));
   }
   tasks.push(put('pillar', -8, -8), put('pillar_decorated', 8, -8), put('pillar', -8, 8));
@@ -95,28 +94,7 @@ export async function buildRoom(look: number, kind: RoomKind | 'vila', remains: 
     group.add(l);
   }
   tasks.push(put(r() < 0.5 ? 'banner_red' : 'banner_patternA_red', -2, -7.9, 0, 0));
-  if (camp) {
-    // Acampamento na boca da Cripta: o baú da vila, a mesa do ferreiro, barris e caixas.
-    tasks.push(
-      put('chest_gold', -5.4, -5.6, Math.PI / 5),
-      put('table_small', -5.6, -1.2, 0.2),
-      put('chair', -4.4, -0.6, 1.2),
-      put('barrel_large', 5.8, -6.4),
-      put('barrel_small_stack', 6.9, -4.4),
-      put('crates_stacked', -6.6, 3.6, 0.4),
-      put('trunk_medium_A', -2.8, -6.8),
-      put('torch_lit', 3.2, -1.5),
-      put('torch_lit', -3.2, -1.5),
-      put('bottle_A_green', -5.7, -1.0, 0, 1.25),
-      put('candle_triple', -5.4, -1.5, 0, 1.25),
-    );
-    for (const [x, z] of [[3.2, -1.5], [-3.2, -1.5]] as const) {
-      const l = torchLight(x, 1.6, z);
-      l.intensity = 9;
-      torches.push(l);
-      group.add(l);
-    }
-  } else {
+  {
     // Enfeites só no fundo e na esquerda: o lado da câmera (x e z positivos) fica livre.
     const props: [string, number, number][] = [
       ['barrel_large', -6.4, -6.2], ['barrel_small', -5.2, -6.8], ['box_stacked', 6.4, -6.4], ['crates_stacked', -6.6, 4.8],
@@ -152,7 +130,7 @@ const KEEP_ATTRS = ['position', 'normal', 'uv'];
  * Junta as peças fixas numa malha por material (o piso à parte, sem projetar sombra): a sala cai
  * de ~60 chamadas de desenho para 2 ou 3. As luzes continuam soltas.
  */
-function mergeStatic(group: THREE.Group): THREE.Group {
+export function mergeStatic(group: THREE.Group): THREE.Group {
   group.updateMatrixWorld(true);
   const buckets = new Map<string, { mat: THREE.Material; floor: boolean; geos: THREE.BufferGeometry[] }>();
   const out = new THREE.Group();

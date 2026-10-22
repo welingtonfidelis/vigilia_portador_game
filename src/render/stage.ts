@@ -10,13 +10,23 @@ import { buildRoom, DUNGEON_PIECES, ENEMY_DOOR, HERO_DOOR } from './dungeon.ts';
 import type { BuiltRoom } from './dungeon.ts';
 import { HeroRig } from './heroRig.ts';
 import { CARRIED_EXIT_TICKS, EXIT_TICKS, travelView } from '../game/travel.ts';
+import { CRYPT, FIRE, HOME_VIEW, SEAT } from '../game/townPlan.ts';
 import { PerfMeter } from './perf.ts';
+import { TOWN_FILES, Town } from './town.ts';
 import { visualFiles } from './visuals.ts';
 
 /** Vagas do anel, girado para a direita da porta: assim o herói aparece de três quartos para a câmera. */
 const RING_ANGLES = [-0.6, 0.55, 1.7];
-/** Onde o herói descansa no acampamento: perto da porta da Cripta, para a saída ser curta. */
-const CAMP_SPOT = new THREE.Vector3(0.8, 0, -2.2);
+/** Na vila: onde o herói senta na fogueira e a frente da porta da Cripta. */
+const SEAT_POS = new THREE.Vector3(SEAT.x, 0, SEAT.z);
+const CRYPT_FRONT = new THREE.Vector3(CRYPT.x + 1.4, 0, CRYPT.z);
+const FIRE_POS = new THREE.Vector3(FIRE.x, 0, FIRE.z);
+const HOME = new THREE.Vector3(HOME_VIEW.x, 0, HOME_VIEW.z);
+
+const DAY_SKY = new THREE.Color(0x9cc7e8);
+const DUSK_SKY = new THREE.Color(0xe4a678);
+const NIGHT_SKY = new THREE.Color(0x0e1626);
+const CRYPT_SKY = new THREE.Color(0x0a0c11);
 const BACK_SPOTS = [new THREE.Vector3(-5, 0, -4.4), new THREE.Vector3(5.4, 0, -3), new THREE.Vector3(-5.6, 0, 0.6), new THREE.Vector3(5.8, 0, 1.2)];
 
 export interface Quality {
@@ -57,6 +67,16 @@ export class Stage {
   private floaters: Floater[] = [];
   private swing = 0;
   private sun: THREE.DirectionalLight;
+  private hemi: THREE.HemisphereLight;
+  readonly town = new Town();
+  /** O jogador escolheu olhar a vila com o herói lá embaixo (botão Vila/Herói do HUD). */
+  watchTown = false;
+  private showingTown = false;
+  /** Câmera da vila: segue o herói até o jogador arrastar; zoom pela roda ou pinça. */
+  private townCam = { target: new THREE.Vector3().copy(HOME), zoom: HOME_VIEW.zoom, free: false };
+  private lastPhase = '';
+  private standUntil = 0;
+  private seated = false;
   ready = false;
 
   private canvas: HTMLCanvasElement;
@@ -74,7 +94,8 @@ export class Stage {
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.scene.background = new THREE.Color(0x0a0c11);
     this.scene.fog = new THREE.Fog(0x0a0c11, 20, 44);
-    this.scene.add(new THREE.HemisphereLight(0x8a9cc4, 0x2a1d14, 1.1));
+    this.hemi = new THREE.HemisphereLight(0x8a9cc4, 0x2a1d14, 1.1);
+    this.scene.add(this.hemi);
     this.sun = new THREE.DirectionalLight(0xc8d6ff, 1.6);
     this.sun.position.set(-7, 16, 9);
     this.sun.castShadow = quality.shadows;
@@ -84,15 +105,19 @@ export class Stage {
     this.sun.shadow.bias = -0.0006;
     this.scene.add(this.sun, this.sun.target);
     this.scene.add(this.hero.root);
+    this.town.group.visible = false;
+    this.scene.add(this.town.group);
     this.perf = new PerfMeter(this.renderer);
+    this.bindTownInput();
   }
 
   /** Carrega tudo que o protótipo usa (cerca de 8 MB) antes de mostrar a cena. */
   async init(onProgress?: (done: number, total: number) => void): Promise<void> {
-    const files = [...visualFiles(), ...enemyFiles(), ...DUNGEON_PIECES];
+    const files = [...visualFiles(), ...enemyFiles(), ...DUNGEON_PIECES, ...TOWN_FILES];
     const anims = [
       'animations/Rig_Medium_General.glb', 'animations/Rig_Medium_MovementBasic.glb', 'animations/Rig_Medium_CombatMelee.glb',
-      'animations/Rig_Medium_CombatRanged.glb', 'animations/Rig_Medium_Special.glb',
+      'animations/Rig_Medium_CombatRanged.glb', 'animations/Rig_Medium_Special.glb', 'animations/Rig_Medium_Simulation.glb',
+      'animations/Rig_Medium_Tools.glb',
     ];
     const total = files.length + anims.length;
     let done = 0;
@@ -104,7 +129,86 @@ export class Stage {
       this.enemyClips.set(k, v);
     }
     await this.hero.init(this.heroClips);
+    await this.town.init();
     this.ready = true;
+  }
+
+  /** Arrastar move a câmera da vila; roda e pinça dão zoom; um toque curto num prédio abre o painel dele. */
+  private bindTownInput(): void {
+    const pts = new Map<number, { x: number; y: number }>();
+    let moved = 0;
+    let pinch = 0;
+    const c = this.canvas;
+    c.addEventListener('pointerdown', (e) => {
+      if (!this.showingTown) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      moved = 0;
+      if (pts.size === 2) {
+        const [a, b] = [...pts.values()];
+        pinch = Math.hypot(a!.x - b!.x, a!.y - b!.y);
+      }
+      c.setPointerCapture(e.pointerId);
+    });
+    c.addEventListener('pointermove', (e) => {
+      const p = pts.get(e.pointerId);
+      if (!p || !this.showingTown) return;
+      const dx = e.clientX - p.x, dy = e.clientY - p.y;
+      p.x = e.clientX;
+      p.y = e.clientY;
+      if (pts.size === 2) {
+        const [a, b] = [...pts.values()];
+        const d = Math.hypot(a!.x - b!.x, a!.y - b!.y);
+        if (pinch > 0) this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * (pinch / d), 0.45, 2.6);
+        pinch = d;
+        return;
+      }
+      moved += Math.abs(dx) + Math.abs(dy);
+      if (moved < 6) return;
+      // Pan no chão: direita e frente da câmera, achatadas no plano.
+      const right = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 0).setY(0).normalize();
+      const fwd = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).setY(0).normalize();
+      const k = 0.06 * this.townCam.zoom;
+      this.townCam.target.addScaledVector(right, -dx * k).addScaledVector(fwd, -dy * k);
+      this.townCam.target.x = THREE.MathUtils.clamp(this.townCam.target.x, -50, 50);
+      this.townCam.target.z = THREE.MathUtils.clamp(this.townCam.target.z, -50, 40);
+      this.townCam.free = true;
+    });
+    const up = (e: PointerEvent) => {
+      if (!pts.has(e.pointerId)) return;
+      const tap = pts.size === 1 && moved < 6;
+      pts.delete(e.pointerId);
+      if (pts.size < 2) pinch = 0;
+      if (tap && this.showingTown) this.tapTown(e.clientX, e.clientY);
+    };
+    c.addEventListener('pointerup', up);
+    c.addEventListener('pointercancel', up);
+    c.addEventListener('wheel', (e) => {
+      if (!this.showingTown) return;
+      e.preventDefault();
+      this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * Math.exp(e.deltaY * 0.0012), 0.45, 2.6);
+    }, { passive: false });
+  }
+
+  /** Toque na vila: acha o ponto do chão e, se cair num lote de prédio, avisa a interface. */
+  private tapTown(x: number, y: number): void {
+    const r = this.canvas.getBoundingClientRect();
+    const ndc = new THREE.Vector2(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(ndc, this.camera);
+    const hit = new THREE.Vector3();
+    if (!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit)) return;
+    const lot = this.town.lotAt(hit.x, hit.z);
+    if (lot) dispatchEvent(new CustomEvent('portador-lot', { detail: lot.kind }));
+  }
+
+  /** Volta a câmera da vila para o herói (ou para a praça, com ele lá embaixo). */
+  recenter(): void {
+    this.townCam.free = false;
+    this.townCam.zoom = HOME_VIEW.zoom;
+  }
+
+  get townFree(): boolean {
+    return this.showingTown && this.townCam.free;
   }
 
   private size = { w: 1, h: 1 };
@@ -146,16 +250,55 @@ export class Stage {
     this.camera.setViewOffset(w, h, this.insetNow.x / 2, this.insetNow.y / 2, w, h);
   }
 
-  private wantedRoom(w: World): { key: string; kind: Parameters<typeof buildRoom>[1]; look: number; remains: boolean } {
-    if (w.room && (w.phase === 'sala' || w.phase === 'voltando')) {
-      const remains = w.remains.some((r) => r.floor === w.room!.floor && r.room === w.room!.index);
-      return { key: `${w.room.floor}:${w.room.index}:${w.room.look}:${remains}`, kind: w.room.kind, look: w.room.look, remains };
+  private wantedRoom(w: World): { key: string; kind: Parameters<typeof buildRoom>[1]; look: number; remains: boolean } | null {
+    if (!w.room || (w.phase !== 'sala' && w.phase !== 'voltando')) return null;
+    const remains = w.remains.some((r) => r.floor === w.room!.floor && r.room === w.room!.index);
+    return { key: `${w.room.floor}:${w.room.index}:${w.room.look}:${remains}`, kind: w.room.kind, look: w.room.look, remains };
+  }
+
+  /** Luz da vila pela hora: céu, névoa, sol e céu refletido. A Cripta tem a própria luz fria. */
+  private lightTown(day: number): void {
+    const sky = day >= 0.5 ? DUSK_SKY.clone().lerp(DAY_SKY, (day - 0.5) * 2) : NIGHT_SKY.clone().lerp(DUSK_SKY, day * 2);
+    (this.scene.background as THREE.Color).copy(sky);
+    const fog = this.scene.fog as THREE.Fog;
+    fog.color.copy(sky);
+    fog.near = 50 + 30 * day;
+    fog.far = 130 + 70 * day;
+    this.sun.intensity = 0.35 + 2.7 * day;
+    this.sun.color.setHSL(0.1 - 0.5 * (1 - day) * 0.1, 0.5, 0.75 + 0.15 * day);
+    this.hemi.intensity = 0.45 + 0.9 * day;
+    this.hemi.color.setHSL(0.58, 0.45, 0.55 + 0.2 * day);
+    const sc = this.sun.shadow.camera;
+    if (sc.right !== 34) {
+      sc.left = sc.bottom = -34;
+      sc.right = sc.top = 34;
+      sc.far = 100;
+      sc.updateProjectionMatrix();
     }
-    return { key: 'vila', kind: 'vila', look: 7, remains: false };
+  }
+
+  private lightCrypt(): void {
+    (this.scene.background as THREE.Color).copy(CRYPT_SKY);
+    const fog = this.scene.fog as THREE.Fog;
+    fog.color.copy(CRYPT_SKY);
+    fog.near = 20;
+    fog.far = 44;
+    this.sun.intensity = 1.6;
+    this.sun.color.set(0xc8d6ff);
+    this.hemi.intensity = 1.1;
+    this.hemi.color.set(0x8a9cc4);
+    const sc = this.sun.shadow.camera;
+    if (sc.right !== 13) {
+      sc.left = sc.bottom = -13;
+      sc.right = sc.top = 13;
+      sc.far = 40;
+      sc.updateProjectionMatrix();
+    }
   }
 
   private async swapRoom(w: World): Promise<void> {
     const want = this.wantedRoom(w);
+    if (!want) return;
     if (want.key === this.roomKey || this.building) return;
     this.building = true;
     const built = await buildRoom(want.look, want.kind, want.remains);
@@ -166,13 +309,12 @@ export class Stage {
     this.scene.add(built.group);
     this.roomKey = want.key;
     this.building = false;
-    // Cena nova: o herói começa na porta por onde entra (na sala, a da esquerda; na vila, a da Cripta),
-    // e a câmera vai junto, sem varrer a sala.
-    const entry = want.key === 'vila'
-      ? (w.phase === 'vila' ? ENEMY_DOOR.clone().add(new THREE.Vector3(0, 0, 0.7)) : CAMP_SPOT.clone())
-      : HERO_DOOR.clone().add(new THREE.Vector3(0.7, 0, 0));
-    this.heroPos.copy(entry);
-    this.focus.copy(entry).add(new THREE.Vector3(0, 1.1, 0));
+    // Sala nova: o herói começa na porta da esquerda, e a câmera vai junto, sem varrer a sala.
+    if (!this.showingTown) {
+      const entry = HERO_DOOR.clone().add(new THREE.Vector3(0.7, 0, 0));
+      this.heroPos.copy(entry);
+      this.focus.copy(entry).add(new THREE.Vector3(0, 1.1, 0));
+    }
   }
 
   private ringPos(e: Enemy): THREE.Vector3 {
@@ -270,16 +412,44 @@ export class Stage {
     if (!this.ready) return;
     this.time += dt;
     this.perf.begin();
-    void this.swapRoom(w);
+    const travel = travelView(w, frac);
+    // Qual cena: a vila com o herói nela (ou saindo para a Cripta), ou quando o jogador quer olhar
+    // a vila; senão, a masmorra.
+    const heroInTown = w.phase === 'vila' || w.phase === 'descendo';
+    const showTown = heroInTown || this.watchTown;
+    if (showTown !== this.showingTown) {
+      this.showingTown = showTown;
+      this.town.group.visible = showTown;
+      if (this.room) this.room.group.visible = !showTown;
+      if (showTown) this.townCam.free = false;
+    }
+    if (!showTown) void this.swapRoom(w);
+    else this.town.sync(w);
+    // Chegando da Cripta: o herói aparece na porta e anda até a fogueira; no primeiro quadro, já sentado.
+    if (w.phase !== this.lastPhase) {
+      if (w.phase === 'vila') {
+        this.heroPos.copy(this.lastPhase ? CRYPT_FRONT : SEAT_POS);
+        this.focus.copy(this.heroPos).add(new THREE.Vector3(0, 1.1, 0));
+        this.seated = false;
+      }
+      if (w.phase === 'descendo' && this.seated) {
+        // Levanta da fogueira antes de ir para a Cripta.
+        this.hero.animator.play({ name: 'Sit_Floor_StandUp', duration: 0.9 / Math.max(1, speed) });
+        this.standUntil = this.time + 0.9 / Math.max(1, speed);
+        this.seated = false;
+      }
+      this.lastPhase = w.phase;
+    }
+    this.hero.root.visible = showTown ? heroInTown : true;
     this.hero.request(this.previewHead ?? w.hero.head, w.hero.equip);
-    const roomShown = this.roomKey !== 'vila' && w.room;
+    const roomShown = !showTown && w.room;
     // Onde o herói deve estar. Ele anda em velocidade constante e para no alvo (nada de correr
     // contra a porta): na saída, chega à porta e a empurra; depois, o cartão da viagem cobre a tela.
-    const travel = travelView(w, frac);
     const target = new THREE.Vector3(0, 0, 0);
-    if (w.phase === 'vila' || (w.phase === 'descendo' && !roomShown)) {
-      target.copy(CAMP_SPOT);
-      if (w.phase === 'descendo') target.copy(ENEMY_DOOR).add(new THREE.Vector3(0, 0, 0.7));
+    if (w.phase === 'vila') {
+      target.copy(SEAT_POS);
+    } else if (w.phase === 'descendo') {
+      target.copy(CRYPT_FRONT);
     } else if (w.phase === 'voltando' && !w.carried && roomShown) {
       target.copy(HERO_DOOR).add(new THREE.Vector3(0.7, 0, 0));
     } else if (w.phase === 'sala' && w.room?.phase === 'saque' && w.room.exitTo === 'fundo') {
@@ -290,26 +460,26 @@ export class Stage {
     const toTarget = target.clone().sub(this.heroPos);
     const gap = toTarget.length();
     const stride = 5.5 * dt * Math.max(1, speed * 0.8);
-    const running = gap > 0.05 && !this.hero.animator.isDead;
+    const running = gap > 0.05 && !this.hero.animator.isDead && this.time >= this.standUntil;
     if (running) this.heroPos.add(toTarget.multiplyScalar(Math.min(1, stride / gap)));
     this.hero.root.position.copy(this.heroPos);
     // Chegou à porta na saída: empurra (uma vez por viagem).
     const doorKey = `${w.phase}:${w.phaseEnd}`;
-    if (travel.mode === 'saindo' && w.phase !== 'sala' && !travel.carried && !running && this.doorKey !== doorKey) {
+    if (travel.mode === 'saindo' && w.phase !== 'sala' && !travel.carried && !running && gap < 0.3 && this.time >= this.standUntil && this.doorKey !== doorKey) {
       this.doorKey = doorKey;
       this.hero.animator.play({ name: 'Interact', duration: 1.2 / Math.max(1, speed) });
     }
     // Para onde olhar: o alvo do golpe, senão a porta dos inimigos, senão a câmera.
     let face: THREE.Vector3 | null = null;
     if (running) face = target.clone().sub(this.heroPos);
-    else if (travel.mode === 'saindo' && w.phase !== 'sala') face = (w.phase === 'descendo' ? ENEMY_DOOR : HERO_DOOR).clone().sub(this.heroPos);
+    else if (travel.mode === 'saindo' && w.phase !== 'sala') face = (w.phase === 'descendo' ? new THREE.Vector3(CRYPT.x, 0, CRYPT.z) : HERO_DOOR).clone().sub(this.heroPos);
     else if (travel.mode === 'saindo' || travel.mode === 'passagem') face = ENEMY_DOOR.clone().sub(this.heroPos);
     else if (w.room && w.phase === 'sala') {
       const tid = w.hero.action?.target;
       const tgt = w.room.enemies.find((e) => e.id === tid && e.state !== 'morto') ?? w.room.enemies.find((e) => e.state === 'anel');
       const a = tgt ? this.enemies.get(tgt.id) : undefined;
       face = a ? a.pos.clone().sub(this.heroPos) : ENEMY_DOOR.clone().sub(this.heroPos);
-    } else if (w.phase === 'vila') face = new THREE.Vector3(0.35, 0, 1);
+    } else if (w.phase === 'vila') face = this.closeUp ? new THREE.Vector3(0.6, 0, 1) : FIRE_POS.clone().sub(this.heroPos);
     if (face && face.lengthSq() > 1e-4) {
       const want = Math.atan2(face.x, face.z);
       let d = want - this.heroFacing;
@@ -319,7 +489,12 @@ export class Stage {
     this.hero.root.rotation.y = this.heroFacing;
     const two = w.hero.equip.arma && BASES[w.hero.equip.arma.base]?.hands === 2;
     const inFight = w.phase === 'sala' && w.room?.phase === 'luta';
-    this.hero.animator.loop(running ? 'Running_A' : inFight && two ? 'Melee_2H_Idle' : inFight ? 'Melee_Unarmed_Idle' : 'Idle_A', running ? Math.min(1.8, Math.max(1, speed * 0.8)) : 1);
+    // Na vila, parado na fogueira, senta (de pé na tela de equipamento).
+    const sitting = w.phase === 'vila' && !running && !this.closeUp && this.heroPos.distanceTo(SEAT_POS) < 0.3;
+    if (sitting && !this.seated) this.hero.animator.play({ name: 'Sit_Floor_Down', duration: 0.9 });
+    this.seated = sitting;
+    const idle = sitting ? 'Sit_Floor_Idle' : inFight && two ? 'Melee_2H_Idle' : inFight ? 'Melee_Unarmed_Idle' : 'Idle_A';
+    this.hero.animator.loop(running ? 'Running_A' : idle, running ? Math.min(1.8, Math.max(1, speed * 0.8)) : 1);
     // Inimigos.
     if (roomShown && w.room) {
       let qi = 0, bi = 0;
@@ -357,20 +532,31 @@ export class Stage {
     }
     this.onEvents(w, events, speed);
     this.hero.animator.update(dt);
-    // Tochas tremem; lendária pulsa.
-    if (this.room) for (const [i, l] of this.room.torches.entries()) l.intensity = (i < 3 ? 14 : 9) * (0.85 + 0.15 * Math.sin(this.time * 9 + i * 2.1) * Math.sin(this.time * 5.3 + i));
+    // Tochas tremem; lendária pulsa; a vila acende e apaga com a hora.
+    if (this.room && !showTown) for (const [i, l] of this.room.torches.entries()) l.intensity = (i < 3 ? 14 : 9) * (0.85 + 0.15 * Math.sin(this.time * 9 + i * 2.1) * Math.sin(this.time * 5.3 + i));
     pulseLegendary(this.time);
-    // Câmera persegue o herói; no celular em pé, mais longe.
+    if (showTown) this.lightTown(this.town.update(w, this.time));
+    else this.lightCrypt();
+    // Câmera: na masmorra persegue o herói; na vila, segue o herói (ou a praça) até o jogador arrastar.
     const portrait = this.camera.aspect < 0.85;
     this.zoom += ((this.closeUp ? 0.58 : 1) - this.zoom) * (1 - Math.exp(-dt * 4));
-    const dist = (portrait ? 1.55 : 1.15) * this.zoom;
-    this.focus.lerp(this.heroPos.clone().add(new THREE.Vector3(0, this.closeUp ? 1.25 : 1.1, 0)), 1 - Math.exp(-dt * 3));
+    let dist = (portrait ? 1.55 : 1.15) * this.zoom;
+    let goal = this.heroPos.clone().add(new THREE.Vector3(0, this.closeUp ? 1.25 : 1.1, 0));
+    if (showTown) {
+      if (this.closeUp) this.townCam.free = false;
+      // Vista de casa (praça, fogueira e Cripta no quadro); na tela de equipamento, perto do herói.
+      if (!this.townCam.free) this.townCam.target.copy(HOME);
+      goal = this.closeUp ? goal : this.townCam.target.clone().add(new THREE.Vector3(0, 1.1, 0));
+      dist *= this.closeUp ? 1 : 1.6 * this.townCam.zoom;
+    }
+    this.focus.lerp(goal, 1 - Math.exp(-dt * (this.townCam.free ? 10 : 3)));
     this.camera.position.copy(this.focus).add(new THREE.Vector3(6.5 * dist, (this.closeUp ? 5.2 : 8.2) * dist, 10.5 * dist));
     this.camera.lookAt(this.focus);
     this.applyInset(dt);
     this.sun.target.position.copy(this.focus);
+    this.sun.position.copy(this.focus).add(showTown ? new THREE.Vector3(-18, 34, 20) : new THREE.Vector3(-7, 16, 9));
     // Com o cartão da viagem cobrindo a tela, não desenha (poupa bateria no celular).
-    const covered = travel.mode === 'viagem' && travel.elapsed > (travel.carried ? CARRIED_EXIT_TICKS : EXIT_TICKS) + 6;
+    const covered = travel.mode === 'viagem' && !this.watchTown && travel.elapsed > (travel.carried ? CARRIED_EXIT_TICKS : EXIT_TICKS) + 6;
     if (!covered) this.renderer.render(this.scene, this.camera);
     this.updateFloaters();
     this.perf.end();

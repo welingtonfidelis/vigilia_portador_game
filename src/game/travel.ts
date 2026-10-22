@@ -27,8 +27,11 @@ export interface TravelView {
   carried: boolean;
 }
 
-/** Saída a pé: correr até a porta (até ~1,4 s) e empurrá-la (0,8 s). Carregado: caído por 2 s. */
-export const EXIT_TICKS = 28;
+/**
+ * Saída a pé: na vila, levantar da fogueira (0,9 s), correr até a Cripta (~1,2 s) e empurrar a
+ * porta (1,2 s); na sala, correr até a porta da esquerda (~1,4 s) e empurrar. Carregado: caído por 2 s.
+ */
+export const EXIT_TICKS = 36;
 export const CARRIED_EXIT_TICKS = 20;
 /** Chegada: quanto tempo depois de chegar o cartão ainda some e o herói entra. */
 export const ARRIVE_TICKS = 15;

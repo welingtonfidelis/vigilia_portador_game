@@ -14,7 +14,7 @@ export function load(path: string): Promise<GLTF> {
   let p = cache.get(path);
   if (!p) {
     p = loader.loadAsync(ROOT + path).then((g) => {
-      shareMaterials(g.scene);
+      shareMaterials(g.scene, path.split('/')[0]!);
       return g;
     });
     cache.set(path, p);
@@ -22,10 +22,13 @@ export function load(path: string): Promise<GLTF> {
   return p;
 }
 
-/** Um material por nome (knight, skeleton, texture…): os glTF que apontam para o mesmo atlas dividem a GPU. */
+/**
+ * Um material por pack e nome (adventurers:knight, dungeon:texture…): os glTF que apontam para o mesmo
+ * atlas dividem a GPU, e dois packs com o mesmo nome de material não se confundem.
+ */
 const shared = new Map<string, THREE.MeshStandardMaterial>();
 
-function shareMaterials(root: THREE.Object3D): void {
+function shareMaterials(root: THREE.Object3D, pack: string): void {
   root.traverse((o) => {
     const mesh = o as THREE.Mesh;
     if (!mesh.isMesh) return;
@@ -34,7 +37,7 @@ function shareMaterials(root: THREE.Object3D): void {
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     const out = mats.map((m) => {
       const std = m as THREE.MeshStandardMaterial;
-      const key = std.name || 'sem-nome';
+      const key = `${pack}:${std.name || 'sem-nome'}`;
       const have = shared.get(key);
       if (have) {
         if (std !== have) std.dispose();

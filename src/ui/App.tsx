@@ -56,10 +56,10 @@ function where(w: World): string {
 }
 
 /** Entre a vila e a sala: a tela escurece e o cartão mostra para onde o herói vai. */
-function TravelCard({ session, w }: { session: Session; w: World }) {
+function TravelCard({ session, w, watching }: { session: Session; w: World; watching: boolean }) {
   const v = travelView(w, session.frac);
-  const trip = v.mode === 'viagem';
-  const on = trip || v.mode === 'passagem';
+  const trip = v.mode === 'viagem' && !watching;
+  const on = trip || (v.mode === 'passagem' && !watching);
   // Enquanto o cartão some (na chegada), ele continua mostrando para onde o herói ia.
   const last = useRef(v);
   if (on || (v.mode === 'saindo' && v.title)) last.current = v;
@@ -79,7 +79,15 @@ function TravelCard({ session, w }: { session: Session; w: World }) {
   );
 }
 
-function Hud({ session, w, onBell, onMenu }: { session: Session; w: World; onBell: () => void; onMenu: () => void }) {
+interface ViewCtl {
+  /** A vila está na tela (herói nela, saindo para a Cripta, ou o jogador olhando). */
+  townShown: boolean;
+  watching: boolean;
+  toggle: () => void;
+  recenter: () => void;
+}
+
+function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World; onBell: () => void; onMenu: () => void; view: ViewCtl }) {
   const h = w.hero;
   const s = heroStats(w);
   const hpPct = Math.max(0, Math.min(1, h.hp / s.maxHp));
@@ -135,6 +143,12 @@ function Hud({ session, w, onBell, onMenu }: { session: Session; w: World; onBel
             <button key={x} class={!session.paused && session.speed === x ? 'on' : ''} onClick={() => { session.speed = x; session.paused = false; session.emit(); }}>{x}×</button>
           ))}
           <button class="bell" disabled={!w.exp || w.phase !== 'sala' || !!w.exp.recall} onClick={onBell} title="Sino: volta no fim da luta">🔔</button>
+          {w.phase !== 'vila' && w.phase !== 'descendo' && (
+            <button class={view.watching ? 'on' : ''} onClick={view.toggle} title={view.watching ? 'Voltar a ver o herói' : 'Olhar a vila enquanto o herói desce'}>
+              {view.watching ? '⚔ Herói' : '⌂ Vila'}
+            </button>
+          )}
+          {view.townShown && <button onClick={view.recenter} title="Centralizar a câmera" aria-label="Centralizar a câmera">◎</button>}
           <button onClick={onMenu} title="Menu" aria-label="Menu">☰</button>
         </div>
       </div>
@@ -151,6 +165,22 @@ export function App({ session }: { session: Session }) {
   const [newGame, setNewGame] = useState<'inicio' | 'trocar' | null>(session.isNew ? 'inicio' : null);
   const [menu, setMenu] = useState(false);
   const [credits, setCredits] = useState(false);
+  const [watching, setWatching] = useState(false);
+  useEffect(() => {
+    dispatchEvent(new CustomEvent('portador-watch', { detail: watching }));
+  }, [watching]);
+  // Tocar num prédio na vila abre a tela da vila.
+  useEffect(() => {
+    const onLot = () => setPanel('vila');
+    addEventListener('portador-lot', onLot);
+    return () => removeEventListener('portador-lot', onLot);
+  }, []);
+  const view: ViewCtl = {
+    townShown: w.phase === 'vila' || w.phase === 'descendo' || watching,
+    watching,
+    toggle: () => setWatching((x) => !x),
+    recenter: () => dispatchEvent(new CustomEvent('portador-recenter')),
+  };
 
   // Painel aberto: a câmera abre espaço para o herói (à esquerda na tela larga, acima no celular).
   useEffect(() => {
@@ -213,8 +243,8 @@ export function App({ session }: { session: Session }) {
   const report = w.report && w.report.tick !== seenReport ? w.report : null;
   return (
     <>
-      <TravelCard session={session} w={w} />
-      <Hud session={session} w={w} onBell={() => session.run((x) => x.exp && (x.exp.recall = true))} onMenu={() => setMenu((m) => !m)} />
+      <TravelCard session={session} w={w} watching={watching} />
+      <Hud session={session} w={w} onBell={() => session.run((x) => x.exp && (x.exp.recall = true))} onMenu={() => setMenu((m) => !m)} view={view} />
       {menu && (
         <div class="menu">
           <button onClick={() => { setMenu(false); setPanel(null); setNewGame('trocar'); }}>Novo jogo</button>

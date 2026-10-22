@@ -1,6 +1,8 @@
 /**
- * Lista exata do que sai de cada pack KayKit baixado para public/assets/kaykit/<pack>/.
- * Os caminhos são relativos à pasta extraída do pack (packs/<pack>/<raiz do zip>/).
+ * Lista exata do que sai de cada pack baixado (KayKit e, em teste para a vila, o Kenney Fantasy Town)
+ * para public/assets/kaykit/<pack>/.
+ * Os caminhos são relativos à pasta extraída do pack (packs/<pack>/<raiz do zip>/). As texturas que um
+ * .gltf cita na mesma pasta vêm junto (o importador valida e copia).
  * Nada fora desta lista é copiado; ver docs/VIGILIA-PORTADOR.md §3.4.
  */
 export interface PackEntry {
@@ -10,10 +12,11 @@ export interface PackEntry {
   dir: string;
   root: string;
   /** Pasta dentro da raiz e nomes base (sem extensão); `.gltf` puxa o `.bin`. */
-  groups: { path: string; files: string[]; ext: '.glb' | '.gltf' | '.png' }[];
+  groups: { path: string; files: string[]; ext: '.glb' | '.gltf' | '.png'; keepPath?: string }[];
 }
 
 const DUNGEON = [
+  'stairs',
   'floor_tile_large', 'floor_tile_large_rocks', 'floor_tile_small', 'floor_tile_small_broken_A',
   'floor_tile_small_broken_B', 'floor_tile_small_decorated', 'floor_tile_big_grate', 'floor_dirt_large',
   'wall', 'wall_corner', 'wall_doorway', 'wall_arched', 'wall_cracked', 'wall_broken', 'wall_pillar',
@@ -23,6 +26,23 @@ const DUNGEON = [
   'banner_thin_red', 'coin_stack_small', 'coin_stack_medium', 'candle_lit', 'candle_triple', 'table_medium_broken',
   'table_small', 'chair', 'stool', 'sword_shield_broken', 'keyring_hanging', 'bottle_A_green', 'trunk_medium_A',
 ];
+
+const FOREST = ['Tree_1_A', 'Tree_2_A', 'Tree_3_A', 'Tree_4_A', 'Bush_1_A', 'Bush_2_A', 'Rock_1_A', 'Rock_2_A', 'Grass_1_A', 'Grass_2_A'].map((n) => `${n}_Color1`);
+
+const KENNEY_TOWN = [
+  'wall-wood', 'wall-wood-door', 'wall-wood-window-shutters', 'wall-wood-window-glass', 'wall', 'wall-door', 'wall-window-glass',
+  'wall-window-shutters', 'roof-gable', 'roof-gable-end', 'roof-gable-top', 'roof', 'roof-corner', 'roof-point', 'chimney', 'stall-red',
+  'stall-green', 'stall-bench', 'fountain-round', 'fountain-round-detail', 'tree', 'tree-high', 'tree-crooked', 'lantern', 'cart', 'road',
+  'fence', 'fence-gate', 'banner-red', 'windmill', 'rock-large', 'planks', 'hedge', 'watermill', 'overhang', 'pillar-wood',
+  // M2.1: ruínas e obras, e o resto da vila.
+  'wall-broken', 'wall-wood-broken', 'wall-half', 'wall-wood-half', 'poles', 'poles-horizontal', 'planks-half', 'planks-opening',
+  'banner-green', 'rock-small', 'rock-wide', 'stairs-stone', 'fence-broken', 'hedge-large', 'stall',
+];
+
+const TOOLS = ['anvil', 'grindstone', 'map', 'compass_base', 'blueprint', 'bucket_metal', 'axe', 'hammer', 'saw', 'shovel', 'lantern'];
+const RESOURCE = ['Wood_Log_Stack', 'Wood_Planks_Stack_Medium', 'Stone_Bricks_Stack_Medium', 'Iron_Bars_Stack_Small', 'Textiles_Stack_Small', 'Pallet_Wood', 'Wood_Log_A'];
+const FURNITURE = ['table_medium', 'chair_A_wood', 'bed_single_A', 'chair_stool_wood', 'shelf_A_small'];
+const MIXED = ['flax_flower_A', 'flax_flower_B', 'guitar_A', 'circus_tent', 'umbrella_green'];
 
 export const PACKS: PackEntry[] = [
   {
@@ -55,8 +75,72 @@ export const PACKS: PackEntry[] = [
     groups: [
       {
         path: 'Animations/gltf/Rig_Medium', ext: '.glb',
-        files: ['Rig_Medium_General', 'Rig_Medium_MovementBasic', 'Rig_Medium_CombatMelee', 'Rig_Medium_CombatRanged', 'Rig_Medium_Special'],
+        files: [
+          'Rig_Medium_General', 'Rig_Medium_MovementBasic', 'Rig_Medium_CombatMelee', 'Rig_Medium_CombatRanged', 'Rig_Medium_Special',
+          'Rig_Medium_Simulation', 'Rig_Medium_Tools',
+        ],
       },
+    ],
+  },
+  {
+    out: 'hexagon',
+    dir: 'hexagon',
+    root: 'KayKit_Medieval_Hexagon_Pack_1.0_FREE',
+    groups: [
+      // Só o alvo e o suporte de armas do treinador (ampliados). Os prédios do Hexagon perderam para o
+      // Kenney no teste lado a lado (docs §3.1) e não entram no jogo.
+      { path: 'Assets/gltf/decoration/props', ext: '.gltf', files: ['target', 'weaponrack'] },
+    ],
+  },
+  {
+    out: 'tools',
+    dir: 'tools',
+    root: 'KayKit_RPGToolsBits_1.0_FREE',
+    groups: [
+      { path: 'Assets/gltf', ext: '.gltf', files: TOOLS },
+    ],
+  },
+  {
+    out: 'resource',
+    dir: 'resource',
+    root: 'KayKit_ResourceBits_1.0_FREE',
+    groups: [
+      { path: 'Assets/gltf', ext: '.gltf', files: RESOURCE },
+    ],
+  },
+  {
+    out: 'furniture',
+    dir: 'furniture',
+    root: 'KayKit_Furniture_Bits_1.0_FREE',
+    groups: [
+      { path: 'Assets/gltf', ext: '.gltf', files: FURNITURE },
+    ],
+  },
+  {
+    out: 'mixed',
+    dir: 'mixedbag',
+    root: 'KayKit_Mixed_Bag_1_FREE',
+    groups: [
+      { path: 'Assets/gltf', ext: '.gltf', files: MIXED },
+    ],
+  },
+  {
+    out: 'forest',
+    dir: 'forest',
+    root: 'KayKit_Forest_Nature_Pack_1.0_FREE',
+    groups: [
+      { path: 'Assets/gltf', ext: '.gltf', files: FOREST },
+      { path: 'Assets/gltf', ext: '.png', files: ['forest_texture'] },
+    ],
+  },
+  {
+    // Kenney Fantasy Town Kit 2.0 (CC0), em teste lado a lado para a vila do M2.
+    out: 'kenney-town',
+    dir: 'kenney-fantasy-town',
+    root: 'Models/GLB format',
+    groups: [
+      { path: '', ext: '.glb', files: KENNEY_TOWN },
+      { path: 'Textures', ext: '.png', files: ['colormap'], keepPath: 'Textures' },
     ],
   },
   {

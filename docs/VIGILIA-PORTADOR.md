@@ -21,6 +21,16 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 **Estado atual: M1, o Ato I completo, pronto** (seção 14.2), sobre o M0, o protótipo vertical (seção 2.14).
 
+**M2.1 (a cena da vila), em 2026-10-22:**
+
+- **A vila é uma cena própria:** prédios do Kenney por estado (ruína, obra, pronto, ampliado), casas por moradores, a entrada da Cripta e a fogueira onde o herói descansa sentado.
+- **Dia e noite:** fonte e lanternas acendem com o marco de 10 moradores.
+- **Câmera de observar:** arrastar e zoom.
+- **Botão Vila/Herói** no HUD, para olhar a vila com o herói lá embaixo.
+- **Toque num prédio** abre a tela da vila.
+
+O resto da vila viva (moradores e marcos de vida) vem na M2.2 (14.3).
+
 O M1 acrescentou:
 
 - **Novo jogo:** escolha de nome e rosto, com o herói 3D trocando de rosto na hora, e um menu com Novo jogo e Créditos.
@@ -532,7 +542,7 @@ A vila é a outra metade da progressão. Ela cresce com o que o herói traz e, e
 | Casas | Sobem sozinhas | Abrigam a gente resgatada; cada 4 moradores erguem uma casa nova no diorama | — |
 
 - **As obras levam tempo:** `30 s × n` em 1×. Uma por vez; mais tarde, uma segunda frente.
-- **Na tela:** a vila é um diorama montado com o KayKit Medieval Hexagon. O prédio aparece em andaime durante a obra (`building_scaffolding`, `building_stage_A–C`) e pronto quando termina. A vila cresce visivelmente com cada volta do herói.
+- **Na tela (M2, 14.3):** a vila é uma cena própria, uma cidade viva montada com o Kenney Fantasy Town e os enfeites do KayKit. Durante a obra, o prédio aparece de andaime e pronto quando ela termina. A vila cresce e ganha vida com cada volta do herói.
 
 ### 10. Morte e regresso (regra completa)
 
@@ -688,7 +698,7 @@ O balanceador sai com código ≠ 0 se alguma meta falhar.
 |---|---|
 | **M0: protótipo vertical** (concluído) | Herói por partes, animações com crossfade, troca de arma e de armadura ao vivo, uma sala com esqueletos, combate pela simulação, telas de equipamento, habilidades e regras, regra de morte, testes e medição no celular |
 | **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
-| M2: vila em 3D | O diorama do Medieval Hexagon com obras visíveis e moradores |
+| **M2: a vila viva** (M2.1 pronta, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
 | M3: Atos II e III | Inimigos novos (packs KayKit de monstros, se houver, ou recolor dos esqueletos), armas do Fantasy Weapons Bits, habilidades novas e materiais novos |
 | M4: polimento | Som, interface de celular, acessibilidade e eventos |
 | M5: Atos IV a VI e as profundezas | Conteúdo e Eras |
@@ -830,6 +840,151 @@ Ficou para depois:
 - **Medidor no celular:** o envio do medidor de desempenho a partir do celular continua sem chegar (15.6).
 - **Prévia do novo jogo:** a tela mostra o rosto novo, mas o HUD só troca o nome depois de "Começar".
 
+#### 14.3 Especificação do M2: a vila viva
+
+> Pedido do usuário (2026-10-22): uma cidade "viva" e divertida de ficar olhando. Mesmo com o herói lutando na masmorra, deve haver motivo para às vezes ficar na vila observando, escutando e relaxando. A vida cresce aos poucos: conforme as masmorras são vencidas, a vila melhora e chega mais gente, com crianças correndo, bichos e gente tocando música.
+
+**Decisões do usuário:**
+
+- **Cena:** a vila é uma cena separada, e não um diorama dentro do acampamento.
+- **Moradores:** aventureiros do KayKit com roupa simples que muda de cor.
+- **Prédios:** Kenney Fantasy Town Kit 2.0, ampliado 4× para cair no grid de 4 m da masmorra. A decisão veio depois de um teste lado a lado: o Medieval Hexagon ampliado continuava com cara de maquete ao lado dos moradores (3.1).
+
+**Princípios:**
+
+1. **A vila conta a progressão.** Tudo o que aparece vem do estado do jogo: moradores, nível dos prédios, obras, chefes vencidos e hora do dia. Não há enfeite que apareça do nada.
+2. **A vida é só visual.** A rotina dos moradores (quem toca, quem martela, onde as crianças correm) não muda nenhum número e não entra no save. Ela é derivada do estado e de uma semente, então o mesmo morador tem sempre o mesmo rosto, a mesma roupa, o mesmo nome e o mesmo ofício. O núcleo continua puro, e o balanceador não muda.
+3. **Dá para olhar a vila com o herói lá embaixo.** Um botão no HUD alterna entre Herói e Vila. Na vila, o HUD continua mostrando o herói (vida, sala, mochila), e os avisos (morte, chefe, volta) trazem um atalho para ver o herói.
+4. **Cresce aos poucos.** A vila começa em ruínas e vazia. Cada marco acrescenta uma camada de vida (tabela abaixo).
+
+**A cena:**
+
+- **Mapa:** fixo, desenhado à mão num grid de 4 m. Tem uma praça central, ruas de pedra (`road` do Kenney), lotes dos 6 prédios, lotes de casas e as bordas de floresta (árvores e arbustos do KayKit Forest).
+- **Entrada da Cripta:** fica na borda norte. É por ela que o herói sai e volta, fazendo a mesma saída e chegada da 2.1.
+- **O herói na vila:** com o herói na vila, ele anda até a fogueira da praça e descansa sentado (`Sit_Floor_Idle`). A tela de equipamento chega a câmera perto dele ali; o acampamento do M0 deixa de existir.
+- **Câmera de observar:** arrastar move; roda do mouse ou pinça dá zoom; um botão volta ao herói. Tocar num morador mostra o nome e o ofício ("Joana, feirante"). Tocar num prédio abre o painel dele na tela da vila.
+- **Dia e noite:** seguem o dia do jogo (10 min em 1×). Manhã clara, tarde dourada, anoitecer com as lanternas acendendo e as janelas iluminadas, e noite azulada com pouca gente na rua.
+
+**Obras visíveis.** Cada prédio tem um lote fixo e aparece num destes estados:
+
+| Estado | Como aparece |
+|---|---|
+| Nível 0 | Ruína: paredes quebradas (`wall-broken`, `wall-wood-broken`), tábuas no chão e mato |
+| Em obra | Paredes pela metade com andaime de varas e tábuas do Kenney (`poles`, `planks`), pilhas de madeira e pedra (KayKit Resource Bits) e um morador martelando (`Hammering`) |
+| Níveis 1 a 2 | O prédio montado, com os objetos do ofício |
+| Níveis 3 em diante | O mesmo prédio maior (mais uma ala ou um andar com `roof-high`), com mais objetos e uma bandeira |
+
+Os objetos de cada ofício:
+
+| Prédio | Objetos |
+|---|---|
+| Ferreiro | Bigorna, rebolo, pilhas de barras de ferro, fumaça na chaminé |
+| Treinador | Alvo de treino, suporte de armas, espadas do Fantasy Weapons Bits |
+| Alquimista | Garrafas e caldeirão (do Dungeon), flores |
+| Carroceiro de resgate | Carroça do Kenney e sacos |
+| Curandeira | Ervas (flores do Mixed Bag), banco e cama do lado de fora |
+| Salão de Táticas | Mesa com mapa, bússola e plantas (RPG Tools Bits) |
+
+As **casas** surgem na ordem dos lotes, uma a cada 4 moradores (a regra que já estava na 2.9). Cada casa sorteia, pela semente do lote, a variação de parede (pedra ou madeira), as janelas e o telhado.
+
+**Moradores:**
+
+- **De onde vêm:** são os moradores do núcleo (`village.people`), com no máximo 24 na tela do computador e 14 na do celular. Os demais "estão em casa".
+- **Corpo:** cabeça de um dos rostos e uma roupa simples (o tronco e as pernas do Ranger ou do Rogue). A cor da roupa é sorteada numa paleta de 8, recolorindo as faixas de tecido do atlas, como no tier (3.3), sem mexer na pele.
+- **Crianças:** os mesmos bonecos em 0,62×, com passo mais rápido.
+- **Identidade:** nome e ofício saem da semente do mundo e do número do morador.
+
+| Ofício | Onde e o que faz | Animação |
+|---|---|---|
+| Ferreiro | Na bigorna, de dia | `Hammering` |
+| Lenhador | Na pilha de lenha | `Chopping`, com o machado do RPG Tools |
+| Feirante | Na barraca da feira | `Idle`, `Interact` |
+| Carregador | Leva caixas entre a feira e as casas | `Walking`, `Holding` |
+| Músico | Na praça, ao entardecer e à noite | Sentado (`Sit_Chair_Idle`) com o violão do Mixed Bag no colo |
+| Idoso | Num banco da praça | `Sit_Chair_Idle` |
+| Criança | Corre e brinca de pega-pega perto da fonte | `Running`, `Jump` |
+| Passante | Anda entre a casa, a feira e a fonte | `Walking` |
+
+- **Rotina por hora:** de manhã, trabalho; ao meio-dia, a praça enche; ao entardecer, música; à noite, cada um entra em casa e some (e a janela acende).
+- **Animações:** entram os conjuntos `Rig_Medium_Simulation` e `Rig_Medium_Tools` do KayKit Character Animations, mais 2,3 MB.
+
+**Marcos de vida** (cumulativos):
+
+| Marco | O que a vila ganha |
+|---|---|
+| Início | Ruínas, a fogueira, a entrada da Cripta e silêncio |
+| 1 morador | Uma casa restaurada; o primeiro morador passa |
+| Ferreiro nível 1 (já no início) e 2 moradores | O ferreiro trabalhando na bigorna |
+| 4 moradores | Lenhador e feirante; a feira com uma barraca |
+| Capitão vencido (andar 5) | Mais barracas; o músico aparece ao entardecer |
+| 6 moradores | Crianças na praça |
+| 10 moradores | A fonte da praça volta a jorrar e as lanternas acendem à noite |
+| Senhor da Cripta vencido (andar 10, fim do Ato I) | Festa por 1 dia de jogo: bandeirolas, a tenda de circo do Mixed Bag na praça, mais música e gente comemorando (`Cheering`, `Waving`). Depois, as bandeirolas ficam |
+| Bichos (fatia M2.3) | Galinhas e um cachorro a partir de 4 moradores; um gato que dorme na fonte |
+
+**Bichos:** o KayKit não tem pack grátis de animais. Antes da M2.3, vou avaliar uma fonte CC0 com animação (por exemplo, a do Quaternius) e pedir autorização para baixar, porque seria uma terceira família de arte.
+
+**Som:** a vila foi feita para ser ouvida (o violão, o martelo, as crianças, o sino da festa), mas o som continua no M4, onde estava. O M2 deixa prontos os ganchos: cada ação de morador e cada marco gera um evento de tela que o M4 só precisa ligar a um efeito.
+
+**Celular:**
+
+- **Desenho:** a geometria fixa de cada prédio é juntada numa malha por material, como na sala da Cripta, e árvores e grama usam instâncias.
+- **Moradores:** os longe da câmera atualizam a animação em ritmo menor, e há um teto de moradores na tela.
+- **Orçamento:** até 150 chamadas de desenho e 150 mil triângulos na vila.
+- **Fora da vista:** a cena da masmorra não é desenhada enquanto se olha a vila, e vice-versa.
+
+**Fatias:**
+
+| Fatia | Conteúdo |
+|---|---|
+| M2.1 | A cena da vila: mapa, ruas, entrada da Cripta, os 6 prédios por estado (ruína, obra, níveis), casas por moradores, câmera de observar, Herói/Vila no HUD, herói descansando na fogueira e dia e noite |
+| M2.2 | Os moradores: corpo e cor de roupa, nome e ofício, rotina por hora, crianças, músico, feira e trabalho com ferramentas, mais os marcos de vida até o fim do Ato I (festa) |
+| M2.3 | Os bichos (fonte a decidir) e o polimento: fumaça, janelas acesas e passarinhos |
+
+As **armas novas do Fantasy Weapons Bits** (espadas A a E, machados, martelos, alabarda, lança e escudos) não entram no M2. Elas ficam para o M3, como bases dos Atos II e III, achadas e forjadas.
+
+**Testes do M2:**
+
+- o marco de vida derivado do estado;
+- a geração dos moradores (mesma semente dá o mesmo rosto, roupa, nome e ofício);
+- a rotina por hora;
+- quais casas existem para cada número de moradores;
+- que nada da vila entra no save.
+
+O balanceador não muda, porque nenhum número muda.
+
+**Pronto quando:** as três fatias funcionam no navegador e no celular dentro do orçamento, e uma captura de cada marco está em `docs/img/`.
+
+**Como ficou a M2.1 (2026-10-22):**
+
+| | |
+|---|---|
+| ![Vila no começo](img/m2-vila-a-inicio.jpg) | ![Vila no meio do jogo](img/m2-vila-b-meio.jpg) |
+| Começo: ruínas, o ferreiro de pé e a praça com a fonte seca | Meio do jogo: obra com andaime e pilhas, casas, treinador, carroceiro, o Salão de Táticas e a entrada da Cripta |
+| ![Vila à noite](img/m2-vila-c-noite.jpg) | ![Empurrando a porta da Cripta](img/m2-vila-f-empurra-porta.jpg) |
+| Noite com 12 moradores: a fonte jorra e as lanternas acendem | O herói levanta da fogueira e empurra a porta da Cripta |
+| ![Olhando a vila](img/m2-vila-e-olhando.jpg) | ![Vila no celular](img/m2-vila-celular.jpg) |
+| Olhando a vila com o herói lá embaixo: a fogueira acesa e o HUD mostrando o herói | Celular (375 × 812) |
+
+**Onde está cada coisa:**
+
+- **`src/game/townPlan.ts` (puro):** os 18 lotes no grid de 4 m (6 prédios e 12 casas), as ruas, a entrada da Cripta, a fogueira, a vista de casa, o estado de cada lote vindo do núcleo e a hora do dia (o jogo começa às 6 h). 5 testes conferem que nada se sobrepõe, as regras de estado, as casas por morador, o dia e a noite, e que nada disso entra no save.
+- **`src/render/town.ts`:** monta cada lote peça por peça com o Kenney (paredes com porta e janelas sorteadas pela semente do lote, telhado e chamine). A ruína usa paredes quebradas e tábuas; a obra, paredes pela metade, varas e pilhas do Resource Bits; o prédio ampliado ganha um segundo andar e uma bandeira. O lote é remontado só quando o estado dele muda, e a geometria fixa é juntada por material.
+
+**O que mudou em relação à especificação:**
+
+- **A entrada da Cripta ficou na borda sul,** virada para o leste, com o morro de pedra a oeste. A câmera vem do sudeste. Com a entrada ao norte, a vila ficava atrás da câmera, e com o arco virado para o norte o herói empurrava a porta escondido atrás da parede.
+- **A fogueira de vigília ficou ao lado da entrada da Cripta, e não no meio da praça.** Assim, levantar, correr e empurrar a porta cabem na saída da viagem, que subiu de 2,8 para 3,6 s.
+- **A câmera da vila tem uma vista de casa fixa,** que enquadra a praça, os prédios, a fogueira e a Cripta. Ela não segue o herói, exceto na tela de equipamento. Arrastar a solta, e o ◎ do HUD a traz de volta.
+- **O acampamento do M0 deixou de existir:** o herói descansa na vila.
+
+**Desempenho no computador:** 70 a 90 chamadas de desenho e cerca de 141 mil triângulos, contando a sombra, dentro do orçamento de 150 e 150 mil. Falta medir no celular.
+
+**Fica para a M2.2:**
+
+- os moradores, com corpo, cor de roupa, nome, ofício e rotina;
+- os marcos de vida (feira, músico, crianças, a festa do fim do Ato I).
+
 ### 15. Decisões em aberto
 
 1. **Regra de morte** (2.10): validar os números e a ideia de que a gente resgatada sempre volta.
@@ -852,7 +1007,11 @@ Ficou para depois:
 
 ### 3.1 Família escolhida
 
-Tudo vem do **KayKit (Kay Lousberg)**, sem misturar com outro autor. É uma família coesa: o mesmo atlas de gradiente de 1024 × 1024, o mesmo traço low-poly e o mesmo esqueleto nos personagens. As versões, os tamanhos e o SHA-256 de cada download estão em `LICENSES.md`.
+Personagens, monstros, animações, masmorra e enfeites vêm do **KayKit (Kay Lousberg)**. É uma família coesa: o mesmo atlas de gradiente de 1024 × 1024, o mesmo traço low-poly e o mesmo esqueleto nos personagens.
+
+**Exceção:** os prédios da vila (M2) vêm do **Kenney Fantasy Town Kit 2.0** (CC0), por decisão do usuário em 2026-10-22, depois de um teste lado a lado. As peças do Kenney ficam em escala de gente: o grid de 1 m dele, ampliado 4×, bate com o grid de 4 m da masmorra, e a paleta conversa com a do KayKit. Os prédios em miniatura do Medieval Hexagon ampliados pareciam maquete ao lado dos moradores. O Kenney usa uma textura de cores numa subpasta (`Textures/colormap.png`), que o importador aceita só para esse pack.
+
+As versões, os tamanhos e o SHA-256 de cada download estão em `LICENSES.md`.
 
 | Uso | Pack (versão Free) | O que tem |
 |---|---|---|
@@ -860,7 +1019,9 @@ Tudo vem do **KayKit (Kay Lousberg)**, sem misturar com outro autor. É uma fam�
 | Monstros | KayKit Character Pack: Skeletons 1.1 | Skeleton_Minion, Warrior, Rogue e Mage, mais 13 acessórios |
 | Animações | KayKit Character Animations 1.1 | 161 animações para `Rig_Medium` e `Rig_Large`, em 8 conjuntos |
 | Cenário da masmorra | KayKit Dungeon Pack 1.1 | 200 peças: piso, paredes, portas, escadas, pilares, tochas, baús, barris, mesas, estandartes e entulho |
-| Vila | KayKit Medieval Hexagon Pack 1.0 | Ferreiro, taverna, igreja, casas, poço, moinho, mercado, mina, andaimes e obras em etapas, em 4 cores; terreno hexagonal |
+| Vila (prédios, M2) | Kenney Fantasy Town Kit 2.0 | 160 peças modulares: paredes de pedra e de madeira, portas, janelas, telhados, chaminés, escadas, fonte, barracas, cercas, postes, carroça, moinho e roda d'água |
+| Vila (enfeites, M2) | KayKit Forest Nature Pack 1.0, Resource Bits 1.0, RPG Tools Bits 1.0, Furniture Bits 1.0 e Mixed Bag 1 | Árvores, arbustos, grama e pedras; pilhas de madeira, pedra, ferro e tecido; bigorna, rebolo, ferramentas, mapa e lanterna; cadeiras, mesas e bancos; violões, guarda-chuvas e a tenda de circo |
+| Treinador (M2) | KayKit Medieval Hexagon Pack 1.0 | Só o alvo e o suporte de armas, ampliados. Os prédios em miniatura sobre hexágonos ficaram como opção descartada no teste lado a lado |
 | Armas de outros atos | KayKit Fantasy Weapons Bits 1.0 | 31 armas e escudos |
 
 Não há outro pack de inimigos humanoides grátis do KayKit além do Skeletons. Os "Mystery Monthly Series" são pagos e não foram baixados. Os atos seguintes vão pedir recolor dos esqueletos, o EXTRA (Golem e Necromante) ou um pack novo do autor.
@@ -891,7 +1052,7 @@ Os arquivos foram lidos só como dados, por scripts próprios (Python com `-I`),
 | Mago e Senhor (M1) | Ranged_Magic_Shoot, Ranged_Magic_Spellcasting, Ranged_Magic_Summon | CombatRanged |
 | Fase 2 do Senhor (M1) | Skeletons_Taunt_Longer (o grito), Skeletons_Death_Resurrect (os mortos se erguem) | Special |
 
-- **Escala.** Os personagens têm 2,2 a 2,5 m. As peças da masmorra seguem um grid de 4 m: piso grande de 4 × 4, parede de 4 m de largura por 4 m de altura e pilar de 1,5 m. Os prédios do Medieval Hexagon são miniaturas de cerca de 1 m sobre hexágonos de 2 m. Por isso a vila é um diorama, não um cenário em escala do herói.
+- **Escala.** Os personagens têm 2,2 a 2,5 m. As peças da masmorra seguem um grid de 4 m: piso grande de 4 × 4, parede de 4 m de largura por 4 m de altura e pilar de 1,5 m. Os prédios do Medieval Hexagon são miniaturas de cerca de 1 m sobre hexágonos de 2 m. Por isso o M0 mostrava a vila como diorama, e a vila do M2 usa o Kenney, que fica em escala do herói (3.1).
 - **Texturas.** Cada personagem tem um PNG de 13 a 17 KB, num atlas de gradiente em grade de 8 × 4 faixas. Os glTF da masmorra e das armas apontam para um PNG compartilhado, como `dungeon_texture.png`.
 - **Caminhos.** Todas as 537 URIs dos glTF são nomes de arquivo simples, sem `/`, `..` ou caminho absoluto.
 - **Conteúdo dos zips.** Nenhum script nem executável. Só aparecem `.fbx`, `.gltf`, `.bin`, `.glb`, `.obj`, `.mtl`, `.png`, `.jpg`, um `.pdf` (guia do Hexagon), `.txt` e atalhos `.url`, que não foram abertos.
@@ -944,7 +1105,7 @@ A pergunta era: os personagens do KayKit são corpos inteiros ou peças por enca
 
 1. **Download.** Os zips da versão Free vêm das páginas do itch.io e vão para uma pasta nova e vazia, fora do repositório: `~/Downloads/vigilia-portador-kaykit/zips/`. Cada um é extraído na própria subpasta `packs/<pack>/`, e o SHA-256 de cada zip fica registrado em `LICENSES.md`.
 2. **Dados não confiáveis.** Nada que veio no pack é executado. Os scripts de inspeção são próprios e ficam fora da pasta do pack. Os de Python rodam com `-I`, e o caminho do arquivo é passado como argumento. Atalhos `.url` e PDFs não são abertos.
-3. **Importação.** `npm run art` (`tools/import-art.ts`, código do projeto) lê um **manifesto** com a lista exata de arquivos de cada pack e copia só esses para `public/assets/kaykit/<pack>/`. Na cópia, ele valida:
+3. **Importação.** `npm run art` (`tools/import-art.ts`, código do projeto) lê um **manifesto** com a lista exata de arquivos de cada pack e copia só esses para `public/assets/kaykit/<pack>/`. As texturas que um `.gltf` cita na mesma pasta vêm junto. O Kenney cita uma subpasta (`Textures/colormap.png`), aceita só para ele. Na cópia, ele valida:
    - extensões permitidas: `.gltf`, `.bin`, `.glb` e `.png`;
    - cada URI interna é um nome simples e existe no mesmo manifesto;
    - nenhum arquivo passa de 4 MB.
@@ -1005,6 +1166,16 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
   - **Primeira conversa sobre o protótipo:**
     - **Morte mais cara, a pedido do usuário:** base de 85% para 55%, 3,5 para 4 pontos por andar, bônus de raridade menores, teto de 75%. Os restos ficam como estavam. A meta de perda passou de 25–55% para 55–80%, e o jogador automático ficou mais cauteloso (Força 1).
     - **Tempo na vila:** está bom no automático; o modo manual fica para depois (15.5).
+  - **M2.1 pronta:**
+    - a vila como cena própria, com prédios do Kenney por estado, entrada da Cripta e fogueira de vigília;
+    - dia e noite, câmera de observar, botão Vila/Herói e toque nos prédios;
+    - 5 testes da planta (40 no total).
+  - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
+    - a vila é uma cena separada;
+    - os moradores são aventureiros com roupa simples de cor variável;
+    - os prédios vêm do Kenney Fantasy Town, depois do teste lado a lado contra o Medieval Hexagon.
+
+    Foram baixados, com autorização, o Forest, o Resource Bits, o RPG Tools Bits, o Mixed Bag 1, o Furniture Bits e o Kenney Fantasy Town.
   - **Passagem entre salas,** a pedido do usuário, que viu o herói "simplesmente aparecer entre as salas": agora ele sai pela porta do fundo, a tela escurece e ele entra na próxima pela porta da esquerda. Cada sala ganhou 1,8 s, e as 18 metas continuam passando.
   - **Viagem na tela,** a pedido do usuário, que viu o herói "correndo contra a porta enquanto conta segundos". Agora ele sai pela porta, um cartão escuro mostra a viagem e ele entra pela porta do lugar novo (2.1).
   - **M1 (Ato I completo), no mesmo dia, a pedido do usuário ("vamos ao m1"):**

@@ -7,7 +7,7 @@
 import { createHash } from 'node:crypto';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { basename, extname, join, resolve } from 'node:path';
+import { basename, dirname, extname, join, resolve } from 'node:path';
 import { ALLOWED_EXT, MAX_BYTES, PACKS } from './art-manifest.ts';
 
 interface Copied { path: string; bytes: number; sha256: string }
@@ -19,6 +19,8 @@ const OUT = resolve(import.meta.dirname, '../public/assets/kaykit');
 
 const errors: string[] = [];
 const copied: Copied[] = [];
+/** Texturas citadas pelos .gltf, copiadas depois de cada pack (sem repetir). */
+const pendingTextures: [string, string][] = [];
 
 /** URIs externas de um .gltf (buffers e imagens); data: URIs não contam. */
 function gltfUris(json: { buffers?: { uri?: string }[]; images?: { uri?: string }[] }): string[] {
@@ -34,11 +36,12 @@ function glbJson(buf: Buffer): { buffers?: { uri?: string }[]; images?: { uri?: 
   return JSON.parse(buf.toString('utf8', 20, 20 + len));
 }
 
+/** Nome de arquivo simples; o Kenney aponta para uma subpasta (Textures/colormap.png), aceita sem "..". */
 function isSimpleName(u: string): boolean {
-  return /^[A-Za-z0-9_.-]+$/.test(u) && !u.startsWith('.');
+  return /^([A-Za-z0-9_-]+\/)?[A-Za-z0-9_.-]+$/.test(u) && !u.split('/').some((part) => part.startsWith('.'));
 }
 
-function copyChecked(from: string, outDir: string, allowedSiblings: Set<string>): void {
+function copyChecked(from: string, outDir: string, allowedSiblings: Set<string>, keepPath?: string): void {
   const name = basename(from);
   const ext = extname(name).toLowerCase();
   if (!ALLOWED_EXT.includes(ext)) return void errors.push(`${name}: extensão não permitida`);
@@ -52,14 +55,23 @@ function copyChecked(from: string, outDir: string, allowedSiblings: Set<string>)
     try {
       const json = ext === '.gltf' ? JSON.parse(buf.toString('utf8')) : glbJson(buf);
       for (const u of gltfUris(json)) {
-        if (!isSimpleName(u)) errors.push(`${name}: URI suspeita "${u}"`);
-        else if (!allowedSiblings.has(u)) errors.push(`${name}: URI "${u}" fora do manifesto`);
+        if (!isSimpleName(u)) {
+          errors.push(`${name}: URI suspeita "${u}"`);
+          continue;
+        }
+        // Textura citada na mesma pasta: vem junto (nome simples, .png, passa pela mesma validação).
+        if (!allowedSiblings.has(u) && ext === '.gltf' && u.endsWith('.png') && !u.includes('/') && existsSync(join(dirname(from), u))) {
+          allowedSiblings.add(u);
+          pendingTextures.push([join(dirname(from), u), outDir]);
+        } else if (!allowedSiblings.has(u)) errors.push(`${name}: URI "${u}" fora do manifesto`);
       }
     } catch (e) {
       return void errors.push(`${name}: glTF inválido (${(e as Error).message})`);
     }
   }
-  const to = join(outDir, name);
+  const dest = keepPath ? join(outDir, keepPath) : outDir;
+  mkdirSync(dest, { recursive: true });
+  const to = join(dest, name);
   copyFileSync(from, to);
   copied.push({ path: to.slice(OUT.length + 1), bytes: st.size, sha256: createHash('sha256').update(buf).digest('hex') });
 }
@@ -78,15 +90,21 @@ for (const pack of PACKS) {
   for (const g of pack.groups) {
     for (const f of g.files) {
       if (g.ext === '.gltf') siblings.add(`${f}.bin`);
-      if (g.ext === '.png') siblings.add(`${f}.png`);
+      if (g.ext === '.png') siblings.add(g.keepPath ? `${g.keepPath}/${f}.png` : `${f}.png`);
     }
   }
   for (const g of pack.groups) {
     const base = join(SRC, pack.dir, pack.root, g.path);
     for (const f of g.files) {
-      copyChecked(join(base, f + g.ext), outDir, siblings);
+      copyChecked(join(base, f + g.ext), outDir, siblings, g.keepPath);
       if (g.ext === '.gltf') copyChecked(join(base, `${f}.bin`), outDir, siblings);
     }
+  }
+  const seen = new Set<string>();
+  for (const [from, dir] of pendingTextures.splice(0)) {
+    if (seen.has(from) || existsSync(join(dir, basename(from)))) continue;
+    seen.add(from);
+    copyChecked(from, dir, siblings);
   }
 }
 

@@ -33,6 +33,10 @@ function resize(): void {
 }
 addEventListener('resize', resize);
 resize();
+addEventListener('portador-watch', (e) => {
+  stage.watchTown = (e as CustomEvent<boolean>).detail;
+});
+addEventListener('portador-recenter', () => stage.recenter());
 addEventListener('portador-preview', (e) => {
   stage.previewHead = (e as CustomEvent<HeadId | null>).detail;
 });

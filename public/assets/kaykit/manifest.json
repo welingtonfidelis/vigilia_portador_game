@@ -227,6 +227,726 @@
       "sha256": "74047dd2178fbed388656051664158e921b7bfc613abb119860aeb7b646bd640"
     },
     {
+      "path": "animations/Rig_Medium_Simulation.glb",
+      "bytes": 855904,
+      "sha256": "ab6ffeed40c8281dd0ce0506534eadf7385151f1c266643a10fa2a0f0a7ba3b1"
+    },
+    {
+      "path": "animations/Rig_Medium_Tools.glb",
+      "bytes": 1461204,
+      "sha256": "e3b62dc122c5073373376a846e354137add2088ddcce8731c389fc5c20734aad"
+    },
+    {
+      "path": "hexagon/target.gltf",
+      "bytes": 3016,
+      "sha256": "e92374d50c46b5816a1c118260d27ac49d3e52e8d7de6b0b7a9326a69c43cc44"
+    },
+    {
+      "path": "hexagon/target.bin",
+      "bytes": 7112,
+      "sha256": "783dc41050451fb43efafc97b60bf486a50679bac07a782c0beb7af9d05bbe2e"
+    },
+    {
+      "path": "hexagon/weaponrack.gltf",
+      "bytes": 3027,
+      "sha256": "e6985e05285ae219a0a6317522debb9d48c8b39334820e0c9694f195f1519be5"
+    },
+    {
+      "path": "hexagon/weaponrack.bin",
+      "bytes": 2940,
+      "sha256": "3773a0eab3da0c7526a13880b3dc7f2c8c42f97e5b8970d5bf5a522f0ea7f0ea"
+    },
+    {
+      "path": "hexagon/hexagons_medieval.png",
+      "bytes": 15783,
+      "sha256": "5301a06866ba3be68dcc14cc429bd6d0f69004b72884283715d7e233f2e9782e"
+    },
+    {
+      "path": "tools/anvil.gltf",
+      "bytes": 2977,
+      "sha256": "6878db53dfdceac3970dd881808f02f38ea06c59cb3dbfe9ae3a463123d7499a"
+    },
+    {
+      "path": "tools/anvil.bin",
+      "bytes": 14696,
+      "sha256": "4dabc949ce4c0876731693c2e70e7020da9d48592c7a469803ba2aaa23ff88d2"
+    },
+    {
+      "path": "tools/grindstone.gltf",
+      "bytes": 5071,
+      "sha256": "399957d108c5962bd1faec76493645c7f5985283cb21dba854a24e015c459b19"
+    },
+    {
+      "path": "tools/grindstone.bin",
+      "bytes": 52828,
+      "sha256": "58930a43405057eaadc7106657282787fd3a887341ca658156718a53856e7fcc"
+    },
+    {
+      "path": "tools/map.gltf",
+      "bytes": 5222,
+      "sha256": "65b43d5348935834681092f9a2dd4283535b719b7d9eea46f3fabd1a3ceb3dc1"
+    },
+    {
+      "path": "tools/map.bin",
+      "bytes": 22584,
+      "sha256": "44cac3ee8e3d22979edb10924d3325a8ab9c91a03b9e14a9297743a86a7f9053"
+    },
+    {
+      "path": "tools/compass_base.gltf",
+      "bytes": 9357,
+      "sha256": "378366d364b67bacfa1ef7e48ced939708546d8b0192333cf7f8e30332b2a331"
+    },
+    {
+      "path": "tools/compass_base.bin",
+      "bytes": 56112,
+      "sha256": "4357707a74c78b087fa5c9220fecc125e4962ed0288e2823be5c647d44dca401"
+    },
+    {
+      "path": "tools/blueprint.gltf",
+      "bytes": 5230,
+      "sha256": "17f90e0cef18d079bb73b2d702253eed95c8390aacf882e40ae1049c55bbfed0"
+    },
+    {
+      "path": "tools/blueprint.bin",
+      "bytes": 8160,
+      "sha256": "415c7a36844a71c2cb1324d8af9f702c9b383d578f368f173f9761f8e39bfe5b"
+    },
+    {
+      "path": "tools/bucket_metal.gltf",
+      "bytes": 5118,
+      "sha256": "c9b3cda1ebaeb7c2da26adfc952676d8978758c38d3daff186b51c062f0109e8"
+    },
+    {
+      "path": "tools/bucket_metal.bin",
+      "bytes": 18668,
+      "sha256": "a111cfc58a0d35fb987b8dbcc457c7ff437d87ae3ca7c893e6af13d54fe07714"
+    },
+    {
+      "path": "tools/axe.gltf",
+      "bytes": 3023,
+      "sha256": "5761ddb06283a0075e5fdfe8665784488e6bc00aabcca2134851c8ebac1831e7"
+    },
+    {
+      "path": "tools/axe.bin",
+      "bytes": 22056,
+      "sha256": "af3b83ef8ab49fe0272382310115c5daacc37cf350aecc064812a3c2a2deb086"
+    },
+    {
+      "path": "tools/hammer.gltf",
+      "bytes": 3029,
+      "sha256": "c5d203d2c0e00e1d69b033943c01e7bc9c2a0f6a2fbbb4de1d240ca1e23fe225"
+    },
+    {
+      "path": "tools/hammer.bin",
+      "bytes": 14600,
+      "sha256": "74133dc5be0278e6310db3427b60325540d2214fb7faa9ac339ac284bb709cd2"
+    },
+    {
+      "path": "tools/saw.gltf",
+      "bytes": 3020,
+      "sha256": "3ab6f3a679f4f9f79841f02ba8d65364c45c43c26ce91ba2c041ccbd55b54720"
+    },
+    {
+      "path": "tools/saw.bin",
+      "bytes": 25568,
+      "sha256": "970ae1ab92be6d167429cc00be1f95087f143f789b478362d6df266d5a3eed39"
+    },
+    {
+      "path": "tools/shovel.gltf",
+      "bytes": 3030,
+      "sha256": "b4aec5f58a2574cb9a89cc19bfc81b3ed9edb641272cea1a42ed6430e5889aed"
+    },
+    {
+      "path": "tools/shovel.bin",
+      "bytes": 28860,
+      "sha256": "c7d64f1be8ba7c70a7a8dacd556c17ba7a4903971c6a9fec9c1354a852a8830e"
+    },
+    {
+      "path": "tools/lantern.gltf",
+      "bytes": 7255,
+      "sha256": "2a286e97dabbec078382d41c72809f469cba210b72ca13c722a6c0519418eddd"
+    },
+    {
+      "path": "tools/lantern.bin",
+      "bytes": 32952,
+      "sha256": "3980d1cb56a3b96bfd294ee6b4ca752fb3f5afbcaae68eec674a0f3d99f0e788"
+    },
+    {
+      "path": "tools/tools_bits_texture.png",
+      "bytes": 28269,
+      "sha256": "e0663527c0c0a8e9f4dba0bb15261c367de31981cb3e3ec80f84bf6a5e47fc60"
+    },
+    {
+      "path": "tools/tools_bits_map.png",
+      "bytes": 39727,
+      "sha256": "ed6a0f8e165ac68d34a1e3f40bb839dbee3d669a42202eb38e0b239ff341ea3d"
+    },
+    {
+      "path": "tools/tools_bits_blueprint.png",
+      "bytes": 39613,
+      "sha256": "577c357193d38c2c10fe8c31e545b86ec0e3f9a5eab4bf2632791d4207d2a98e"
+    },
+    {
+      "path": "resource/Wood_Log_Stack.gltf",
+      "bytes": 3073,
+      "sha256": "1730bda0f010bd9772186940aaff56ccdd7753f2682b8d1fb42452aeda62f471"
+    },
+    {
+      "path": "resource/Wood_Log_Stack.bin",
+      "bytes": 191568,
+      "sha256": "42912884c56affe69539da3ca4c604c711b7aac882bb3c1aff5c20b5f9248bf7"
+    },
+    {
+      "path": "resource/Wood_Planks_Stack_Medium.gltf",
+      "bytes": 3098,
+      "sha256": "4a411551cd451fcd1d5049c761d042deabdda05dcfbd81937f3901ba98236aa0"
+    },
+    {
+      "path": "resource/Wood_Planks_Stack_Medium.bin",
+      "bytes": 46912,
+      "sha256": "71b5c0b3b68fc8a94d425b9ecd58f8df5fdef25e0229268e04a32e362f3a5614"
+    },
+    {
+      "path": "resource/Stone_Bricks_Stack_Medium.gltf",
+      "bytes": 3100,
+      "sha256": "f2b4179b334da3bafedc20e6b319061e683269c3f4bacdf51256decba4d1796e"
+    },
+    {
+      "path": "resource/Stone_Bricks_Stack_Medium.bin",
+      "bytes": 42816,
+      "sha256": "baf444270a44fd9b2911c1d513b8ee5689dcb26722795a23ff0b5125febcb6a7"
+    },
+    {
+      "path": "resource/Iron_Bars_Stack_Small.gltf",
+      "bytes": 3071,
+      "sha256": "9107015b5c71560bcd48b6f2f0e67b436292c17904515380e14da966b198f9df"
+    },
+    {
+      "path": "resource/Iron_Bars_Stack_Small.bin",
+      "bytes": 23088,
+      "sha256": "edc6429c44bbcbdf68e8cb5f283dd6a6e8f2b3c4205e95666c36850e57012a5a"
+    },
+    {
+      "path": "resource/Textiles_Stack_Small.gltf",
+      "bytes": 3087,
+      "sha256": "24861a1d9b0d631a5a2a70f6a7caf5c77f1d6ebcb7c4adc354243564e770626d"
+    },
+    {
+      "path": "resource/Textiles_Stack_Small.bin",
+      "bytes": 65400,
+      "sha256": "742d0a2a32af11e743ae7275a811dd7a462584e39261f0e001cd6ab11f0bda14"
+    },
+    {
+      "path": "resource/Pallet_Wood.gltf",
+      "bytes": 3053,
+      "sha256": "a5e59a95461a598aa93adb77cc28b55954c283bea43985a9d57a59ea38f6be0c"
+    },
+    {
+      "path": "resource/Pallet_Wood.bin",
+      "bytes": 13248,
+      "sha256": "bdd8842cb81dd462e7ce92f62a197aa4c9cc50b188276f41642f65bd16e60b01"
+    },
+    {
+      "path": "resource/Wood_Log_A.gltf",
+      "bytes": 3056,
+      "sha256": "39827330b7d77d528149bd57197b4204f72d471cc2cda290fb4a18a6165a1e68"
+    },
+    {
+      "path": "resource/Wood_Log_A.bin",
+      "bytes": 40312,
+      "sha256": "cc8de89a2079438987df3b0157118b81bb506dd1a89367ec0273ab28e056e7a7"
+    },
+    {
+      "path": "resource/resource_bits_texture.png",
+      "bytes": 25730,
+      "sha256": "62a252aba7bc9382effe48d93b976605d8fa70a3a40af7fc52362f5ca89c135b"
+    },
+    {
+      "path": "furniture/table_medium.gltf",
+      "bytes": 2973,
+      "sha256": "fd5e5fe8bbf1d3729b6bd725165d58490e9cbd8dd46ce42314b01f20951a302b"
+    },
+    {
+      "path": "furniture/table_medium.bin",
+      "bytes": 9328,
+      "sha256": "0e6ba8fd006f673d946979e45487067f4e274be9bbd07816fd371578d2a37518"
+    },
+    {
+      "path": "furniture/chair_A_wood.gltf",
+      "bytes": 3032,
+      "sha256": "e17a16127b9a3e44ef8888c9d52fe7ec09a06b348934627816a538720793af8d"
+    },
+    {
+      "path": "furniture/chair_A_wood.bin",
+      "bytes": 16504,
+      "sha256": "726ea8962909becf3d925d272928a8e26a1f345fc9f8f165e7424221c69be733"
+    },
+    {
+      "path": "furniture/bed_single_A.gltf",
+      "bytes": 3009,
+      "sha256": "7b2852bb66bf82cad3e0d03a499b1480879790fa66b645347e3e73761c4fe3f5"
+    },
+    {
+      "path": "furniture/bed_single_A.bin",
+      "bytes": 22044,
+      "sha256": "fc7631db4540d31cbe76dac3c672bc8836ee302796d14bba428bda84b9237f5b"
+    },
+    {
+      "path": "furniture/chair_stool_wood.gltf",
+      "bytes": 3052,
+      "sha256": "b1670bee678ab5920ad8ef3a6fb7c6146054bb7b859798f86aaac96be5765f35"
+    },
+    {
+      "path": "furniture/chair_stool_wood.bin",
+      "bytes": 10832,
+      "sha256": "59ebde1791f6c46b6f3880cbe5632e44b123466a1bc7d2d2f3008da9a2a492ac"
+    },
+    {
+      "path": "furniture/shelf_A_small.gltf",
+      "bytes": 3033,
+      "sha256": "198fb7851f987c51c8dba4ea2e22c27345467c1cbef700995699c10298f9edd5"
+    },
+    {
+      "path": "furniture/shelf_A_small.bin",
+      "bytes": 10104,
+      "sha256": "4e87b996fe8184cac7d556d0ea854513bd7d04e674d254fb8c7d296320cbdfc0"
+    },
+    {
+      "path": "furniture/furniturebits_texture.png",
+      "bytes": 15605,
+      "sha256": "de62db37a80d1801c3d9eb674890ae04b04469e0c149481a51fa250562c628dc"
+    },
+    {
+      "path": "mixed/flax_flower_A.gltf",
+      "bytes": 3057,
+      "sha256": "80b6e81e7bb3f78ba8efa383403f01ee7f639663f2dcc95080b42ff18dd83994"
+    },
+    {
+      "path": "mixed/flax_flower_A.bin",
+      "bytes": 23928,
+      "sha256": "bfb26a8cd349bcccfc9a500051e26d3a3ac9dc2284b6f062f5cc4be2321bc5f7"
+    },
+    {
+      "path": "mixed/flax_flower_B.gltf",
+      "bytes": 3057,
+      "sha256": "12fe1d039d32083e1b3f6f61909344e03de5f7a043dab855f91c27be9e7fb8d9"
+    },
+    {
+      "path": "mixed/flax_flower_B.bin",
+      "bytes": 23708,
+      "sha256": "d8d788aba44e02a5fd1be1324ef83cb4a9cea7305a2c58ec468213934e899810"
+    },
+    {
+      "path": "mixed/guitar_A.gltf",
+      "bytes": 3050,
+      "sha256": "cc1305f817dbb4f04b3d32e2b451a1d5109934f9d654e4c30090188a53de1b6e"
+    },
+    {
+      "path": "mixed/guitar_A.bin",
+      "bytes": 50428,
+      "sha256": "92702e3f13b3426a2668c9c86e40ab9c1de3e24bfbe83ff62d69abe930c7b731"
+    },
+    {
+      "path": "mixed/circus_tent.gltf",
+      "bytes": 3056,
+      "sha256": "2ce9426963ec46ba0057b66176087ad3753263ef8d4fb038f914c264137b88a4"
+    },
+    {
+      "path": "mixed/circus_tent.bin",
+      "bytes": 37376,
+      "sha256": "59935739bf783899d455d3eeeeb95e44c0de42f07ddd0dcd84bb46713a154d44"
+    },
+    {
+      "path": "mixed/umbrella_green.gltf",
+      "bytes": 3059,
+      "sha256": "89ed7e471dc039221bec5edc31c5a79dd0386457a30032c91c4f397d57d8bc7f"
+    },
+    {
+      "path": "mixed/umbrella_green.bin",
+      "bytes": 27472,
+      "sha256": "b3b43dadea0a4022d1681d6144bedb6445aa378cccc991b5575ae673699f0bcc"
+    },
+    {
+      "path": "mixed/kaykit_texture_A.png",
+      "bytes": 17392,
+      "sha256": "c7a786a6cd552f2954257624a30051e780bf293559f1d1eace85a5d317ecfb3c"
+    },
+    {
+      "path": "forest/Tree_1_A_Color1.gltf",
+      "bytes": 3061,
+      "sha256": "9d972eba9d61fc563cb7c3248f1be057190859ce2554ad2032df27c3d09e06c6"
+    },
+    {
+      "path": "forest/Tree_1_A_Color1.bin",
+      "bytes": 17484,
+      "sha256": "76a10ffa74960d730f0895a2599e5d56cc50a553d6624a14422420eb9b083979"
+    },
+    {
+      "path": "forest/Tree_2_A_Color1.gltf",
+      "bytes": 3057,
+      "sha256": "793570b93cd350b935bc88c766317675890f102d157965d2aca3d8daef5ee49b"
+    },
+    {
+      "path": "forest/Tree_2_A_Color1.bin",
+      "bytes": 8192,
+      "sha256": "fd413ad809ff30939faf1190194654892066aba94f67ec6f96ce257fa5b34e35"
+    },
+    {
+      "path": "forest/Tree_3_A_Color1.gltf",
+      "bytes": 3061,
+      "sha256": "a5140f21978004544844df4c2969625724c2c263e74f798716ea9e115216a230"
+    },
+    {
+      "path": "forest/Tree_3_A_Color1.bin",
+      "bytes": 29740,
+      "sha256": "ea2f20e847bd3bcf748b9f1cf9932abe45967db8dcacfeafaea1f07e3da6a2e9"
+    },
+    {
+      "path": "forest/Tree_4_A_Color1.gltf",
+      "bytes": 3061,
+      "sha256": "14f8f50af9f9cf8d2bb488cae15613f9e2ed6ce0002d2aa11721a2efc2ba3010"
+    },
+    {
+      "path": "forest/Tree_4_A_Color1.bin",
+      "bytes": 12568,
+      "sha256": "eeb22bdc0ece9941865139476afcaf5dadd8285751321770886d1a065b8512d6"
+    },
+    {
+      "path": "forest/Bush_1_A_Color1.gltf",
+      "bytes": 3054,
+      "sha256": "bc6cf33dbed296a181d8afbd82ffe1c44ee5e57cb095f9efdf4b63e93c165b70"
+    },
+    {
+      "path": "forest/Bush_1_A_Color1.bin",
+      "bytes": 2352,
+      "sha256": "66ba041776959c19849954c9d2393528783461ca6dd11ebe1c1f6b9026b63c0c"
+    },
+    {
+      "path": "forest/Bush_2_A_Color1.gltf",
+      "bytes": 3050,
+      "sha256": "c41284ba3191bdda026380527edf9fb0dcf03b5dd26c8779ed056edb6526c444"
+    },
+    {
+      "path": "forest/Bush_2_A_Color1.bin",
+      "bytes": 1032,
+      "sha256": "156a986b87b097725a1c675ea20eeaf3f788014742dbf4b8f0fd2c69f27cad98"
+    },
+    {
+      "path": "forest/Rock_1_A_Color1.gltf",
+      "bytes": 3032,
+      "sha256": "ca24326b9c24556227c68df64933122f34a972cd38b6e95c53353fefa97dbc80"
+    },
+    {
+      "path": "forest/Rock_1_A_Color1.bin",
+      "bytes": 2848,
+      "sha256": "1c94027b4b01e479f14c6a0288445f2ec74c4971bd5154095c4ea261ddea5b95"
+    },
+    {
+      "path": "forest/Rock_2_A_Color1.gltf",
+      "bytes": 3052,
+      "sha256": "bbe5254a4c13be7f4aa017297a9458db441e99234028af378d29207d80be4696"
+    },
+    {
+      "path": "forest/Rock_2_A_Color1.bin",
+      "bytes": 840,
+      "sha256": "ffee05221dda59936ba6c94112b65bb3c8a38e938fbb219a2808a1590daab050"
+    },
+    {
+      "path": "forest/Grass_1_A_Color1.gltf",
+      "bytes": 3058,
+      "sha256": "58686904164d636e8731544fbb6911bf1ebc068841fe6c127f0c509b1449212b"
+    },
+    {
+      "path": "forest/Grass_1_A_Color1.bin",
+      "bytes": 2056,
+      "sha256": "d293510be3ca4a6062dc305c22a143ba134fc49af65aaba064cc8f8d868d6c6e"
+    },
+    {
+      "path": "forest/Grass_2_A_Color1.gltf",
+      "bytes": 3056,
+      "sha256": "fa822543a17721c40b3386557ed37af6c44fd6d4ce6b4fc16f9187d69cde8fe1"
+    },
+    {
+      "path": "forest/Grass_2_A_Color1.bin",
+      "bytes": 2056,
+      "sha256": "07fc84eda0b374b3fd4afed280452f0be21f75c0e53fbf6778d3997c09832a64"
+    },
+    {
+      "path": "forest/forest_texture.png",
+      "bytes": 48679,
+      "sha256": "406c01e0ac1d3368fc7b26ff5fb0d3335ba5e48bd19a703540ed92ee3971ea39"
+    },
+    {
+      "path": "kenney-town/wall-wood.glb",
+      "bytes": 4808,
+      "sha256": "8699614fdbc99f565942709c0977c964e2c12f3b3c60098a6e2c397c973f08db"
+    },
+    {
+      "path": "kenney-town/wall-wood-door.glb",
+      "bytes": 30744,
+      "sha256": "2aa4e982fcb6434be4e6051fcee7972799ff5350a3f36ca8bf71530b84608123"
+    },
+    {
+      "path": "kenney-town/wall-wood-window-shutters.glb",
+      "bytes": 10612,
+      "sha256": "c45a63690760cd5de3842ffbe222092e8cd483524679c4ba92fef4d1e52f7248"
+    },
+    {
+      "path": "kenney-town/wall-wood-window-glass.glb",
+      "bytes": 11184,
+      "sha256": "e0bb383a908d473181ad89ad7c676a0632f7ecd0f23e5f912216391d3e62bb69"
+    },
+    {
+      "path": "kenney-town/wall.glb",
+      "bytes": 4792,
+      "sha256": "cab1dff37610e2a214237cc62ec0b1506e8fd76bb66c29f6c585b4b643b569c4"
+    },
+    {
+      "path": "kenney-town/wall-door.glb",
+      "bytes": 29276,
+      "sha256": "79b2d40db110ca96a6e77d4261da665fdf8c68f4c20c2afef5bce1c28ad72857"
+    },
+    {
+      "path": "kenney-town/wall-window-glass.glb",
+      "bytes": 15708,
+      "sha256": "b0d666b1850d0b92734bdea736a062b4424fd909d13495f4a73719eb51bb41f4"
+    },
+    {
+      "path": "kenney-town/wall-window-shutters.glb",
+      "bytes": 23892,
+      "sha256": "58a641a03fc4a5a225663969cc257fcf4f2fc63c199b4aca16b612142ff9eed0"
+    },
+    {
+      "path": "kenney-town/roof-gable.glb",
+      "bytes": 7632,
+      "sha256": "4bb6bdbcadbb8ebeb69d720e29f6c2e57c99d98966baa41fd86914d3c13d6039"
+    },
+    {
+      "path": "kenney-town/roof-gable-end.glb",
+      "bytes": 6056,
+      "sha256": "2ee635e8550180bb7840f7fdfff0b0835a34a425ffb903f19657cde65c261704"
+    },
+    {
+      "path": "kenney-town/roof-gable-top.glb",
+      "bytes": 6572,
+      "sha256": "584761438f511db6c0c36a602b0cb7a84484acaebf94b96c722d6c8f188d57e9"
+    },
+    {
+      "path": "kenney-town/roof.glb",
+      "bytes": 9324,
+      "sha256": "8f245dfc04b8e76b2833081462f7530c2aea9114a703161c1d9a4a975927347d"
+    },
+    {
+      "path": "kenney-town/roof-corner.glb",
+      "bytes": 4996,
+      "sha256": "122d00bf873e5928eecf334785f1daf005c6f04033552258e97bf1cb1000b353"
+    },
+    {
+      "path": "kenney-town/roof-point.glb",
+      "bytes": 6180,
+      "sha256": "a7dfd157128e04105e976d7a47f772e95e4bd9f3d73b87a00b43861f406b94f8"
+    },
+    {
+      "path": "kenney-town/chimney.glb",
+      "bytes": 4656,
+      "sha256": "a15cdbd13860092f6d793e5b785043eb90a49cdaa725bb71df9fd154ca68dac6"
+    },
+    {
+      "path": "kenney-town/stall-red.glb",
+      "bytes": 24304,
+      "sha256": "aa20a630f417032c46aaefbc779fd2b3355b451bf05d31acc36fd664146866b1"
+    },
+    {
+      "path": "kenney-town/stall-green.glb",
+      "bytes": 27120,
+      "sha256": "2da2f7b31cde5d943d7c08c457bbb39797ef0a607921fde0b8455f338ce40205"
+    },
+    {
+      "path": "kenney-town/stall-bench.glb",
+      "bytes": 14168,
+      "sha256": "5a4b379488241394916991c4b482ec4863c05bb548ca8751f5c3935f1f6e5b9c"
+    },
+    {
+      "path": "kenney-town/fountain-round.glb",
+      "bytes": 84848,
+      "sha256": "8d19741e2cca6cbdce114b950b4aa12af625979bbc17b2910ef2366834af5565"
+    },
+    {
+      "path": "kenney-town/fountain-round-detail.glb",
+      "bytes": 136888,
+      "sha256": "05cdd740e3175c2d3208d4cb6630a279a9b4cbc48393b28c92e3e40cca2a5d6b"
+    },
+    {
+      "path": "kenney-town/tree.glb",
+      "bytes": 18188,
+      "sha256": "e8d81b97297de62699b92559cee7b247da84b1815df2515e42fd5a318a30b8d7"
+    },
+    {
+      "path": "kenney-town/tree-high.glb",
+      "bytes": 20700,
+      "sha256": "2dbb718a81d9c3697c069495f58840f6c2002c8cdd13388be560c2199f6d03e7"
+    },
+    {
+      "path": "kenney-town/tree-crooked.glb",
+      "bytes": 19252,
+      "sha256": "da4349701dd3fc474f7bb03cfe8b230bec0919025d8d1ecac0d1061a23c5e910"
+    },
+    {
+      "path": "kenney-town/lantern.glb",
+      "bytes": 14984,
+      "sha256": "f270637e3083d6e84a30626ee05df2b09597a642985a7f5c3e4ab5bb1c7a8d55"
+    },
+    {
+      "path": "kenney-town/cart.glb",
+      "bytes": 52920,
+      "sha256": "63503cd0a7398310e01aabc8e3663f711a7517394d23d179d0695157fee99d40"
+    },
+    {
+      "path": "kenney-town/road.glb",
+      "bytes": 2788,
+      "sha256": "85630c89588bdc19285a7b5e894c1ddac69d7ce2b069966453800519e446f900"
+    },
+    {
+      "path": "kenney-town/fence.glb",
+      "bytes": 7672,
+      "sha256": "92261b9419108d84f3db0def5eadeffa783032029897562b1f512e4a7570ef48"
+    },
+    {
+      "path": "kenney-town/fence-gate.glb",
+      "bytes": 46340,
+      "sha256": "cee58694ea5fdcca18e01318b355bfcd38eac6fad21b83f860039c287b150cc6"
+    },
+    {
+      "path": "kenney-town/banner-red.glb",
+      "bytes": 9988,
+      "sha256": "4e4a83de16e5979d2b34bb206d3bf3703a9039711bc658b37e3738d43090703d"
+    },
+    {
+      "path": "kenney-town/windmill.glb",
+      "bytes": 71160,
+      "sha256": "72562df164f5fd36670521462da8f4161cf2c4c1c889799443f0fb44532ad5db"
+    },
+    {
+      "path": "kenney-town/rock-large.glb",
+      "bytes": 18876,
+      "sha256": "425bea0dd3c8d9198a067a2faad1df8860c5b9eb53560ce5c67347a79852b9d1"
+    },
+    {
+      "path": "kenney-town/planks.glb",
+      "bytes": 11148,
+      "sha256": "619705afa7ad290bfa499a701fd7ea07210ad535126cb3abc245b6f16e1420ab"
+    },
+    {
+      "path": "kenney-town/hedge.glb",
+      "bytes": 6524,
+      "sha256": "12001b57dbd3ccaddd217c49e541620137d3e835d873ce0bcedc0e01180a08a9"
+    },
+    {
+      "path": "kenney-town/watermill.glb",
+      "bytes": 53856,
+      "sha256": "177e76c12f43845303638d1375c323675c3937b053b8762042fe19d3d7d27c5d"
+    },
+    {
+      "path": "kenney-town/overhang.glb",
+      "bytes": 7648,
+      "sha256": "515edba27d8c6326cee6f5912b7270224672f9f3dd61e43e85e1d504913ef19c"
+    },
+    {
+      "path": "kenney-town/pillar-wood.glb",
+      "bytes": 5312,
+      "sha256": "569c83dade6063399576640e80db35c34e422817ec132419fc2e2695189be5cf"
+    },
+    {
+      "path": "kenney-town/wall-broken.glb",
+      "bytes": 16904,
+      "sha256": "043f74b83254c32379d0fe60b066c5ded7f3396ccc91df443aea1763d492fa23"
+    },
+    {
+      "path": "kenney-town/wall-wood-broken.glb",
+      "bytes": 16344,
+      "sha256": "53b61a341f0d6bd82256955f8dc29c4c714fcee115a9e803b28938fcfe1ae597"
+    },
+    {
+      "path": "kenney-town/wall-half.glb",
+      "bytes": 4808,
+      "sha256": "b64b5d8a8d3aa472162e3c00197fc24253a791a6100b8b63590d42eb2fb62eb4"
+    },
+    {
+      "path": "kenney-town/wall-wood-half.glb",
+      "bytes": 4824,
+      "sha256": "4b56875dcb488a0c17c01ebe8ce7337e891b3326860799b49f163f793cb882df"
+    },
+    {
+      "path": "kenney-town/poles.glb",
+      "bytes": 4212,
+      "sha256": "5e6e9cbbcf29b042191781f830f928471c57f1dc7843ee33e2f7c1bff3edf522"
+    },
+    {
+      "path": "kenney-town/poles-horizontal.glb",
+      "bytes": 5660,
+      "sha256": "058d3816d57dca64dbc1e9a30e85c6e5e3aca2561bf57083acdce0ed3f375b29"
+    },
+    {
+      "path": "kenney-town/planks-half.glb",
+      "bytes": 10164,
+      "sha256": "fe096b7ed7b29104724feab61d65ebc06966075955bf6e044eea635ef1076043"
+    },
+    {
+      "path": "kenney-town/planks-opening.glb",
+      "bytes": 16360,
+      "sha256": "20540c1d80f8b4af816e139a31f6a385f436dbf2d03314176ab99ca35452e11c"
+    },
+    {
+      "path": "kenney-town/banner-green.glb",
+      "bytes": 10200,
+      "sha256": "5c9a1bb7d564270306fe438fd4a141fc6de0d102b355bbd1d2710249c489868a"
+    },
+    {
+      "path": "kenney-town/rock-small.glb",
+      "bytes": 12620,
+      "sha256": "2f2ca3e9970124b81bde77cec3b1a337410a5c76336ce5dec5760aff1b415316"
+    },
+    {
+      "path": "kenney-town/rock-wide.glb",
+      "bytes": 15172,
+      "sha256": "236082a8c9dec4cef61f00f7f77e4a2050d1083852af65d27dd3c16a53c54b64"
+    },
+    {
+      "path": "kenney-town/stairs-stone.glb",
+      "bytes": 12172,
+      "sha256": "ce92a069280c069d675f030a7258a50f5271cd8070e84339c120faa6c115e61d"
+    },
+    {
+      "path": "kenney-town/fence-broken.glb",
+      "bytes": 11960,
+      "sha256": "caa25191602fd94389e022c8e1f6a4963dd3b1457768e3ccff1dc8dbf4671aa4"
+    },
+    {
+      "path": "kenney-town/hedge-large.glb",
+      "bytes": 9568,
+      "sha256": "f3aafd7064fcb53a1783cb04997d2f676038a55e0941bada74f39bcc7c86afd3"
+    },
+    {
+      "path": "kenney-town/stall.glb",
+      "bytes": 11500,
+      "sha256": "f0a636fccb7d57c38f5acd58881c468f4872f1bcda1e9fd9b1118e76110565a1"
+    },
+    {
+      "path": "kenney-town/Textures/colormap.png",
+      "bytes": 11143,
+      "sha256": "4aac939dc33195e35caf8c382ee3cb170054da763577f22d3c22692ec6afccdf"
+    },
+    {
+      "path": "dungeon/stairs.gltf",
+      "bytes": 2990,
+      "sha256": "40e14349e811d092c2e45b32197dde9f522d811f75e693537eb6fd3450249cd7"
+    },
+    {
+      "path": "dungeon/stairs.bin",
+      "bytes": 25700,
+      "sha256": "f048336109afcaa340062e58cb4598e44615cc565bc04a17090c6e069fbc6633"
+    },
+    {
       "path": "dungeon/floor_tile_large.gltf",
       "bytes": 2999,
       "sha256": "c9c8807b44e18ecf1cb058b45f237008a23503e95e2d2282498730c87a734af1"

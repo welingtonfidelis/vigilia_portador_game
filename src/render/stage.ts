@@ -9,11 +9,14 @@ import { clips, load, pulseLegendary } from './assets.ts';
 import { buildRoom, DUNGEON_PIECES, ENEMY_DOOR, HERO_DOOR } from './dungeon.ts';
 import type { BuiltRoom } from './dungeon.ts';
 import { HeroRig } from './heroRig.ts';
+import { CARRIED_EXIT_TICKS, EXIT_TICKS, travelView } from '../game/travel.ts';
 import { PerfMeter } from './perf.ts';
 import { visualFiles } from './visuals.ts';
 
 /** Vagas do anel, girado para a direita da porta: assim o herói aparece de três quartos para a câmera. */
 const RING_ANGLES = [-0.6, 0.55, 1.7];
+/** Onde o herói descansa no acampamento: perto da porta da Cripta, para a saída ser curta. */
+const CAMP_SPOT = new THREE.Vector3(0.8, 0, -2.2);
 const BACK_SPOTS = [new THREE.Vector3(-5, 0, -4.4), new THREE.Vector3(5.4, 0, -3), new THREE.Vector3(-5.6, 0, 0.6), new THREE.Vector3(5.8, 0, 1.2)];
 
 export interface Quality {
@@ -121,6 +124,9 @@ export class Stage {
     this.closeUp = closeUp;
   }
 
+  /** Fase em que o herói já empurrou a porta (para empurrar uma vez só). */
+  private doorKey = '';
+
   /** Rosto mostrado na tela de novo jogo (null = o do herói). */
   previewHead: HeadId | null = null;
 
@@ -160,6 +166,13 @@ export class Stage {
     this.scene.add(built.group);
     this.roomKey = want.key;
     this.building = false;
+    // Cena nova: o herói começa na porta por onde entra (na sala, a da esquerda; na vila, a da Cripta),
+    // e a câmera vai junto, sem varrer a sala.
+    const entry = want.key === 'vila'
+      ? (w.phase === 'vila' ? ENEMY_DOOR.clone().add(new THREE.Vector3(0, 0, 0.7)) : CAMP_SPOT.clone())
+      : HERO_DOOR.clone().add(new THREE.Vector3(0.7, 0, 0));
+    this.heroPos.copy(entry);
+    this.focus.copy(entry).add(new THREE.Vector3(0, 1.1, 0));
   }
 
   private ringPos(e: Enemy): THREE.Vector3 {
@@ -259,32 +272,33 @@ export class Stage {
     this.perf.begin();
     void this.swapRoom(w);
     this.hero.request(this.previewHead ?? w.hero.head, w.hero.equip);
-    const t = w.tick + frac;
     const roomShown = this.roomKey !== 'vila' && w.room;
-    // Onde o herói deve estar.
+    // Onde o herói deve estar. Ele anda em velocidade constante e para no alvo (nada de correr
+    // contra a porta): na saída, chega à porta e a empurra; depois, o cartão da viagem cobre a tela.
+    const travel = travelView(w, frac);
     const target = new THREE.Vector3(0, 0, 0);
-    let running = false;
-    if (w.phase === 'vila') target.set(0, 0, 1.5);
-    else if (w.phase === 'descendo') {
-      target.set(ENEMY_DOOR.x, 0, ENEMY_DOOR.z + 0.6);
-      running = true;
-    } else if (w.phase === 'sala' && w.room?.phase === 'entrando') {
-      const p = 1 - Math.max(0, w.room.phaseEnd - t) / BALANCE.enterTicks;
-      target.copy(HERO_DOOR).add(new THREE.Vector3(0.6, 0, 0)).lerp(new THREE.Vector3(0, 0, 0), Math.min(1, p));
-      running = p < 1;
+    if (w.phase === 'vila' || (w.phase === 'descendo' && !roomShown)) {
+      target.copy(CAMP_SPOT);
+      if (w.phase === 'descendo') target.copy(ENEMY_DOOR).add(new THREE.Vector3(0, 0, 0.7));
     } else if (w.phase === 'voltando' && !w.carried && roomShown) {
-      target.copy(HERO_DOOR).add(new THREE.Vector3(0.4, 0, 0));
-      running = true;
+      target.copy(HERO_DOOR).add(new THREE.Vector3(0.7, 0, 0));
     }
-    const step = 1 - Math.exp(-dt * 6 * Math.max(1, speed * 0.6));
-    const before = this.heroPos.clone();
-    this.heroPos.lerp(target, step);
-    const moved = before.distanceTo(this.heroPos) / Math.max(dt, 1e-3);
-    if (moved > 0.6) running = true;
+    const toTarget = target.clone().sub(this.heroPos);
+    const gap = toTarget.length();
+    const stride = 5.5 * dt * Math.max(1, speed * 0.8);
+    const running = gap > 0.05 && !this.hero.animator.isDead;
+    if (running) this.heroPos.add(toTarget.multiplyScalar(Math.min(1, stride / gap)));
     this.hero.root.position.copy(this.heroPos);
+    // Chegou à porta na saída: empurra (uma vez por viagem).
+    const doorKey = `${w.phase}:${w.phaseEnd}`;
+    if (travel.mode === 'saindo' && !travel.carried && !running && this.doorKey !== doorKey) {
+      this.doorKey = doorKey;
+      this.hero.animator.play({ name: 'Interact', duration: 1.2 / Math.max(1, speed) });
+    }
     // Para onde olhar: o alvo do golpe, senão a porta dos inimigos, senão a câmera.
     let face: THREE.Vector3 | null = null;
     if (running) face = target.clone().sub(this.heroPos);
+    else if (travel.mode === 'saindo') face = (w.phase === 'descendo' ? ENEMY_DOOR : HERO_DOOR).clone().sub(this.heroPos);
     else if (w.room && w.phase === 'sala') {
       const tid = w.hero.action?.target;
       const tgt = w.room.enemies.find((e) => e.id === tid && e.state !== 'morto') ?? w.room.enemies.find((e) => e.state === 'anel');
@@ -300,7 +314,7 @@ export class Stage {
     this.hero.root.rotation.y = this.heroFacing;
     const two = w.hero.equip.arma && BASES[w.hero.equip.arma.base]?.hands === 2;
     const inFight = w.phase === 'sala' && w.room?.phase === 'luta';
-    this.hero.animator.loop(running ? 'Running_A' : inFight && two ? 'Melee_2H_Idle' : inFight ? 'Melee_Unarmed_Idle' : 'Idle_A', running ? Math.min(1.6, 0.9 + 0.1 * speed) : 1);
+    this.hero.animator.loop(running ? 'Running_A' : inFight && two ? 'Melee_2H_Idle' : inFight ? 'Melee_Unarmed_Idle' : 'Idle_A', running ? Math.min(1.8, Math.max(1, speed * 0.8)) : 1);
     // Inimigos.
     if (roomShown && w.room) {
       let qi = 0, bi = 0;
@@ -350,7 +364,9 @@ export class Stage {
     this.camera.lookAt(this.focus);
     this.applyInset(dt);
     this.sun.target.position.copy(this.focus);
-    this.renderer.render(this.scene, this.camera);
+    // Com o cartão da viagem cobrindo a tela, não desenha (poupa bateria no celular).
+    const covered = travel.mode === 'viagem' && travel.elapsed > (travel.carried ? CARRIED_EXIT_TICKS : EXIT_TICKS) + 6;
+    if (!covered) this.renderer.render(this.scene, this.camera);
     this.updateFloaters();
     this.perf.end();
   }

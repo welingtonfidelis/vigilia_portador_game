@@ -186,3 +186,11 @@ button.primary { background: #6a4c1c; border-color: var(--gold); font-weight: 60
 @media (max-width: 720px) {
   .menu { top: calc(96px + var(--safe-t)); }
 }
+
+/* Viagem entre a vila e a Cripta: a tela escurece por baixo do HUD */
+.travel { position: absolute; inset: 0; display: grid; place-items: center; background: #0a0c11; opacity: 0; transition: opacity 0.45s ease; pointer-events: none; }
+.travel.on { opacity: 0.97; }
+.travel-card { text-align: center; width: min(420px, 86vw); }
+.travel-card h2 { font-size: 1.5rem; margin-bottom: 0.2em; }
+.travel.carried .travel-card h2 { color: #e0806f; }
+.travel-bar { height: 6px; margin: 14px 0 8px; }

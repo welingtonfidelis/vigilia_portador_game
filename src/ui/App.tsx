@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Session } from '../game/session.ts';
+import { travelView } from '../game/travel.ts';
 import { BALANCE, ELITE_NAMES, ENEMIES, heroStats, isBoss, roomsOnFloor, xpToNext } from '../sim/index.ts';
 import type { World } from '../sim/index.ts';
 import { duration, nf } from './format.ts';
@@ -52,6 +53,28 @@ function where(w: World): string {
   if (!r) return '';
   const kind = { combate: 'Combate', elite: 'Elite', bau: 'Baú', prisioneiro: 'Prisioneiro', santuario: 'Santuário', chefe: 'Chefe' }[r.kind];
   return `Andar ${r.floor} · sala ${r.index + 1}/${roomsOnFloor(r.floor)} · ${kind}`;
+}
+
+/** Entre a vila e a sala: a tela escurece e o cartão mostra para onde o herói vai. */
+function TravelCard({ session, w }: { session: Session; w: World }) {
+  const v = travelView(w, session.frac);
+  const on = v.mode === 'viagem';
+  // Enquanto o cartão some (na chegada), ele continua mostrando para onde o herói ia.
+  const last = useRef(v);
+  if (on || v.mode === 'saindo') last.current = v;
+  const show = on ? v : last.current;
+  return (
+    <div class={`travel ${on ? 'on' : ''} ${show.carried ? 'carried' : ''}`} aria-hidden={!on}>
+      {show.title && (
+        <div class="travel-card">
+          <h2>{show.title}</h2>
+          {show.subtitle && <p class="muted">{show.subtitle}</p>}
+          <div class="bar xp travel-bar"><div style={{ width: `${(on ? v.progress : 1) * 100}%` }} /></div>
+          <p class="small muted">{on ? `faltam ${duration(v.left)}${session.speed > 1 ? ` · ${session.speed}×` : ''}` : 'chegando'}</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function Hud({ session, w, onBell, onMenu }: { session: Session; w: World; onBell: () => void; onMenu: () => void }) {
@@ -188,6 +211,7 @@ export function App({ session }: { session: Session }) {
   const report = w.report && w.report.tick !== seenReport ? w.report : null;
   return (
     <>
+      <TravelCard session={session} w={w} />
       <Hud session={session} w={w} onBell={() => session.run((x) => x.exp && (x.exp.recall = true))} onMenu={() => setMenu((m) => !m)} />
       {menu && (
         <div class="menu">

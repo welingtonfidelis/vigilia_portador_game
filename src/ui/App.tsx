@@ -209,7 +209,7 @@ export function App({ session }: { session: Session }) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).closest('input, select, textarea')) return;
+      if ((e.target as HTMLElement).closest?.('input, select, textarea')) return;
       const k = e.key.toLowerCase();
       if (k === 'escape') setPanel(null);
       else if (k === ' ') {

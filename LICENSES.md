@@ -1,10 +1,10 @@
 # Licenças da arte
 
-A arte 3D do Vigília: O Portador da Chama vem da família **KayKit**, de **Kay Lousberg** (https://kaylousberg.com, https://kaylousberg.itch.io). A exceção são os prédios da vila do M2, que vêm do **Kenney Fantasy Town Kit**, de **Kenney** (https://kenney.nl), por decisão do usuário em 2026-10-22. Todos os packs usados estão sob **Creative Commons Zero v1.0 Universal (CC0 1.0)**: domínio público, uso livre (inclusive comercial) e sem crédito obrigatório. Mesmo assim, o jogo credita "Kay Lousberg, www.kaylousberg.com" e "Kenney, www.kenney.nl" no menu e no README.
+A arte 3D do Vigília: O Portador da Chama vem da família **KayKit**, de **Kay Lousberg** (https://kaylousberg.com, https://kaylousberg.itch.io). A exceção é a vila do M2, que vem de quatro kits do **Kenney** (https://kenney.nl): Fantasy Town, Graveyard, Castle e Survival, por decisão do usuário em 2026-10-22. Todos os packs usados estão sob **Creative Commons Zero v1.0 Universal (CC0 1.0)**: domínio público, uso livre (inclusive comercial) e sem crédito obrigatório. Mesmo assim, o jogo credita "Kay Lousberg, www.kaylousberg.com" e "Kenney, www.kenney.nl" no menu e no README.
 
 O autor também pede que não se revendam cópias sem modificação nem se apresentem os modelos como próprios. Isso é um pedido, não uma condição da licença, e o projeto segue o pedido.
 
-Download feito em **2026-10-22**, da versão **Free** de cada pack, pela página de download do itch.io. Os arquivos ficam fora do repositório, em `~/Downloads/vigilia-portador-kaykit/`, e são tratados como dados não confiáveis (`docs/VIGILIA-PORTADOR.md`, §3.4). Só os arquivos listados em `tools/art-manifest.ts` são copiados para `public/assets/kaykit/`.
+Download feito em **2026-10-22**, da versão **Free** de cada pack, pela página de download do itch.io (os do Kenney, pela página de cada kit em kenney.nl). Os arquivos ficam fora do repositório, em `~/Downloads/vigilia-portador-kaykit/`, e são tratados como dados não confiáveis (`docs/VIGILIA-PORTADOR.md`, §3.4). Só os arquivos listados em `tools/art-manifest.ts` são copiados para `public/assets/kaykit/`.
 
 ## Packs
 
@@ -22,8 +22,11 @@ Download feito em **2026-10-22**, da versão **Free** de cada pack, pela página
 | KayKit - Mixed Bag 1 | Free | https://kaylousberg.itch.io/mixed-bag-1 | Asset license: Creative Commons Zero v1.0 Universal | "License: (Creative Commons Zero, CC0)", criado em 15/09/2026 | Free → `mixedbag.zip` (M2) | 5 692 996 B | `65d0ff7cfe128b78d26b98f2e4797b7bd7c6371885455faed52c15d9d2c3ec60` |
 | KayKit : Furniture Bits | 1.0 (Free) | https://kaylousberg.itch.io/furniture-bits | Asset license: Creative Commons Zero v1.0 Universal | "License: (Creative Commons Zero, CC0)", criado em 08/09/2023 | Free → `furniture.zip` (M2) | 3 780 559 B | `e6d75f34c5545486b5a8f45f86209dbd49092f3e77ae23011bdb87edab89e7e4` |
 | Kenney Fantasy Town Kit | 2.0 | https://kenney.nl/assets/fantasy-town-kit | License: Creative Commons CC0 | "License: (Creative Commons Zero, CC0)", criado em 03-08-2025; crédito a "Kenney" ou "www.kenney.nl" opcional | `kenney_fantasy-town-kit_2.0.zip` → `kenney-fantasy-town.zip` (M2) | 3 854 691 B | `1a7530c09f4d2fa2cdee259876f089334f8b1f27fa86a0c4f54ef86cdd8676ef` |
+| Kenney Graveyard Kit | 5.0 | https://kenney.nl/assets/graveyard-kit | License: Creative Commons CC0 | "License: (Creative Commons Zero, CC0)", criado em 17-10-2025; crédito a "Kenney" ou "www.kenney.nl" opcional | `kenney_graveyard-kit_5.0.zip` → `kenney-graveyard-kit.zip` (diorama) | 3 623 408 B | `1a93613f2e5675f3310acf49ec9ef13ae7adeb756ac3b205bfb6cc9311a81062` |
+| Kenney Castle Kit | 2.0 | https://kenney.nl/assets/castle-kit | License: Creative Commons CC0 | "License: (Creative Commons Zero, CC0)", criado em 27-03-2024; crédito a "Kenney" ou "www.kenney.nl" opcional | `kenney_castle-kit.zip` → `kenney-castle-kit.zip` (diorama) | 2 232 589 B | `921f3f73927bb23106cae34bc21d5ab4b033a9fc120475e96f714a406e3169df` |
+| Kenney Survival Kit | 2.0 | https://kenney.nl/assets/survival-kit | License: Creative Commons CC0 | "License: (Creative Commons Zero, CC0)", criado em 03-04-2024; crédito a "Kenney" ou "www.kenney.nl" opcional | `kenney_survival-kit.zip` → `kenney-survival-kit.zip` (diorama) | 1 948 174 B | `c3586341b5932c87eb43d75d915434f47daed168b17ed36a03e8ca9977c7443e` |
 
-Texto da licença (o mesmo nos seis `License.txt`):
+Texto da licença (o mesmo em todos os `License.txt`):
 
 > License: (Creative Commons Zero, CC0)
 > http://creativecommons.org/publicdomain/zero/1.0/
@@ -42,7 +45,10 @@ A lista exata, com o tamanho e o SHA-256 de cada arquivo copiado, é gerada por 
 | Dungeon 1.1 | Piso, paredes, porta, pilares, tochas, baús, barris, caixas, entulho, estandartes e moedas (lista no manifesto) |
 | Medieval Hexagon 1.0 | Só o alvo e o suporte de armas do treinador (`target`, `weaponrack`), ampliados. Os prédios dele foram testados lado a lado e descartados |
 | Forest Nature 1.0 | 4 árvores, 2 arbustos, 2 pedras e 2 tufos de grama, na floresta em volta da vila, nas ruínas e na fogueira |
-| Kenney Fantasy Town 2.0 | 51 peças em GLB mais `Textures/colormap.png` (lista em `tools/art-manifest.ts`): paredes, portas, janelas, telhados, chaminé, varas, tábuas, ruas, fonte, lanternas, bancos, carroça, pedras e bandeiras da vila |
+| Kenney Fantasy Town 2.0 | 69 peças em GLB mais `Textures/colormap.png` (lista em `tools/art-manifest.ts`): paredes (inclusive enxaimel), portas, janelas, telhados com janela de sótão, chaminé, varas, tábuas, escada, fonte, lanternas, barracas, bancos, carroça, cercas e bandeiras da vila. A paleta é recolorida no jogo (`src/render/palette.ts`) |
+| Kenney Graveyard 5.0 | 45 peças em GLB mais a paleta: a capela da Cripta, lápides, covas, cerca de ferro, velas, cestos de fogo, postes de luz, destroços, fardos de feno, pedras e pinheiros (também os da floresta) |
+| Kenney Castle 2.0 | 26 peças em GLB mais a paleta: a torre do Salão de Táticas, ameias, bandeiras, estandartes, a balista e pedras |
+| Kenney Survival 2.0 | 44 peças em GLB mais a paleta: tendas, a fogueira de vigília, bancadas da forja, caixas, barris, estruturas de obra e mato |
 | Resource Bits 1.0 | Pilhas de madeira, pedra, ferro e tecido e a tora (obras, ferreiro, carroceiro e fogueira) |
 | RPG Tools Bits 1.0 | Bigorna, rebolo, mapa e bússola (ferreiro e Salão de Táticas); machado, martelo, serrote, pá, balde e lanterna esperam a M2.2 |
 | Furniture Bits 1.0 | Mesa, cadeira e cama (alquimista, curandeira e Salão de Táticas) |

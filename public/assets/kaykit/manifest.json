@@ -932,9 +932,689 @@
       "sha256": "f0a636fccb7d57c38f5acd58881c468f4872f1bcda1e9fd9b1118e76110565a1"
     },
     {
+      "path": "kenney-town/wall-wood-detail-cross.glb",
+      "bytes": 8480,
+      "sha256": "0335f9f55d541a2c044d11242103d5de70359ca5758e6734c8936ec27ab58043"
+    },
+    {
+      "path": "kenney-town/wall-wood-detail-diagonal.glb",
+      "bytes": 6684,
+      "sha256": "3b1ef50674432944f3f9561e511c0867571393c58e3c73d475d383c5bfc469fc"
+    },
+    {
+      "path": "kenney-town/wall-wood-detail-horizontal.glb",
+      "bytes": 6256,
+      "sha256": "ee27ac4f7b2a9dd944e1d3ee3e52d0018281033c768017afbc248b66e0d99764"
+    },
+    {
+      "path": "kenney-town/wall-wood-window-small.glb",
+      "bytes": 11808,
+      "sha256": "3c9118d167d8e75ee78f884b9edb90101f9c1928d4fcc2afaedcc349bf8c672b"
+    },
+    {
+      "path": "kenney-town/wall-window-small.glb",
+      "bytes": 9376,
+      "sha256": "44516aac3d06ee8d2694cfd57d0c6e1e27ca2d0bc45b738ea1f0d1821da10110"
+    },
+    {
+      "path": "kenney-town/roof-high.glb",
+      "bytes": 8088,
+      "sha256": "7d39cd8fdcb8bd652d8a40f5f54e5e3d2c41bc1bb84691334f75bc411024cb12"
+    },
+    {
+      "path": "kenney-town/roof-high-window.glb",
+      "bytes": 20732,
+      "sha256": "b5bea885f9dc0a2b1195748a1c4b9994e16256ab740b6cdc6783ebbcf8b96946"
+    },
+    {
+      "path": "kenney-town/roof-window.glb",
+      "bytes": 15524,
+      "sha256": "9c95c71b7ea2a284f9ea37d0f684fe5aa654cdff14815969bc97d234014bbd53"
+    },
+    {
+      "path": "kenney-town/chimney-base.glb",
+      "bytes": 8408,
+      "sha256": "f7da0ca85be73a00f65aa297023e136e6bed93b7667ef49861a97ce89fd3a6e9"
+    },
+    {
+      "path": "kenney-town/chimney-top.glb",
+      "bytes": 7896,
+      "sha256": "639eb7e9add8e491aa64aac94bd4ecbf1e67f8c628f3e0173f029f1c667b7590"
+    },
+    {
+      "path": "kenney-town/stairs-wide-stone.glb",
+      "bytes": 12188,
+      "sha256": "b28dae600de5c1759993dd363e18eebb40db6db544d94f7f56fb8829bc7f38be"
+    },
+    {
+      "path": "kenney-town/stairs-wide-stone-handrail.glb",
+      "bytes": 23440,
+      "sha256": "def3d44694a5393d3ddc1c002d09db90387dcef820286961ac506b0b9fc7009b"
+    },
+    {
+      "path": "kenney-town/fence-curved.glb",
+      "bytes": 25408,
+      "sha256": "be132586a950f4e4830815b909d9d53fb7e8653ff14c9f03c38c9fc550f4e797"
+    },
+    {
+      "path": "kenney-town/cart-high.glb",
+      "bytes": 88560,
+      "sha256": "4b0bce37e8645f3719a9032bf4d49048b7779ac891758ae6e2693238911c5eec"
+    },
+    {
+      "path": "kenney-town/stall-stool.glb",
+      "bytes": 14172,
+      "sha256": "50c6b512d810687f40e27c7a43b2864e5f7bc84f16ff7a4112cea4807676c336"
+    },
+    {
+      "path": "kenney-town/wheel.glb",
+      "bytes": 17184,
+      "sha256": "c049e479d0fa31d7cae7a3f4fe239172e7117789fdd10be4be5bddde6239d59f"
+    },
+    {
+      "path": "kenney-town/wall-block.glb",
+      "bytes": 8532,
+      "sha256": "daa35e5b32d7941f3dc61f64f6f9630b70441478d652989cd6c02a908b84af86"
+    },
+    {
+      "path": "kenney-town/wall-block-half.glb",
+      "bytes": 8564,
+      "sha256": "c875a1d86faf9eab5af9152c0fd06b91cea4693e92780f949d505a5186925e32"
+    },
+    {
       "path": "kenney-town/Textures/colormap.png",
       "bytes": 11143,
       "sha256": "4aac939dc33195e35caf8c382ee3cb170054da763577f22d3c22692ec6afccdf"
+    },
+    {
+      "path": "kenney-graveyard/crypt-large.glb",
+      "bytes": 54852,
+      "sha256": "2995f0d1356d9b92344c607ecc9ff727347dd7347527edfe1cf20ad582aef199"
+    },
+    {
+      "path": "kenney-graveyard/crypt-large-door.glb",
+      "bytes": 21712,
+      "sha256": "04ccdafcca9207f6dc1b1897f96066286f7336ca81fdef55eedf5fd998bd0f1c"
+    },
+    {
+      "path": "kenney-graveyard/crypt-large-roof.glb",
+      "bytes": 35600,
+      "sha256": "46c4e80205bd74b2d1162cf261ad46bd8846c63e106f56e44869bf9184670d7e"
+    },
+    {
+      "path": "kenney-graveyard/crypt.glb",
+      "bytes": 25048,
+      "sha256": "61ff55e95648a28872cedba61c9c48fac723852adad49a3a2d92e26e0c0d2909"
+    },
+    {
+      "path": "kenney-graveyard/crypt-door.glb",
+      "bytes": 16168,
+      "sha256": "41a62fcf6fdf3e1b45ffb03df6bfe6613ca9299c29295c6fdde907e9394c23bf"
+    },
+    {
+      "path": "kenney-graveyard/gravestone-round.glb",
+      "bytes": 16832,
+      "sha256": "20574c84e41990d7143cdb1201d8318e875a326fe605512a7c82bac3086c8db0"
+    },
+    {
+      "path": "kenney-graveyard/gravestone-cross.glb",
+      "bytes": 20584,
+      "sha256": "ef49164a4ca545cb2bb491f592d63b1611f6f8f640db77db62f9651ec33fb849"
+    },
+    {
+      "path": "kenney-graveyard/gravestone-wide.glb",
+      "bytes": 23020,
+      "sha256": "ddbdd815905b3365a991b9b264997c81f2d38235e11ab88a0b594700c34455c3"
+    },
+    {
+      "path": "kenney-graveyard/gravestone-broken.glb",
+      "bytes": 12920,
+      "sha256": "67693974f6b30d49da8c56a436b78de4f49007be68d985bfb42d433119cc527a"
+    },
+    {
+      "path": "kenney-graveyard/gravestone-bevel.glb",
+      "bytes": 15852,
+      "sha256": "83c78e259fe18fd9d93548ee4a28b327f368cc06a711f15839ed1ceb09032ff0"
+    },
+    {
+      "path": "kenney-graveyard/gravestone-decorative.glb",
+      "bytes": 10004,
+      "sha256": "3011f6c20c7a3a26b2a9968ceabdede5a36374683817c84dff4ec334b4fe9708"
+    },
+    {
+      "path": "kenney-graveyard/cross-wood.glb",
+      "bytes": 13080,
+      "sha256": "8c84436cf5d058276e5b83af9638220c94d265f1f042a6f021307303e1b929a0"
+    },
+    {
+      "path": "kenney-graveyard/grave.glb",
+      "bytes": 25080,
+      "sha256": "72218a70525389bb6dcb3b46e097a8637bde2a233b776344988aab6bb99a0e97"
+    },
+    {
+      "path": "kenney-graveyard/grave-border.glb",
+      "bytes": 57352,
+      "sha256": "ab330ef153b3616967346cc4db3df942bd54661e538dcb938fb0e80b3077250a"
+    },
+    {
+      "path": "kenney-graveyard/iron-fence.glb",
+      "bytes": 38576,
+      "sha256": "6ea3e334d97348d8ad9de5a8c77cdd07fb798a23f56971186c8f9edb85689cd9"
+    },
+    {
+      "path": "kenney-graveyard/iron-fence-damaged.glb",
+      "bytes": 34956,
+      "sha256": "7229744e6c557fdc4afe3dc6459b24a04b79056b7951b02e0afcd24608a55ac2"
+    },
+    {
+      "path": "kenney-graveyard/iron-fence-border-gate.glb",
+      "bytes": 26340,
+      "sha256": "efc72718ec621098884d1f7580e63b06e297ad71c4f7a1a07fcdc9a8b3612724"
+    },
+    {
+      "path": "kenney-graveyard/iron-fence-border-column.glb",
+      "bytes": 40752,
+      "sha256": "0216ee96788a593317e233b5fdca3386d5153943c46088e0c712d6cb09907b1d"
+    },
+    {
+      "path": "kenney-graveyard/fence.glb",
+      "bytes": 40020,
+      "sha256": "f822b39a56f1a4b55957845976b1803230fca0df1c99fa41b3986fdc8c9a8332"
+    },
+    {
+      "path": "kenney-graveyard/fence-damaged.glb",
+      "bytes": 30152,
+      "sha256": "29d600de13fd132a615b7f0f6342d4a974610303ca12595049e5b43a0d2ad8b5"
+    },
+    {
+      "path": "kenney-graveyard/pine.glb",
+      "bytes": 35920,
+      "sha256": "0bd5e72e2aa430e74625b3a11bd809c669c7cc58a300b028ff06814d45c2d213"
+    },
+    {
+      "path": "kenney-graveyard/pine-crooked.glb",
+      "bytes": 35944,
+      "sha256": "3080ca745df311d59cbe445a31da6cadfd7aa5f14e4846015f310746a6c23fe1"
+    },
+    {
+      "path": "kenney-graveyard/pine-fall.glb",
+      "bytes": 35936,
+      "sha256": "1370654dc1da3615f51e31880e71d78990d5dbe7a4a0480abdbfc840fb89a6ad"
+    },
+    {
+      "path": "kenney-graveyard/fire-basket.glb",
+      "bytes": 18740,
+      "sha256": "f72e5a3f69711b30055219961d16824fe6d1ac5a8240d456d7f1a1a2cb7d5433"
+    },
+    {
+      "path": "kenney-graveyard/lightpost-single.glb",
+      "bytes": 34440,
+      "sha256": "76a179f45f24e7cd044c2e1f3bfaf3297d10feb044613d14a03691a62c1f55fe"
+    },
+    {
+      "path": "kenney-graveyard/lightpost-double.glb",
+      "bytes": 54228,
+      "sha256": "54288335ecba277a05df2e62526574cdfe5e3cd5d8f19065142e2d669b5ede0b"
+    },
+    {
+      "path": "kenney-graveyard/lantern-candle.glb",
+      "bytes": 22124,
+      "sha256": "c78da0717e38ea019617a39a2ad263c54ecc3b0efbdcd3da124db6550657e90e"
+    },
+    {
+      "path": "kenney-graveyard/candle-multiple.glb",
+      "bytes": 17304,
+      "sha256": "e747e04390e8f431e0d80b17696ef01cfa935dd8efff44f7008de6408236b547"
+    },
+    {
+      "path": "kenney-graveyard/debris.glb",
+      "bytes": 25132,
+      "sha256": "bf584bb5a4c1a7d4b7aed9ced00473a8678e9d402db1cfafc17e84e46aa2d42a"
+    },
+    {
+      "path": "kenney-graveyard/debris-wood.glb",
+      "bytes": 10820,
+      "sha256": "f0cf5285322f7d75125487f1574a61cca2fd96edb0e702a2773ae5cbb0244133"
+    },
+    {
+      "path": "kenney-graveyard/hay-bale.glb",
+      "bytes": 17828,
+      "sha256": "675d70aab70a1ad6792d347183cdf0cf1de5c342863c0e03128cd31ed2a5963a"
+    },
+    {
+      "path": "kenney-graveyard/hay-bale-bundled.glb",
+      "bytes": 35088,
+      "sha256": "94e00bc82083ebd34580a686ad2b10920a53d9c54edb5fed61e4837e987739ee"
+    },
+    {
+      "path": "kenney-graveyard/rocks.glb",
+      "bytes": 36844,
+      "sha256": "e574e8dd7e71a8673765b4385c1fbef3af05940bdf6b6df7690225509a6d394b"
+    },
+    {
+      "path": "kenney-graveyard/rocks-tall.glb",
+      "bytes": 36924,
+      "sha256": "c6769af9562a9f47d8ae96cad506e4ff900c66299f5ec4494903a40642c12a6d"
+    },
+    {
+      "path": "kenney-graveyard/stone-wall.glb",
+      "bytes": 6944,
+      "sha256": "f6276d585e0ae3603d005e5a80d8d2ac6af3da5f357df520d21de0df62837f59"
+    },
+    {
+      "path": "kenney-graveyard/stone-wall-damaged.glb",
+      "bytes": 14168,
+      "sha256": "2e0357e73f5fc0bc95f12469474c39191c93a67d586b5d3ad749edf2ec021c88"
+    },
+    {
+      "path": "kenney-graveyard/stone-wall-column.glb",
+      "bytes": 13744,
+      "sha256": "7c979fd9868e28c0d762d11a8deccc33075afe8a47cbf5adf833396383172a5b"
+    },
+    {
+      "path": "kenney-graveyard/bench.glb",
+      "bytes": 15952,
+      "sha256": "2fd1ed7a06e8b2a9a6e81896eb96f08103ba6d9d705f6643504ea82d8280d213"
+    },
+    {
+      "path": "kenney-graveyard/bench-damaged.glb",
+      "bytes": 23548,
+      "sha256": "48007ab37acaf512dc131f57984424d1897fe2f94446c096e9f3574e06c5b8af"
+    },
+    {
+      "path": "kenney-graveyard/trunk.glb",
+      "bytes": 27100,
+      "sha256": "e8f241c336d6693ccee658bc9830a461f0d18d5b90aba9a52e6276e89e4f8171"
+    },
+    {
+      "path": "kenney-graveyard/trunk-long.glb",
+      "bytes": 30832,
+      "sha256": "d5d3547b19650a07cad0eb6d597c5cc233675159dd2594a84a19199109f9dc27"
+    },
+    {
+      "path": "kenney-graveyard/altar-stone.glb",
+      "bytes": 17164,
+      "sha256": "6cdcdc19c2d979fc0fafa073bc31db9a45ddc76390bfef366f23e92768d7dde9"
+    },
+    {
+      "path": "kenney-graveyard/pillar-obelisk.glb",
+      "bytes": 8552,
+      "sha256": "f7a9d985522d8bb1eef765ce2b841588b43c8607b32c87056945696a172b3bf1"
+    },
+    {
+      "path": "kenney-graveyard/shovel-dirt.glb",
+      "bytes": 26068,
+      "sha256": "860958adac031d959a3d42a451b915cf01e91efd63abf3df62640c64bb083b9f"
+    },
+    {
+      "path": "kenney-graveyard/urn-round.glb",
+      "bytes": 23712,
+      "sha256": "9a80d295c1c2124435eea72166fc16d7a4fe54e538950aa320dfb63a704b5e37"
+    },
+    {
+      "path": "kenney-graveyard/Textures/colormap.png",
+      "bytes": 10965,
+      "sha256": "a94b4dc4f77a4b8aec96bde94f63912a1ce12aa98eec2c1e9a37c89e20a5f091"
+    },
+    {
+      "path": "kenney-castle/tower-square-base.glb",
+      "bytes": 4456,
+      "sha256": "996887e98957eeea2ba7b5d14f0d17877c91e4e99e1c5b8ee57d87b7f7c9d5e8"
+    },
+    {
+      "path": "kenney-castle/tower-square-base-border.glb",
+      "bytes": 3684,
+      "sha256": "7c48a3a8f8af838c0d7e114115c5abb7a557023b89e08aa421f14bd6add924e3"
+    },
+    {
+      "path": "kenney-castle/tower-square-mid.glb",
+      "bytes": 7744,
+      "sha256": "34a43b162b0984df0c691cb12fcd169ff374412deca0de5fdfdd702a9fa0c98f"
+    },
+    {
+      "path": "kenney-castle/tower-square-mid-windows.glb",
+      "bytes": 30852,
+      "sha256": "68c186f978135ba77969cdbee502a1c0d9d8f40bd01e8aa33b7cc6859a2ba766"
+    },
+    {
+      "path": "kenney-castle/tower-square-mid-door.glb",
+      "bytes": 28996,
+      "sha256": "1a7d065cb548b73adcdd497cac10397247bd70377cb2f6b9d36b78b61087b35d"
+    },
+    {
+      "path": "kenney-castle/tower-square-top.glb",
+      "bytes": 13276,
+      "sha256": "5e98cdf2bf4d885edc3fa514719f80d63872e11c54ee629c11859223dad8489c"
+    },
+    {
+      "path": "kenney-castle/tower-square-top-roof.glb",
+      "bytes": 11256,
+      "sha256": "5516fb45c3158e03773e15e83f5fc8b9bafbbcb3f35fc8e1e06e823cdb01e3bb"
+    },
+    {
+      "path": "kenney-castle/tower-square-top-roof-high.glb",
+      "bytes": 11288,
+      "sha256": "b9345255366bc88744eea5469dddb4dedf2c70f33075b0fde53144ca251e25ea"
+    },
+    {
+      "path": "kenney-castle/tower-square-roof.glb",
+      "bytes": 14036,
+      "sha256": "94215209b27f5274188d70906d2a4df357529abd878b6b916bfb61ac5e64d1c8"
+    },
+    {
+      "path": "kenney-castle/tower-top.glb",
+      "bytes": 27408,
+      "sha256": "222537f0daa9167788a468b4ee71918d1066b7c142e7e251c449c50be3438068"
+    },
+    {
+      "path": "kenney-castle/flag.glb",
+      "bytes": 15192,
+      "sha256": "263fc3c7bedcfcd2b30f1aca6feb76c8f249f8f79dc9a694f47ec63b77b180d6"
+    },
+    {
+      "path": "kenney-castle/flag-banner-long.glb",
+      "bytes": 6660,
+      "sha256": "e6a4433f5770b9fc31bf67d72424a877d5c010486d5b7373ce7af900566827e4"
+    },
+    {
+      "path": "kenney-castle/flag-banner-short.glb",
+      "bytes": 6664,
+      "sha256": "9561b6afd1d551199d02f520d31eab46dbff137eef4f9aa13f12e311b588fbd7"
+    },
+    {
+      "path": "kenney-castle/flag-pennant.glb",
+      "bytes": 13652,
+      "sha256": "741368448bd21991700a488dfc5125330594c4dccd9395feecaa6bbfa682b65d"
+    },
+    {
+      "path": "kenney-castle/flag-wide.glb",
+      "bytes": 25460,
+      "sha256": "74e94f48dffb40aca288676191265523c3e752aef40b868bfa3a51394083519b"
+    },
+    {
+      "path": "kenney-castle/wall.glb",
+      "bytes": 16552,
+      "sha256": "b2ea00acbf4ba91ff0d4b8b942edf9fa12d821abd0b2c945c57a2b9b3153cfe3"
+    },
+    {
+      "path": "kenney-castle/wall-half.glb",
+      "bytes": 12132,
+      "sha256": "4f0baca90eb52d96717aaabf36db98f1f2b554876f44da533b57dd92b6f67965"
+    },
+    {
+      "path": "kenney-castle/wall-corner.glb",
+      "bytes": 15264,
+      "sha256": "82d27b869162b6a9ee19b0d7480913f56928b6620708f3b3899131495803cc9a"
+    },
+    {
+      "path": "kenney-castle/wall-doorway.glb",
+      "bytes": 37560,
+      "sha256": "8daf5cccceace888d51d74b0e0254e192004faf926e07f1b28e94191879af3a6"
+    },
+    {
+      "path": "kenney-castle/wall-pillar.glb",
+      "bytes": 18156,
+      "sha256": "22d359abfaa3cf3dc5a2fece09a108024a07a4e263b21a4a0689da0e630699ed"
+    },
+    {
+      "path": "kenney-castle/gate.glb",
+      "bytes": 13880,
+      "sha256": "fdc3d5b07f619dcacbf2af36024dc9a356696e541f6ce409a5305be782665ec9"
+    },
+    {
+      "path": "kenney-castle/stairs-stone.glb",
+      "bytes": 9836,
+      "sha256": "ec21b1d65c04ba6384734c31ac542bb4015541e652c411796fd7bcf292e6413c"
+    },
+    {
+      "path": "kenney-castle/stairs-stone-square.glb",
+      "bytes": 9556,
+      "sha256": "22b52789ae3b0b208bcf5e9d5e8a70c6e307d51672217a122eaa58c42f2d7b36"
+    },
+    {
+      "path": "kenney-castle/siege-ballista.glb",
+      "bytes": 64608,
+      "sha256": "8b2317b6820dd9782c7c2b5da9b7cf77cc3704f3b4d27a4c32e50069852a6b0d"
+    },
+    {
+      "path": "kenney-castle/rocks-large.glb",
+      "bytes": 16204,
+      "sha256": "7ea1ee769eb063b192c3c3744cd32a11616320f7ca491fbe23289552f6655595"
+    },
+    {
+      "path": "kenney-castle/rocks-small.glb",
+      "bytes": 15192,
+      "sha256": "d860d3a053e1fc7b5825a39f6df68f14c49bab7443c1703e1f5b28444bd60e0d"
+    },
+    {
+      "path": "kenney-castle/Textures/colormap.png",
+      "bytes": 7529,
+      "sha256": "66fd49be148f32e88f6c8cace67120250d1943a7856601158ad0ff24651db0b0"
+    },
+    {
+      "path": "kenney-survival/tent.glb",
+      "bytes": 14020,
+      "sha256": "2c1c5fcc213929af0904a84921084361599ffab5077423a44d3d72a81d8c87c6"
+    },
+    {
+      "path": "kenney-survival/tent-canvas.glb",
+      "bytes": 16864,
+      "sha256": "efc4bca46a22e4cc4fe391aeafba161c24bc39bfa75e192c57eaacaf686f9717"
+    },
+    {
+      "path": "kenney-survival/tent-canvas-half.glb",
+      "bytes": 15656,
+      "sha256": "f6e12c0de280a9d5e93e27652a3e80ea620374865a6053dbe6fd5fb7eaca9d93"
+    },
+    {
+      "path": "kenney-survival/campfire-pit.glb",
+      "bytes": 26468,
+      "sha256": "a78ce38de408456649146077e1917d70bb39f7c87c3c7370276d809d2409b0ab"
+    },
+    {
+      "path": "kenney-survival/campfire-stand.glb",
+      "bytes": 8320,
+      "sha256": "12fe58a0aa3f73bc4cc0a817f4e8bfa331bb304703384852ca38b38ab38ee5ea"
+    },
+    {
+      "path": "kenney-survival/workbench.glb",
+      "bytes": 26104,
+      "sha256": "bf72d2d535fa29127e5078a6c4c2023a74fa5cd7d02d91ad550e897e088e1dc8"
+    },
+    {
+      "path": "kenney-survival/workbench-anvil.glb",
+      "bytes": 30084,
+      "sha256": "a6253df726c1eba7cbaddf7e31cd5a4adfac31309894bf647e4b803d9d75c275"
+    },
+    {
+      "path": "kenney-survival/workbench-grind.glb",
+      "bytes": 24704,
+      "sha256": "93aa1468ee12b16bd2a554e65eab2beebe7e14cf52ed5a35a9530c6123292773"
+    },
+    {
+      "path": "kenney-survival/barrel.glb",
+      "bytes": 34256,
+      "sha256": "3a0d12f6bdd1badd361f64ce0fbbf878a4ccfc2de8ff1ac4ed4c1aea2a9ee04a"
+    },
+    {
+      "path": "kenney-survival/barrel-open.glb",
+      "bytes": 31772,
+      "sha256": "f24ab1c5ab3685fc758f7e7298bf4f255f039fc6dfc7463711fbe90c4c011a41"
+    },
+    {
+      "path": "kenney-survival/box.glb",
+      "bytes": 14056,
+      "sha256": "346eebd23986793b992ca6e05e9f98d6f5db96a9bfa3aa7c8360ac8b7920def8"
+    },
+    {
+      "path": "kenney-survival/box-large.glb",
+      "bytes": 14072,
+      "sha256": "69b4052f32b7b27e5d2ee27041b091a07d4a2dd4d877168a701607a97609f0f6"
+    },
+    {
+      "path": "kenney-survival/box-open.glb",
+      "bytes": 17052,
+      "sha256": "2169e2291052ef9c378af4d6736df3fcff4ebca8fc39cbcdb4b7ad6accdff568"
+    },
+    {
+      "path": "kenney-survival/chest.glb",
+      "bytes": 35172,
+      "sha256": "84b03023e425cc1f96c6d0b0f352608be9e8e01b112790e6b00b8651bf84379b"
+    },
+    {
+      "path": "kenney-survival/resource-wood.glb",
+      "bytes": 7272,
+      "sha256": "1d5f559da9432f89bd323731ef76b60372e0deb261a96d0da8d5af570c485d80"
+    },
+    {
+      "path": "kenney-survival/resource-planks.glb",
+      "bytes": 8884,
+      "sha256": "d3804257474a3baab7ac067be91de5c3d6d18d5803775dc876cb6d9442c30873"
+    },
+    {
+      "path": "kenney-survival/resource-stone.glb",
+      "bytes": 5464,
+      "sha256": "c0ad4ecc890f99dc7c62da067824e31de0f0515de4437e73d8690136bd06e3c0"
+    },
+    {
+      "path": "kenney-survival/resource-stone-large.glb",
+      "bytes": 12664,
+      "sha256": "6faf73c4998d253f944c0f2372cbd770b2780dd45248221537bf9983d55e0323"
+    },
+    {
+      "path": "kenney-survival/signpost.glb",
+      "bytes": 5924,
+      "sha256": "6d33757888c4ec9249610266ca8d60532b1138ae28fd37e93fa843ec4856fd25"
+    },
+    {
+      "path": "kenney-survival/signpost-single.glb",
+      "bytes": 4452,
+      "sha256": "ca011990b4e1a48240bb78edeb4b6f3b1bf7265dcc6500a5268fc8de1a54262c"
+    },
+    {
+      "path": "kenney-survival/fence.glb",
+      "bytes": 6428,
+      "sha256": "5d8050e39c8b83b5835ea38b9b17429b4a03e289b566a1db771b7e1d9c6e4050"
+    },
+    {
+      "path": "kenney-survival/fence-doorway.glb",
+      "bytes": 13588,
+      "sha256": "f52756aa5150704dba49ef4d4d179a20dfd333e4ce9a914a5e9b0088cf2db933"
+    },
+    {
+      "path": "kenney-survival/fence-fortified.glb",
+      "bytes": 13592,
+      "sha256": "c50f420e9ebf0f1383a9f95766d47f377b19852651760b8223219cc2be850ece"
+    },
+    {
+      "path": "kenney-survival/structure.glb",
+      "bytes": 9672,
+      "sha256": "2ff24b6e283bc687c04cd3e0341049e34ce10fe2394a9856af89226a72eebd9d"
+    },
+    {
+      "path": "kenney-survival/structure-roof.glb",
+      "bytes": 21740,
+      "sha256": "645e0454780d0b07084e3d5ffc6c5b164742f62b07b810e1cb838897c7ca83ac"
+    },
+    {
+      "path": "kenney-survival/structure-canvas.glb",
+      "bytes": 11276,
+      "sha256": "f450f215599f8962b63737825c7d55d7be498742551ba21e5633d6459b194134"
+    },
+    {
+      "path": "kenney-survival/tool-axe.glb",
+      "bytes": 8612,
+      "sha256": "de5c6cc51cdb5bcfad8bd7128b7ff0e37a34e6f4f8deddec82bb8634c25cc20d"
+    },
+    {
+      "path": "kenney-survival/tool-hammer.glb",
+      "bytes": 6520,
+      "sha256": "9b27f03c26dabd49a7ea358615e63fe65e1c3d0157887d4ee1ecdfa1f0e688f3"
+    },
+    {
+      "path": "kenney-survival/tool-shovel.glb",
+      "bytes": 11656,
+      "sha256": "20abb2420f0215c59694287207b7a6324114552b9f59846ab2a2673e3a7c1147"
+    },
+    {
+      "path": "kenney-survival/tool-pickaxe.glb",
+      "bytes": 8152,
+      "sha256": "2b77a238b8666338094d83fc5561984643c335c49ccacd9e0e0a50fb2849c542"
+    },
+    {
+      "path": "kenney-survival/bucket.glb",
+      "bytes": 7816,
+      "sha256": "ff173908480929067cd634d5edfedba038428f1503db487521492975fa5c8274"
+    },
+    {
+      "path": "kenney-survival/bedroll.glb",
+      "bytes": 14036,
+      "sha256": "2ad9baa2d800845195c7c92bd8423b0d99519530dee0afd3bd0ac4b2e255d728"
+    },
+    {
+      "path": "kenney-survival/tree-tall.glb",
+      "bytes": 24672,
+      "sha256": "c4822d1c6fc127701b2f7958c3e97c779103d6beaa19925ba439c99092ccea4c"
+    },
+    {
+      "path": "kenney-survival/tree.glb",
+      "bytes": 22184,
+      "sha256": "7f8c2381a747882fc4fb534dcf803002f2cc925aa400f1328b24bd5576c3dca0"
+    },
+    {
+      "path": "kenney-survival/tree-log.glb",
+      "bytes": 9180,
+      "sha256": "bd358e55e63a75bd54bea1e4b40ed362baa937ce8e503f2aa2370a5a1d9da11c"
+    },
+    {
+      "path": "kenney-survival/tree-trunk.glb",
+      "bytes": 6920,
+      "sha256": "4f833d091adbae0af77ab78783e4717b53a918c512c59e46612936ea42f22b8f"
+    },
+    {
+      "path": "kenney-survival/rock-a.glb",
+      "bytes": 10812,
+      "sha256": "343bab63ea4c51a5b6c881a9d546f165789cfc26e1f60c517d59e4baa384c82a"
+    },
+    {
+      "path": "kenney-survival/rock-b.glb",
+      "bytes": 15184,
+      "sha256": "f0f4eec72f18722dee56f799c6045953835a91856929dff6fb71331602b12c2e"
+    },
+    {
+      "path": "kenney-survival/rock-c.glb",
+      "bytes": 11692,
+      "sha256": "a0f2e78460acfc4e02e029065472360f2e491c389d6e82f02837e3ed643b9d75"
+    },
+    {
+      "path": "kenney-survival/patch-grass.glb",
+      "bytes": 3492,
+      "sha256": "ae22da8e00dfdf5c12969d9dc27bd0fad70d1c5dc2a8b32f8cf441833f0d203c"
+    },
+    {
+      "path": "kenney-survival/patch-grass-large.glb",
+      "bytes": 3508,
+      "sha256": "458f467382babd3f0d075a8bef781119c8fead62f806366a274cbc0e7e65b3a1"
+    },
+    {
+      "path": "kenney-survival/grass.glb",
+      "bytes": 5992,
+      "sha256": "f9430602f076fad8f67b396008ba412fc0c073a93eb8c863ec0944564cbda93d"
+    },
+    {
+      "path": "kenney-survival/grass-large.glb",
+      "bytes": 18848,
+      "sha256": "68d23ba79b8b8c7a8fc5da6c4b688cce6d9a739720fbf9c3134e5388e91d6f07"
+    },
+    {
+      "path": "kenney-survival/floor-old.glb",
+      "bytes": 10056,
+      "sha256": "a66581f16641c7da6c67de84f64c36c35c5b18367640e44aada5a9c6a62487aa"
+    },
+    {
+      "path": "kenney-survival/Textures/colormap.png",
+      "bytes": 7440,
+      "sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
     },
     {
       "path": "dungeon/stairs.gltf",

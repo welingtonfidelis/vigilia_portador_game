@@ -37,6 +37,37 @@ const KENNEY_TOWN = [
   // M2.1: ruínas e obras, e o resto da vila.
   'wall-broken', 'wall-wood-broken', 'wall-half', 'wall-wood-half', 'poles', 'poles-horizontal', 'planks-half', 'planks-opening',
   'banner-green', 'rock-small', 'rock-wide', 'stairs-stone', 'fence-broken', 'hedge-large', 'stall',
+  // Vila em diorama: enxaimel, telhado alto com janela de sótão e o resto da praça.
+  'wall-wood-detail-cross', 'wall-wood-detail-diagonal', 'wall-wood-detail-horizontal', 'wall-wood-window-small', 'wall-window-small',
+  'roof-high', 'roof-high-window', 'roof-window', 'chimney-base', 'chimney-top', 'stairs-wide-stone', 'stairs-wide-stone-handrail',
+  'fence-curved', 'cart-high', 'stall-stool', 'wheel', 'wall-block', 'wall-block-half',
+];
+
+/** Kenney Graveyard Kit 5.0: o cemitério do platô, a capela da Cripta e os pinheiros. */
+const GRAVEYARD = [
+  'crypt-large', 'crypt-large-door', 'crypt-large-roof', 'crypt', 'crypt-door', 'gravestone-round', 'gravestone-cross', 'gravestone-wide',
+  'gravestone-broken', 'gravestone-bevel', 'gravestone-decorative', 'cross-wood', 'grave', 'grave-border', 'iron-fence', 'iron-fence-damaged',
+  'iron-fence-border-gate', 'iron-fence-border-column', 'fence', 'fence-damaged', 'pine', 'pine-crooked', 'pine-fall', 'fire-basket',
+  'lightpost-single', 'lightpost-double', 'lantern-candle', 'candle-multiple', 'debris', 'debris-wood', 'hay-bale', 'hay-bale-bundled', 'rocks',
+  'rocks-tall', 'stone-wall', 'stone-wall-damaged', 'stone-wall-column', 'bench', 'bench-damaged', 'trunk', 'trunk-long', 'altar-stone',
+  'pillar-obelisk', 'shovel-dirt', 'urn-round',
+];
+
+/** Kenney Castle Kit 2.0: a torre do Salão de Táticas, a muralha e as bandeiras. */
+const CASTLE = [
+  'tower-square-base', 'tower-square-base-border', 'tower-square-mid', 'tower-square-mid-windows', 'tower-square-mid-door', 'tower-square-top',
+  'tower-square-top-roof', 'tower-square-top-roof-high', 'tower-square-roof', 'tower-top', 'flag', 'flag-banner-long', 'flag-banner-short',
+  'flag-pennant', 'flag-wide', 'wall', 'wall-half', 'wall-corner', 'wall-doorway', 'wall-pillar', 'gate', 'stairs-stone', 'stairs-stone-square',
+  'siege-ballista', 'rocks-large', 'rocks-small',
+];
+
+/** Kenney Survival Kit 2.0: as barracas do carroceiro, a forja ao ar livre e a lenha. */
+const SURVIVAL = [
+  'tent', 'tent-canvas', 'tent-canvas-half', 'campfire-pit', 'campfire-stand', 'workbench', 'workbench-anvil', 'workbench-grind', 'barrel',
+  'barrel-open', 'box', 'box-large', 'box-open', 'chest', 'resource-wood', 'resource-planks', 'resource-stone', 'resource-stone-large',
+  'signpost', 'signpost-single', 'fence', 'fence-doorway', 'fence-fortified', 'structure', 'structure-roof', 'structure-canvas', 'tool-axe',
+  'tool-hammer', 'tool-shovel', 'tool-pickaxe', 'bucket', 'bedroll', 'tree-tall', 'tree', 'tree-log', 'tree-trunk', 'rock-a', 'rock-b',
+  'rock-c', 'patch-grass', 'patch-grass-large', 'grass', 'grass-large', 'floor-old',
 ];
 
 const TOOLS = ['anvil', 'grindstone', 'map', 'compass_base', 'blueprint', 'bucket_metal', 'axe', 'hammer', 'saw', 'shovel', 'lantern'];
@@ -134,7 +165,7 @@ export const PACKS: PackEntry[] = [
     ],
   },
   {
-    // Kenney Fantasy Town Kit 2.0 (CC0), em teste lado a lado para a vila do M2.
+    // Kenney Fantasy Town Kit 2.0 (CC0): os prédios da vila (docs §3.1).
     out: 'kenney-town',
     dir: 'kenney-fantasy-town',
     root: 'Models/GLB format',
@@ -143,6 +174,16 @@ export const PACKS: PackEntry[] = [
       { path: 'Textures', ext: '.png', files: ['colormap'], keepPath: 'Textures' },
     ],
   },
+  ...([['kenney-graveyard', GRAVEYARD], ['kenney-castle', CASTLE], ['kenney-survival', SURVIVAL]] as const).map(([name, files]): PackEntry => ({
+    // Kenney Graveyard, Castle e Survival (CC0): o diorama da vila (docs §14.3).
+    out: name,
+    dir: name,
+    root: 'Models/GLB format',
+    groups: [
+      { path: '', ext: '.glb', files: [...files] },
+      { path: 'Textures', ext: '.png', files: ['colormap'], keepPath: 'Textures' },
+    ],
+  })),
   {
     out: 'dungeon',
     dir: 'dungeon',

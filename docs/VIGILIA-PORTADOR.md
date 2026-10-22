@@ -23,8 +23,9 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 **M2.1 (a cena da vila), em 2026-10-22:**
 
-- **A vila é uma cena própria:** prédios do Kenney por estado (ruína, obra, pronto, ampliado), casas por moradores, a entrada da Cripta e a fogueira onde o herói descansa sentado.
-- **Dia e noite:** fonte e lanternas acendem com o marco de 10 moradores.
+- **A vila é um diorama:** um quadrado de terra flutuando na névoa, com a floresta lá embaixo. Ao fundo há dois platôs e a escada de pedra até a capela da Cripta, onde o herói descansa sentado na fogueira de vigília.
+- **Quatro estágios,** como nas imagens de referência: destruída, reconstruída, melhorada e melhorada de novo. Eles mudam o chão, os telhados e os enfeites, e cada prédio continua com o próprio estado (ruína, obra, pronto ou ampliado).
+- **Dia e noite.**
 - **Câmera de observar:** arrastar, setas ou WASD movem; roda, pinça ou + e - dão zoom.
 - **Botão Vila/Herói** no HUD, para olhar a vila com o herói lá embaixo.
 - **Toque num prédio** abre a tela da vila.
@@ -847,6 +848,7 @@ Ficou para depois:
 **Decisões do usuário:**
 
 - **Cena:** a vila é uma cena separada, e não um diorama dentro do acampamento.
+- **Visual (decisão de 2026-10-22, depois da primeira versão):** um diorama, isto é, um quadrado de terra limitado flutuando na névoa, como nas quatro imagens de referência do usuário. Elas estão em `docs/img/conceito-vila-*.jpg`: destruída, reconstruída, melhorada 1 e melhorada 2. A área limitada também ajuda o desempenho.
 - **Moradores:** aventureiros do KayKit com roupa simples que muda de cor.
 - **Prédios:** Kenney Fantasy Town Kit 2.0, ampliado 4× para cair no grid de 4 m da masmorra. A decisão veio depois de um teste lado a lado: o Medieval Hexagon ampliado continuava com cara de maquete ao lado dos moradores (3.1).
 
@@ -859,11 +861,21 @@ Ficou para depois:
 
 **A cena:**
 
-- **Mapa:** fixo, desenhado à mão num grid de 4 m. Tem uma praça central, ruas de pedra (`road` do Kenney), lotes dos 6 prédios, lotes de casas e as bordas de floresta (árvores e arbustos do KayKit Forest).
-- **Entrada da Cripta:** fica na borda norte. É por ela que o herói sai e volta, fazendo a mesma saída e chegada da 2.1.
-- **O herói na vila:** com o herói na vila, ele anda até a fogueira da praça e descansa sentado (`Sit_Floor_Idle`). A tela de equipamento chega a câmera perto dele ali; o acampamento do M0 deixa de existir.
+- **Mapa:** fixo, desenhado à mão num grid de 4 m, numa ilha de 64 × 48 m. Tem a praça, os caminhos, os lotes dos 6 prédios e 3 lotes de casas.
+- **Platôs:** dois ao fundo, a 4 m de altura (o cemitério a oeste e a torre a leste), ligados por uma ponte.
+- **Entrada da Cripta:** a capela no alto da escada de pedra, na ponte entre os platôs. É por ela que o herói sai e volta, fazendo a mesma saída e chegada da 2.1.
+- **O herói na vila:** com o herói na vila, ele descansa sentado (`Sit_Floor_Idle`) na fogueira de vigília, ao lado da capela. A tela de equipamento chega a câmera perto dele ali; o acampamento do M0 deixa de existir.
 - **Câmera de observar:** arrastar move; roda do mouse ou pinça dá zoom; um botão volta ao herói. Tocar num morador mostra o nome e o ofício ("Joana, feirante"). Tocar num prédio abre o painel dele na tela da vila.
 - **Dia e noite:** seguem o dia do jogo (10 min em 1×). Manhã clara, tarde dourada, anoitecer com as lanternas acendendo e as janelas iluminadas, e noite azulada com pouca gente na rua.
+
+**Estágios da vila** (`townStage`, derivado do estado):
+
+| Estágio | Quando | Como aparece |
+|---|---|---|
+| 0, destruída | No começo (menos de 3 prédios de pé) | Chão queimado com cinzas e brasas; casas queimadas com o telhado desabado e fumaça preta; lápides quebradas; cercas caídas; a torre em ruína soltando fumaça |
+| 1, reconstruída | 3 prédios de pé | Grama de volta e caminhos de terra; telhados de palha; fumaça só nas chaminés |
+| 2, melhorada | Capitão do andar 5 vencido | Telhas vermelhas com janelas de sótão; calçamento de pedra nos caminhos e na praça; lanternas; velas no cemitério; a torre com ameias, bandeira e balista |
+| 3, melhorada de novo | Senhor do andar 10 vencido e 10 moradores | A fonte na praça, barracas de feira, a muralha baixa na frente com estandartes e a cerca do cemitério inteira |
 
 **Obras visíveis.** Cada prédio tem um lote fixo e aparece num destes estados:
 
@@ -918,7 +930,7 @@ As **casas** surgem na ordem dos lotes, uma a cada 4 moradores (a regra que já 
 | 4 moradores | Lenhador e feirante; a feira com uma barraca |
 | Capitão vencido (andar 5) | Mais barracas; o músico aparece ao entardecer |
 | 6 moradores | Crianças na praça |
-| 10 moradores | A fonte da praça volta a jorrar e as lanternas acendem à noite |
+| 10 moradores e o Senhor vencido | Estágio 3: a fonte da praça volta a jorrar (as lanternas acendem desde o estágio 2) |
 | Senhor da Cripta vencido (andar 10, fim do Ato I) | Festa por 1 dia de jogo: bandeirolas, a tenda de circo do Mixed Bag na praça, mais música e gente comemorando (`Cheering`, `Waving`). Depois, as bandeirolas ficam |
 | Bichos (fatia M2.3) | Galinhas e um cachorro a partir de 4 moradores; um gato que dorme na fonte |
 
@@ -955,35 +967,59 @@ O balanceador não muda, porque nenhum número muda.
 
 **Pronto quando:** as três fatias funcionam no navegador e no celular dentro do orçamento, e uma captura de cada marco está em `docs/img/`.
 
-**Como ficou a M2.1 (2026-10-22):**
+**Como ficou a M2.1 (2026-10-22), já em diorama:**
 
 | | |
 |---|---|
-| ![Vila no começo](img/m2-vila-a-inicio.jpg) | ![Vila no meio do jogo](img/m2-vila-b-meio.jpg) |
-| Começo: ruínas, o ferreiro de pé e a praça com a fonte seca | Meio do jogo: obra com andaime e pilhas, casas, treinador, carroceiro, o Salão de Táticas e a entrada da Cripta |
-| ![Vila à noite](img/m2-vila-c-noite.jpg) | ![Empurrando a porta da Cripta](img/m2-vila-f-empurra-porta.jpg) |
-| Noite com 12 moradores: a fonte jorra e as lanternas acendem | O herói levanta da fogueira e empurra a porta da Cripta |
-| ![Olhando a vila](img/m2-vila-e-olhando.jpg) | ![Vila no celular](img/m2-vila-celular.jpg) |
-| Olhando a vila com o herói lá embaixo: a fogueira acesa e o HUD mostrando o herói | Celular (375 × 812) |
+| ![Estágio 0, destruída](img/m2-diorama-0.jpg) | ![Estágio 1, reconstruída](img/m2-diorama-1.jpg) |
+| Estágio 0, destruída: só o ferreiro de pé, com telhado de palha; o resto queimado, com fumaça e brasas | Estágio 1, reconstruída: quatro prédios de pé, a curandeira em obra, telhados de palha e caminhos de terra |
+| ![Estágio 2, melhorada](img/m2-diorama-2.jpg) | ![Estágio 3, melhorada de novo](img/m2-diorama-3.jpg) |
+| Estágio 2, melhorada: telhas, calçamento e lanternas; a torre ainda em ruína e o carroceiro em obra | Estágio 3, melhorada de novo: a fonte, a feira, a muralha com estandartes, a torre com ameias e as tendas do carroceiro |
+| ![De perto, estágio 0](img/m2-diorama-0-perto.jpg) | ![De perto, estágio 3](img/m2-diorama-3-perto.jpg) |
+| De perto: casas queimadas com o telhado desabado | De perto: enxaimel, janelas de sótão, calçamento e a fonte |
+| ![O herói na porta da capela](img/m2-diorama-porta.jpg) | ![Vila no celular](img/m2-diorama-celular.jpg) |
+| À noite: o herói levanta da fogueira e empurra a porta da capela da Cripta | Celular (375 × 812), estágio 0 |
+
+As imagens de referência ficam em `docs/img/conceito-vila-1-destruida.jpg` a `conceito-vila-4-melhorada-2.jpg`.
 
 **Onde está cada coisa:**
 
-- **`src/game/townPlan.ts` (puro):** os 18 lotes no grid de 4 m (6 prédios e 12 casas), as ruas, a entrada da Cripta, a fogueira, a vista de casa, o estado de cada lote vindo do núcleo e a hora do dia (o jogo começa às 6 h). 5 testes conferem que nada se sobrepõe, as regras de estado, as casas por morador, o dia e a noite, e que nada disso entra no save.
-- **`src/render/town.ts`:** monta cada lote peça por peça com o Kenney (paredes com porta e janelas sorteadas pela semente do lote, telhado e chamine). A ruína usa paredes quebradas e tábuas; a obra, paredes pela metade, varas e pilhas do Resource Bits; o prédio ampliado ganha um segundo andar e uma bandeira. O lote é remontado só quando o estado dele muda, e a geometria fixa é juntada por material.
+- **`src/game/townPlan.ts` (puro):** a ilha, os platôs, a escada, a capela, a fogueira, os 9 lotes, os caminhos, a altura do chão (`heightAt`), o estágio da vila (`townStage`), o estado de cada lote e a hora do dia. 8 testes conferem que:
+  - nada se sobrepõe (lotes, caminhos, escada, fogueira e capela);
+  - cada lote cabe num chão só, dentro da ilha;
+  - a escada liga a praça à ponte, e a fogueira e a porta ficam no mesmo platô;
+  - as regras de estado, de estágio e de dia e noite valem;
+  - nada disso entra no save.
+- **`src/render/palette.ts`:** recolore a paleta dos packs do Kenney. Cada pack tem uma grade de 16 × 4 faixas, e trocar a cor de uma faixa troca a de tudo que a usa, mantendo o degradê. É assim que o mesmo telhado vira palha, telha ou carvão, a parede vira enxaimel (reboco claro e vigas escuras), o arenito do castelo vira pedra cinza e a cerca verde do cemitério vira ferro.
+- **`src/render/town.ts`:**
+  - **Ilha e platôs:** extrudados, com o topo pintado numa textura que muda com o estágio (grama ou chão queimado, terra embaixo dos lotes, caminhos de terra ou calçados, cinzas e brasas). As paredes de terra têm camadas de cor e pedrinhas.
+  - **Floresta:** 80 pinheiros instanciados (um desenho só) e três camadas de névoa embaixo da ilha.
+  - **Lotes:** casas de enxaimel, as tendas do carroceiro e a torre do Salão de Táticas, montadas peça por peça.
+  - **Fumaça e brasas:** partículas de um desenho só cada.
+- **Depuração:** `portador.stage.town.stageOverride`, `viewOverride` e `hourOverride` forçam o estágio, o estado dos lotes e a hora, só na tela e sem mexer no save. Foi assim que as capturas foram feitas.
 
 **O que mudou em relação à especificação:**
 
-- **A entrada da Cripta ficou na borda sul,** virada para o leste, com o morro de pedra a oeste. A câmera vem do sudeste. Com a entrada ao norte, a vila ficava atrás da câmera, e com o arco virado para o norte o herói empurrava a porta escondido atrás da parede.
-- **A fogueira de vigília ficou ao lado da entrada da Cripta, e não no meio da praça.** Assim, levantar, correr e empurrar a porta cabem na saída da viagem, que subiu de 2,8 para 3,6 s.
-- **A câmera da vila tem uma vista de casa fixa,** que enquadra a praça, os prédios, a fogueira e a Cripta. Ela não segue o herói, exceto na tela de equipamento. Arrastar (ou as setas e WASD) a solta, e o ◎ do HUD ou a tecla 0 a traz de volta. Pelo teclado, + e - dão zoom.
+- **Uma ilha em diorama, e não um mapa aberto:** pedido do usuário, com as quatro imagens de referência. A primeira versão, um mapa largo com ruas cinza e telhados verde-água, foi trocada no mesmo dia.
+- **A entrada da Cripta é a capela no alto da escada** (Kenney Graveyard), com a fogueira de vigília ao lado. Levantar, andar e empurrar a porta cabem na saída da viagem, de 3,6 s.
+- **Três casas, e não doze:** a ilha comporta os 6 prédios e 3 casas. O crescimento da gente vai aparecer nos moradores andando (M2.2).
+- **A fonte e as lanternas seguem os estágios:** a fonte vem no estágio 3 e as lanternas no 2, e não mais no marco de 10 moradores sozinho.
+- **Câmera:** vem do sul, de cima e com a lente fechada (30°), para parecer maquete, e enquadra a ilha inteira na vista de casa. Arrastar (ou as setas e WASD) a solta, e o ◎ do HUD ou a tecla 0 a traz de volta. Pelo teclado, + e - dão zoom.
 - **O acampamento do M0 deixou de existir:** o herói descansa na vila.
 
-**Desempenho no computador:** 70 a 90 chamadas de desenho e cerca de 141 mil triângulos, contando a sombra, dentro do orçamento de 150 e 150 mil. Falta medir no celular.
+**Desempenho no computador** (contando a sombra):
 
-**Fica para a M2.2:**
+| Estágio | Chamadas de desenho | Triângulos |
+|---|---|---|
+| 0 | 88 | 92 mil |
+| 3 | 92 | 139 mil |
 
-- os moradores, com corpo, cor de roupa, nome, ofício e rotina;
-- os marcos de vida (feira, músico, crianças, a festa do fim do Ato I).
+O herói sentado na fogueira acrescenta cerca de 14 chamadas e 16 mil triângulos, o que leva o estágio 3 a uns 155 mil, um pouco acima do orçamento de 150 mil. Falta medir no celular.
+
+**Fica para depois:**
+
+- **M2.2:** os moradores (corpo, cor de roupa, nome, ofício e rotina) e os marcos de vida (feira, músico, crianças, a festa do fim do Ato I).
+- **M2.3:** as janelas acesas à noite e o portão de caveira de boi das imagens de referência, que não existe nos packs.
 
 ### 15. Decisões em aberto
 
@@ -1021,6 +1057,7 @@ As versões, os tamanhos e o SHA-256 de cada download estão em `LICENSES.md`.
 | Cenário da masmorra | KayKit Dungeon Pack 1.1 | 200 peças: piso, paredes, portas, escadas, pilares, tochas, baús, barris, mesas, estandartes e entulho |
 | Vila (prédios, M2) | Kenney Fantasy Town Kit 2.0 | 160 peças modulares: paredes de pedra e de madeira, portas, janelas, telhados, chaminés, escadas, fonte, barracas, cercas, postes, carroça, moinho e roda d'água |
 | Vila (enfeites, M2) | KayKit Forest Nature Pack 1.0, Resource Bits 1.0, RPG Tools Bits 1.0, Furniture Bits 1.0 e Mixed Bag 1 | Árvores, arbustos, grama e pedras; pilhas de madeira, pedra, ferro e tecido; bigorna, rebolo, ferramentas, mapa e lanterna; cadeiras, mesas e bancos; violões, guarda-chuvas e a tenda de circo |
+| Vila em diorama (M2) | Kenney Graveyard Kit 5.0, Castle Kit 2.0 e Survival Kit 2.0 | A capela da Cripta, lápides, a cerca de ferro e os pinheiros; a torre do Salão de Táticas, a balista e os estandartes; as tendas do carroceiro, a fogueira, a bancada da forja e o mato |
 | Treinador (M2) | KayKit Medieval Hexagon Pack 1.0 | Só o alvo e o suporte de armas, ampliados. Os prédios em miniatura sobre hexágonos ficaram como opção descartada no teste lado a lado |
 | Armas de outros atos | KayKit Fantasy Weapons Bits 1.0 | 31 armas e escudos |
 
@@ -1170,6 +1207,13 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - a vila como cena própria, com prédios do Kenney por estado, entrada da Cripta e fogueira de vigília;
     - dia e noite, câmera de observar, botão Vila/Herói e toque nos prédios;
     - 5 testes da planta (40 no total).
+  - **A vila virou diorama**, a pedido do usuário e com quatro imagens de referência:
+    - a ilha com platôs, a escada e a capela da Cripta;
+    - quatro estágios (destruída, reconstruída, melhorada e melhorada de novo);
+    - recolor das paletas do Kenney;
+    - floresta na névoa, fumaça e brasas;
+    - três packs CC0 novos do Kenney (Graveyard, Castle e Survival);
+    - 8 testes da planta (43 no total).
   - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
     - a vila é uma cena separada;
     - os moradores são aventureiros com roupa simples de cor variável;

@@ -10,14 +10,13 @@ import { buildRoom, DUNGEON_PIECES, ENEMY_DOOR, HERO_DOOR } from './dungeon.ts';
 import type { BuiltRoom } from './dungeon.ts';
 import { HeroRig } from './heroRig.ts';
 import { CARRIED_EXIT_TICKS, EXIT_TICKS, travelView } from '../game/travel.ts';
-import { CRYPT, FIRE, HOME_VIEW, SEAT } from '../game/townPlan.ts';
+import { CRYPT, CRYPT_DOOR, FIRE, HOME_VIEW, ISLAND, SEAT, heightAt } from '../game/townPlan.ts';
 import { PerfMeter } from './perf.ts';
 import { TOWN_FILES, Town } from './town.ts';
 import { visualFiles } from './visuals.ts';
 
 /** Vagas do anel, girado para a direita da porta: assim o herói aparece de três quartos para a câmera. */
 const RING_ANGLES = [-0.6, 0.55, 1.7];
-/** Na vila: onde o herói senta na fogueira e a frente da porta da Cripta. */
 /** Câmera da vila pelo teclado: [direita, frente, zoom] de cada tecla (+ aproxima, - afasta). */
 const TOWN_KEYS: Record<string, [number, number, number]> = {
   ArrowRight: [1, 0, 0], KeyD: [1, 0, 0],
@@ -27,14 +26,27 @@ const TOWN_KEYS: Record<string, [number, number, number]> = {
   Minus: [0, 0, 1], NumpadSubtract: [0, 0, 1],
   Equal: [0, 0, -1], NumpadAdd: [0, 0, -1],
 };
-const SEAT_POS = new THREE.Vector3(SEAT.x, 0, SEAT.z);
-const CRYPT_FRONT = new THREE.Vector3(CRYPT.x + 1.4, 0, CRYPT.z);
+/** Na vila: onde o herói senta na fogueira e a frente da porta da capela da Cripta (no platô). */
+const SEAT_POS = new THREE.Vector3(SEAT.x, heightAt(SEAT.x, SEAT.z), SEAT.z);
+const CRYPT_FRONT = new THREE.Vector3(CRYPT_DOOR.x, heightAt(CRYPT_DOOR.x, CRYPT_DOOR.z), CRYPT_DOOR.z);
 const FIRE_POS = new THREE.Vector3(FIRE.x, 0, FIRE.z);
 const HOME = new THREE.Vector3(HOME_VIEW.x, 0, HOME_VIEW.z);
+/**
+ * Câmera da vila em diorama: vem do sul, um pouco do oeste, de cima e com a lente mais fechada
+ * (parece maquete, como nas imagens de referência). A distância é a da vista de casa, no zoom 1.
+ */
+const TOWN_DIR = new THREE.Vector3(-0.28, 0.92, 1).normalize();
+const TOWN_DIST = { landscape: 112, portrait: 255 };
+/** No retrato, a mira vai um pouco para o fundo: a ilha desce para o meio, entre o HUD e a barra de baixo. */
+const HOME_PORTRAIT = new THREE.Vector3(HOME_VIEW.x, 0, HOME_VIEW.z - 6);
+const TOWN_FOV = 30;
+const ROOM_FOV = 38;
+const ZOOM = { min: 0.18, max: 1.3 };
 
-const DAY_SKY = new THREE.Color(0x9cc7e8);
-const DUSK_SKY = new THREE.Color(0xe4a678);
-const NIGHT_SKY = new THREE.Color(0x0e1626);
+/** Céu e névoa da vila: cinza-esverdeado de dia (a névoa das imagens de referência), quente no fim da tarde. */
+const DAY_SKY = new THREE.Color(0x87a5a1);
+const DUSK_SKY = new THREE.Color(0xc79a7d);
+const NIGHT_SKY = new THREE.Color(0x141d29);
 const CRYPT_SKY = new THREE.Color(0x0a0c11);
 const BACK_SPOTS = [new THREE.Vector3(-5, 0, -4.4), new THREE.Vector3(5.4, 0, -3), new THREE.Vector3(-5.6, 0, 0.6), new THREE.Vector3(5.8, 0, 1.2)];
 
@@ -60,7 +72,7 @@ interface Floater {
 export class Stage {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
-  readonly camera = new THREE.PerspectiveCamera(38, 1, 0.1, 120);
+  readonly camera = new THREE.PerspectiveCamera(ROOM_FOV, 1, 0.1, 420);
   readonly hero = new HeroRig();
   readonly perf: PerfMeter;
   private enemies = new Map<number, EnemyActor>();
@@ -176,7 +188,7 @@ export class Stage {
       if (pts.size === 2) {
         const [a, b] = [...pts.values()];
         const d = Math.hypot(a!.x - b!.x, a!.y - b!.y);
-        if (pinch > 0) this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * (pinch / d), 0.45, 2.6);
+        if (pinch > 0) this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * (pinch / d), ZOOM.min, ZOOM.max);
         pinch = d;
         return;
       }
@@ -185,7 +197,7 @@ export class Stage {
       // Pan no chão: direita e frente da câmera, achatadas no plano.
       const right = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 0).setY(0).normalize();
       const fwd = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).setY(0).normalize();
-      const k = 0.06 * this.townCam.zoom;
+      const k = this.metersPerPixel();
       this.panTown(right.multiplyScalar(-dx * k).addScaledVector(fwd, -dy * k));
     });
     const up = (e: PointerEvent) => {
@@ -200,7 +212,7 @@ export class Stage {
     c.addEventListener('wheel', (e) => {
       if (!this.showingTown) return;
       e.preventDefault();
-      this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * Math.exp(e.deltaY * 0.0012), 0.45, 2.6);
+      this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * Math.exp(e.deltaY * 0.0012), ZOOM.min, ZOOM.max);
     }, { passive: false });
     const typing = (e: KeyboardEvent) => e.ctrlKey || e.metaKey || e.altKey || !!(e.target as HTMLElement).closest?.('input, select, textarea');
     addEventListener('keydown', (e) => {
@@ -222,12 +234,21 @@ export class Stage {
   /** Move o alvo da câmera da vila no chão, sem sair da vila. */
   private panTown(d: THREE.Vector3): void {
     this.townCam.target.add(d);
-    this.townCam.target.x = THREE.MathUtils.clamp(this.townCam.target.x, -50, 50);
-    this.townCam.target.z = THREE.MathUtils.clamp(this.townCam.target.z, -50, 40);
+    this.townCam.target.x = THREE.MathUtils.clamp(this.townCam.target.x, ISLAND.x0 + 2, ISLAND.x1 - 2);
+    this.townCam.target.z = THREE.MathUtils.clamp(this.townCam.target.z, ISLAND.z0 + 2, ISLAND.z1 - 2);
     this.townCam.free = true;
   }
 
-  /** Teclas seguradas: anda cerca de 20 m/s (mais com a câmera longe) e o zoom dobra em meio segundo. */
+  /** Distância da câmera ao foco no último quadro (o pan anda na mesma proporção). */
+  private camDist = 30;
+
+  /** Quantos metros do chão cabem num pixel da tela, na distância atual da câmera. */
+  private metersPerPixel(): number {
+    const h = Math.max(1, this.canvas.clientHeight);
+    return (2 * this.camDist * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2)) / h;
+  }
+
+  /** Teclas seguradas: anda meia distância da câmera por segundo e o zoom dobra em meio segundo. */
   private keyTown(dt: number): void {
     if (!this.keys.size) return;
     let x = 0, y = 0, z = 0;
@@ -239,11 +260,11 @@ export class Stage {
       y += ky;
       z += kz;
     }
-    if (z) this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * Math.exp(z * dt * 1.4), 0.45, 2.6);
+    if (z) this.townCam.zoom = THREE.MathUtils.clamp(this.townCam.zoom * Math.exp(z * dt * 1.4), ZOOM.min, ZOOM.max);
     if (!x && !y) return;
     const right = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 0).setY(0).normalize();
     const fwd = new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).setY(0).normalize();
-    const k = 20 * this.townCam.zoom * dt;
+    const k = this.camDist * 0.5 * dt;
     this.panTown(right.multiplyScalar(x * k).addScaledVector(fwd, -y * k));
   }
 
@@ -253,9 +274,7 @@ export class Stage {
     const ndc = new THREE.Vector2(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
     const ray = new THREE.Raycaster();
     ray.setFromCamera(ndc, this.camera);
-    const hit = new THREE.Vector3();
-    if (!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit)) return;
-    const lot = this.town.lotAt(hit.x, hit.z);
+    const lot = this.town.pick(ray);
     if (lot) dispatchEvent(new CustomEvent('portador-lot', { detail: lot.kind }));
   }
 
@@ -320,17 +339,18 @@ export class Stage {
     (this.scene.background as THREE.Color).copy(sky);
     const fog = this.scene.fog as THREE.Fog;
     fog.color.copy(sky);
-    fog.near = 50 + 30 * day;
-    fog.far = 130 + 70 * day;
+    // A ilha fica nítida; a floresta lá embaixo e o horizonte somem na névoa.
+    fog.near = this.camDist * 0.95;
+    fog.far = this.camDist * (1.9 + 0.5 * day);
     this.sun.intensity = 0.35 + 2.7 * day;
     this.sun.color.setHSL(0.1 - 0.5 * (1 - day) * 0.1, 0.5, 0.75 + 0.15 * day);
     this.hemi.intensity = 0.45 + 0.9 * day;
     this.hemi.color.setHSL(0.58, 0.45, 0.55 + 0.2 * day);
     const sc = this.sun.shadow.camera;
-    if (sc.right !== 34) {
-      sc.left = sc.bottom = -34;
-      sc.right = sc.top = 34;
-      sc.far = 100;
+    if (sc.right !== 38) {
+      sc.left = sc.bottom = -38;
+      sc.right = sc.top = 38;
+      sc.far = 130;
       sc.updateProjectionMatrix();
     }
   }
@@ -395,6 +415,8 @@ export class Stage {
   }
 
   private float(text: string, pos: THREE.Vector3, cls: string): void {
+    // Olhando a vila, os números da luta lá embaixo não aparecem (cairiam em cima das casas).
+    if (this.showingTown) return;
     if (this.floaters.length > 24) this.floaters.shift()?.el.remove();
     const el = document.createElement('div');
     el.className = `floater ${cls}`;
@@ -520,6 +542,8 @@ export class Stage {
     const stride = 5.5 * dt * Math.max(1, speed * 0.8);
     const running = gap > 0.05 && !this.hero.animator.isDead && this.time >= this.standUntil;
     if (running) this.heroPos.add(toTarget.multiplyScalar(Math.min(1, stride / gap)));
+    // Na vila, o herói pisa no chão da planta (platô, escada ou praça).
+    if (showTown && heroInTown) this.heroPos.y = heightAt(this.heroPos.x, this.heroPos.z);
     this.hero.root.position.copy(this.heroPos);
     // Chegou à porta na saída: empurra (uma vez por viagem).
     const doorKey = `${w.phase}:${w.phaseEnd}`;
@@ -593,27 +617,38 @@ export class Stage {
     // Tochas tremem; lendária pulsa; a vila acende e apaga com a hora.
     if (this.room && !showTown) for (const [i, l] of this.room.torches.entries()) l.intensity = (i < 3 ? 14 : 9) * (0.85 + 0.15 * Math.sin(this.time * 9 + i * 2.1) * Math.sin(this.time * 5.3 + i));
     pulseLegendary(this.time);
-    if (showTown) this.lightTown(this.town.update(w, this.time));
-    else this.lightCrypt();
+    if (showTown) {
+      const pxScale = this.canvas.clientHeight / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2));
+      this.lightTown(this.town.update(w, this.time, dt, (this.scene.fog as THREE.Fog).color, pxScale));
+    } else this.lightCrypt();
     // Câmera: na masmorra persegue o herói; na vila, segue o herói (ou a praça) até o jogador arrastar.
     const portrait = this.camera.aspect < 0.85;
     this.zoom += ((this.closeUp ? 0.58 : 1) - this.zoom) * (1 - Math.exp(-dt * 4));
-    let dist = (portrait ? 1.55 : 1.15) * this.zoom;
+    const dist = (portrait ? 1.55 : 1.15) * this.zoom;
     let goal = this.heroPos.clone().add(new THREE.Vector3(0, this.closeUp ? 1.25 : 1.1, 0));
+    const diorama = showTown && !this.closeUp;
     if (showTown) {
       if (this.closeUp) this.townCam.free = false;
       else this.keyTown(dt);
-      // Vista de casa (praça, fogueira e Cripta no quadro); na tela de equipamento, perto do herói.
-      if (!this.townCam.free) this.townCam.target.copy(HOME);
-      goal = this.closeUp ? goal : this.townCam.target.clone().add(new THREE.Vector3(0, 1.1, 0));
-      dist *= this.closeUp ? 1 : 1.6 * this.townCam.zoom;
+      // Vista de casa (a ilha inteira); na tela de equipamento, perto do herói.
+      if (!this.townCam.free) this.townCam.target.copy(portrait ? HOME_PORTRAIT : HOME);
+      if (diorama) goal = this.townCam.target.clone();
+    }
+    // A distância anda suave entre a masmorra, a vista da ilha e o zoom do jogador.
+    const want = diorama ? (portrait ? TOWN_DIST.portrait : TOWN_DIST.landscape) * this.townCam.zoom : 15.1 * dist;
+    this.camDist += (want - this.camDist) * (1 - Math.exp(-dt * (this.townCam.free ? 12 : 4)));
+    const fov = diorama ? TOWN_FOV : ROOM_FOV;
+    if (Math.abs(this.camera.fov - fov) > 0.01) {
+      this.camera.fov += (fov - this.camera.fov) * (1 - Math.exp(-dt * 4));
+      this.camera.updateProjectionMatrix();
     }
     this.focus.lerp(goal, 1 - Math.exp(-dt * (this.townCam.free ? 10 : 3)));
-    this.camera.position.copy(this.focus).add(new THREE.Vector3(6.5 * dist, (this.closeUp ? 5.2 : 8.2) * dist, 10.5 * dist));
+    const dir = diorama ? TOWN_DIR : new THREE.Vector3(6.5, this.closeUp ? 5.2 : 8.2, 10.5).normalize();
+    this.camera.position.copy(this.focus).addScaledVector(dir, this.camDist);
     this.camera.lookAt(this.focus);
     this.applyInset(dt);
     this.sun.target.position.copy(this.focus);
-    this.sun.position.copy(this.focus).add(showTown ? new THREE.Vector3(-18, 34, 20) : new THREE.Vector3(-7, 16, 9));
+    this.sun.position.copy(this.focus).add(showTown ? new THREE.Vector3(-26, 46, 30) : new THREE.Vector3(-7, 16, 9));
     // Com o cartão da viagem cobrindo a tela, não desenha (poupa bateria no celular).
     const covered = travel.mode === 'viagem' && !this.watchTown && travel.elapsed > (travel.carried ? CARRIED_EXIT_TICKS : EXIT_TICKS) + 6;
     if (!covered) this.renderer.render(this.scene, this.camera);

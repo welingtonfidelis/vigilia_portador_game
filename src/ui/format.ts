@@ -3,6 +3,14 @@ import type { Item, Loot, Rarity } from '../sim/index.ts';
 
 export const nf = (n: number, digits = 0) => n.toLocaleString('pt-BR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
+/** Número curto para o HUD: 9.870, 12,3 mil, 456 mil, 1,2 mi. */
+export function short(n: number): string {
+  const a = Math.abs(n);
+  if (a < 10_000) return nf(n);
+  if (a < 1_000_000) return `${nf(n / 1000, a < 100_000 ? 1 : 0)} mil`;
+  return `${nf(n / 1_000_000, a < 100_000_000 ? 1 : 0)} mi`;
+}
+
 export function duration(ticks: number): string {
   const s = Math.max(0, Math.ceil(ticks / BALANCE.ticksPerSecond));
   if (s < 60) return `${s} s`;

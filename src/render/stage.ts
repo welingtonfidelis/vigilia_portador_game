@@ -12,6 +12,7 @@ import { HeroRig } from './heroRig.ts';
 import { CARRIED_EXIT_TICKS, EXIT_TICKS, travelView } from '../game/travel.ts';
 import { CRYPT, CRYPT_DOOR, FIRE, HOME_VIEW, ISLAND, SEAT, heightAt } from '../game/townPlan.ts';
 import { PerfMeter } from './perf.ts';
+import { VenomFx } from './venom.ts';
 import { TOWN_FILES, Town } from './town.ts';
 import { visualFiles } from './visuals.ts';
 
@@ -87,6 +88,8 @@ export class Stage {
   private enemyClips = new Map<string, THREE.AnimationClip>();
   private focus = new THREE.Vector3();
   private heroPos = new THREE.Vector3();
+  /** Bolhas do veneno no herói (Ato III). */
+  private venom = new VenomFx();
   private heroFacing = 0;
   private time = 0;
   private floaters: Floater[] = [];
@@ -133,6 +136,7 @@ export class Stage {
     this.sun.shadow.bias = -0.0006;
     this.scene.add(this.sun, this.sun.target);
     this.scene.add(this.hero.root);
+    this.hero.root.add(this.venom.points);
     this.town.group.visible = false;
     this.scene.add(this.town.group);
     this.perf = new PerfMeter(this.renderer);
@@ -730,6 +734,7 @@ export class Stage {
     // Tochas tremem; lendária pulsa; a vila acende e apaga com a hora.
     if (this.room && !showTown) for (const [i, l] of this.room.torches.entries()) l.intensity = (i < 3 ? 14 : 9) * (0.85 + 0.15 * Math.sin(this.time * 9 + i * 2.1) * Math.sin(this.time * 5.3 + i));
     pulseLegendary(this.time);
+    this.venom.update(this.time, showTown ? 0 : w.hero.poison.filter((t) => t > w.tick).length);
     if (showTown) {
       const pxScale = this.canvas.clientHeight / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2));
       this.lightTown(this.town.update(w, this.time, dt, (this.scene.fog as THREE.Fog).color, pxScale, speed, this.camDist > 60));

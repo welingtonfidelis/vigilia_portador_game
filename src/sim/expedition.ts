@@ -13,6 +13,12 @@ const LEGEND_BY_BOSS_FLOOR: Record<number, string> = {
   5: 'coroa_capitao', 10: 'vigia_partida', 15: 'picareta_capataz', 20: 'ancora_partida', 25: 'coroa_micelio', 30: 'ferrao_mae',
 };
 
+/** O que a crônica diz ao abrir o primeiro andar de cada ato. */
+const ACT_GATES: Record<number, string> = {
+  11: 'desceu abaixo da Cripta: as Minas Inundadas, onde os mortos usam couraça.',
+  21: 'chegou ao Jardim de Fungos. Lá embaixo, o ar envenena.',
+};
+
 /** Do que é feito o chefe, para a crônica ("Nos ossos dele, …"). */
 const BOSS_REMAINS = ['Nos ossos dele', 'Na ferrugem dele', 'No bolor dele'];
 
@@ -358,6 +364,9 @@ function nextRoom(w: World, ev: SimEvent[]): void {
       h.deepest = reached;
       w.stats.deepestAt[String(reached)] = w.tick;
       if (reached > exp.floor) chronicle(w, `${h.name} abriu caminho até o andar ${reached}.`, 'bom', ev);
+      // A porta de um ato novo.
+      const gate = ACT_GATES[reached];
+      if (gate) chronicle(w, `${h.name} ${gate}`, 'lenda', ev);
     }
     if (why) return leave(w, why.text, ev);
     exp.floor++;

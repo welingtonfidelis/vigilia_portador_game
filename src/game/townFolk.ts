@@ -95,7 +95,7 @@ export interface LifeMarks {
   carregador: boolean;
   musico: boolean;
   criancas: boolean;
-  /** Festa por 1 dia de jogo depois da primeira vitória sobre o Senhor da Cripta. */
+  /** Festa por 1 dia de jogo depois da primeira vitória sobre o chefe de um ato (Senhor, Couraça, Mãe-Bolor). */
   festa: boolean;
   /** As bandeirolas da festa ficam. */
   bandeirolas: boolean;
@@ -109,7 +109,9 @@ export function lifeMarks(w: World): LifeMarks {
   const people = w.village.people;
   const capitao = w.bossesBeaten.includes(5);
   const senhor = w.bossesBeaten.includes(10);
-  const first = w.stats.bossFirst['10'];
+  // A festa segue a vitória de ato mais recente.
+  const wins = ['10', '20', '30'].map((f) => w.stats.bossFirst[f]).filter((t): t is number => t !== undefined);
+  const first = wins.length ? Math.max(...wins) : undefined;
   return {
     people,
     stalls: people >= 4 ? (capitao || townStage(w) === 3 ? 3 : 1) : 0,

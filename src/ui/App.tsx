@@ -3,7 +3,7 @@ import type { Session } from '../game/session.ts';
 import { travelView } from '../game/travel.ts';
 import { BALANCE, ELITE_NAMES, ENEMIES, heroStats, isBoss, roomsOnFloor, xpToNext } from '../sim/index.ts';
 import type { World } from '../sim/index.ts';
-import { duration, nf } from './format.ts';
+import { duration, nf, short } from './format.ts';
 import { ChroniclePanel } from './panels/ChroniclePanel.tsx';
 import { EquipPanel } from './panels/EquipPanel.tsx';
 import { Credits, NewGame } from './panels/NewGame.tsx';
@@ -134,11 +134,11 @@ function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World;
       </div>
       <div class="hud-right">
         <div class="res">
-          <span title="Ouro">◉ {nf(v.gold)}</span>
-          <span title="Ossos">🦴 {nf(v.mats.ossos)}</span>
-          <span title="Ferro">⛓ {nf(v.mats.ferro)}</span>
-          {(v.mats.ferro_negro > 0 || w.hero.deepest >= 11) && <span title="Ferro-negro">◆ {nf(v.mats.ferro_negro ?? 0)}</span>}
-          {(v.mats.esporos > 0 || w.hero.deepest >= 21) && <span title="Esporos">✻ {nf(v.mats.esporos ?? 0)}</span>}
+          <span title={`Ouro: ${nf(v.gold)}`}>◉ {short(v.gold)}</span>
+          <span title={`Ossos: ${nf(v.mats.ossos)}`}>🦴 {short(v.mats.ossos)}</span>
+          <span title={`Ferro: ${nf(v.mats.ferro)}`}>⛓ {short(v.mats.ferro)}</span>
+          {(v.mats.ferro_negro > 0 || w.hero.deepest >= 11) && <span title={`Ferro-negro: ${nf(v.mats.ferro_negro ?? 0)}`}>◆ {short(v.mats.ferro_negro ?? 0)}</span>}
+          {(v.mats.esporos > 0 || w.hero.deepest >= 21) && <span title={`Esporos: ${nf(v.mats.esporos ?? 0)}`}>✻ {short(v.mats.esporos ?? 0)}</span>}
           <span title="Moradores">☺ {v.people}</span>
         </div>
         <div class="speed">

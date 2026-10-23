@@ -1,12 +1,12 @@
 import { useState } from 'preact/hooks';
 import type { Session } from '../../game/session.ts';
 import { AFFIXES, BALANCE, BASES, BUILDINGS, BUILDING_IDS, MATERIAL_NAMES, SLOT_NAMES, affixPool, commands, floorTier, forgeCap, forgeCost, lacking, nextCost, reforgeCost } from '../../sim/index.ts';
-import type { AffixId, Cost, ForgeRarity, World } from '../../sim/index.ts';
+import type { AffixId, Cost, ForgeRarity, Material, World } from '../../sim/index.ts';
 import { RARITY_CLASS, duration, itemTitle, nf } from '../format.ts';
 
 function costText(c: Cost): string {
   const parts = [`${nf(c.gold)} de ouro`];
-  for (const [m, n] of Object.entries(c.mats)) if (n) parts.push(`${n} de ${m}`);
+  for (const [m, n] of Object.entries(c.mats)) if (n) parts.push(`${nf(n)} de ${MATERIAL_NAMES[m as Material] ?? m}`);
   if (c.people) parts.push(`${c.people} moradores`);
   return parts.join(' · ');
 }

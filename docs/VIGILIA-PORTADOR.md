@@ -19,7 +19,19 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 ## 1. Estado, como jogar e arquitetura
 
-**Estado atual: M3.3, o Ato III, pronta** (seção 14.4), com os monstros do Quaternius nos Fungos. Ela vem sobre o Ato II (M3.1 e M3.2), a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+**Estado atual: M3 (os Atos II e III) concluído** (seção 14.4), com a M3.4, o polimento dos três atos. Ele vem sobre a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+
+**M3.4 (o polimento), em 2026-10-22:**
+
+- **HUD no celular:** com o ferro-negro e os esporos, a linha de cima estourava, e os botões Vila e ☰ sumiam em 375 px de largura. Agora:
+  - os números do HUD são curtos (1,2 mi, 12,3 mil), com o valor inteiro na dica;
+  - cada material fica inteiro numa peça só;
+  - os botões descem para a linha de baixo quando não cabem.
+- **Veneno à vista:** o herói envenenado solta bolhas verdes, mais bolhas a cada dose (`venom.ts`).
+- **A vila comemora cada ato:** a festa de um dia vem também com a primeira vitória sobre a Couraça e sobre a Mãe-Bolor.
+- **A crônica anuncia os atos:** ela registra a descida às Minas Inundadas e a chegada ao Jardim de Fungos.
+- **Custos da vila:** apareciam com o nome interno do material ("ferro_negro"). Agora sai o nome do jogo.
+- 92 testes. O balanceador passa as 34 metas nas duas faixas de sementes.
 
 **M3.3 (o Jardim de Fungos, o Ato III), em 2026-10-22:**
 
@@ -786,7 +798,7 @@ As metas do Ato II e o resultado da M3.1 estão em 14.4.
 | **M0: protótipo vertical** (concluído) | Herói por partes, animações com crossfade, troca de arma e de armadura ao vivo, uma sala com esqueletos, combate pela simulação, telas de equipamento, habilidades e regras, regra de morte, testes e medição no celular |
 | **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
 | **M2: a vila viva** (pronto, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
-| **M3: Atos II e III** (M3.1 a M3.3 prontas; falta a M3.4, o polimento dos três atos; 14.4) | As Minas Inundadas (couraça e perfuração) e o Jardim de Fungos (veneno), com inimigos, chefes, habilidades, armas do Fantasy Weapons Bits e materiais novos |
+| **M3: Atos II e III** (concluído, 14.4) | As Minas Inundadas (couraça e perfuração) e o Jardim de Fungos (veneno), com inimigos, chefes, habilidades, armas do Fantasy Weapons Bits e materiais novos |
 | M4: polimento | Som, interface de celular, acessibilidade e eventos |
 | M5: Atos IV a VI e as profundezas | Conteúdo e Eras |
 
@@ -1588,6 +1600,18 @@ As 18 metas do Ato I continuam passando nas duas faixas. O Senhor sai aos 72,3 e
 As 18 metas do Ato I também passam nas duas faixas. Uma semente em cada faixa chegou a 96 min parada na Couraça; as outras ficaram abaixo de 90.
 
 
+**Como ficou a M3.4 (2026-10-22): o polimento**
+
+O balanceamento dos três atos juntos já tinha fechado na M3.3: as 34 metas passam nas duas faixas de sementes, e a M3.4 rodou de novo para conferir. O resto foi polimento, olhando o jogo em tamanho de celular (375 × 812) no navegador embutido:
+
+- **HUD:** números curtos (`short` em `format.ts`), materiais sem quebra dentro e a linha dos botões que desce quando não cabe.
+- **Veneno:** bolhas verdes no herói, 5 por dose, até 25 (`VenomFx` em `venom.ts`).
+- **Festa:** o marco `festa` segue a vitória de ato mais recente (Senhor, Couraça ou Mãe-Bolor).
+- **Crônica:** a abertura dos andares 11 e 21 tem frase própria.
+- **Tela da vila:** os custos usam `MATERIAL_NAMES`.
+
+**Pronto quando, conferido:** as quatro fatias rodam no navegador. O HUD e as telas foram vistos em tamanho de celular no navegador embutido, mas ainda não num celular de verdade. O balanceador passa nas metas dos três atos, e há capturas de cada ato em `docs/img/`.
+
 ### 15. Decisões em aberto
 
 1. **Regra de morte** (2.10): validar os números e a ideia de que a gente resgatada sempre volta.
@@ -1824,6 +1848,12 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - o balanceador com 12 h e 34 metas; o bot corrigido (barra por ato, mochila, pressa e chefes);
     - os monstros do Quaternius (baixados do poly.pizza, porque o Drive do pack estava sem cota);
     - 92 testes.
+  - **M3.4 pronta, o M3 concluído:**
+    - o HUD cabe no celular;
+    - bolhas de veneno no herói;
+    - a festa a cada ato vencido e a crônica na porta de cada ato;
+    - os custos da vila com o nome do material;
+    - 34 metas nas duas faixas.
   - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
     - a vila é uma cena separada;
     - os moradores são aventureiros com roupa simples de cor variável;

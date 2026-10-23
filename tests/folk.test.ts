@@ -56,6 +56,9 @@ describe('moradores da vila', () => {
     expect(lifeMarks(w)).toMatchObject({ festa: true, bandeirolas: true });
     w.tick += BALANCE.dayTicks;
     expect(lifeMarks(w)).toMatchObject({ festa: false, bandeirolas: true });
+    // A primeira vitória sobre o chefe de outro ato faz outra festa.
+    w.stats.bossFirst['20'] = w.tick;
+    expect(lifeMarks(w)).toMatchObject({ festa: true });
   });
 
   it('o ofício só começa com o marco dele; antes, o morador passeia', () => {

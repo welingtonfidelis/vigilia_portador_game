@@ -72,6 +72,7 @@ input[type='number'] { width: 4.2em; }
 .remains { color: #e6c27a; display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
 .hud-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .res { display: flex; gap: 10px; font-size: 0.9rem; text-shadow: 0 1px 2px #000; }
+.res span { white-space: nowrap; }
 .speed { display: flex; gap: 4px; }
 .speed button { padding: 0.15em 0.55em; }
 
@@ -164,7 +165,8 @@ input[type='number'] { width: 4.2em; }
   .hud-hero .bar.hp { margin-top: 0; }
   .hud-hero .bar.xp { grid-column: 1 / -1; }
   .hud-hero .hud-row { grid-column: 1 / -1; margin-top: 2px; }
-  .hud-right { order: 2; flex: 1 1 100%; flex-direction: row; justify-content: space-between; align-items: center; }
+  .hud-right { order: 2; flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; row-gap: 4px; }
+  .res { flex-wrap: wrap; row-gap: 2px; }
   .hud-where { order: 3; flex-basis: 100%; font-size: 0.82rem; }
   .res { gap: 8px; font-size: 0.8rem; }
   .speed button { padding: 0.1em 0.45em; font-size: 0.85rem; }

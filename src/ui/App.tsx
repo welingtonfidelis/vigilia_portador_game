@@ -224,6 +224,7 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
   // Criando o herói, o HUD, a barra de baixo e os avisos saem da frente dele.
   useEffect(() => {
     document.body.classList.toggle('creating', !!newGame);
+    dispatchEvent(new CustomEvent('portador-creating', { detail: !!newGame }));
   }, [newGame]);
   const [, setPrefsN] = useState(0);
   useEffect(() => prefs.subscribe(() => setPrefsN((n) => n + 1)), [prefs]);
@@ -327,7 +328,7 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
   const report = w.report && w.report.tick !== seenReport ? w.report : null;
   return (
     <>
-      <TravelCard session={session} w={w} watching={watching} />
+      {!newGame && <TravelCard session={session} w={w} watching={watching} />}
       <Hud session={session} w={w} view={view} muted={prefs.value.muted} onMute={toggleMute} />
       <nav class="dock">
         {PANELS.map((p) => (

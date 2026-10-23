@@ -3,8 +3,8 @@ import { startAudio } from './audio/index.ts';
 import { PrefsStore, TEXT_SCALE } from './game/prefs.ts';
 import { Session } from './game/session.ts';
 import { clearSave } from './game/storage.ts';
-import { itemName } from './sim/index.ts';
-import type { HeadId, SimEvent } from './sim/index.ts';
+import { createWorld, itemName } from './sim/index.ts';
+import type { HeadId, SimEvent, World } from './sim/index.ts';
 import { MOTION } from './render/motion.ts';
 import { Stage, pickQuality } from './render/stage.ts';
 import { App } from './ui/App.tsx';
@@ -50,6 +50,13 @@ addEventListener('portador-recenter', () => stage.recenter());
 addEventListener('portador-preview', (e) => {
   stage.previewHead = (e as CustomEvent<HeadId | null>).detail;
 });
+// Criando um herói novo, a cena é a vila do começo, com ele na fogueira, esteja o herói atual onde
+// estiver (lá embaixo, ou carregado de volta com o cartão da viagem cobrindo a tela). O jogo atual
+// segue por baixo até o "Começar"; cancelando, a cena volta a ele.
+let preview: World | null = null;
+addEventListener('portador-creating', (e) => {
+  preview = (e as CustomEvent<boolean>).detail ? createWorld(session.world.seed) : null;
+});
 addEventListener('portador-inset', (e) => {
   const d = (e as CustomEvent<{ x: number; y: number; closeUp: boolean }>).detail;
   stage.setInset(d.x, d.y, d.closeUp);
@@ -72,7 +79,8 @@ function loop(now: number): void {
 function frame(ms: number, dt: number): void {
   const events = session.frame(ms);
   if (events.length) toasts(events);
-  stage.frame(session.world, events, session.frac, dt, session.paused ? 1 : session.speed);
+  if (preview) stage.frame(preview, [], 0, dt, 1);
+  else stage.frame(session.world, events, session.frac, dt, session.paused ? 1 : session.speed);
   audio.frame(session.world, events, stage.townShown);
 }
 

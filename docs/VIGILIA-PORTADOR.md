@@ -1798,6 +1798,7 @@ O balanceamento dos três atos juntos já tinha fechado na M3.3: as 34 metas pas
     - no "Começar", o herói recebe a ordem de descer na hora. A câmera fica na vila enquanto ele sai da fogueira e entra na capela, e um aviso ensina o "⚔ Ver o herói";
     - o Novo jogo do Menu passa pelo mesmo caminho;
     - no celular, a folha cobria o herói. Agora, enquanto ele é criado, o HUD, a barra de baixo e os avisos saem da tela. Em pé, a folha fica compacta e colada embaixo; deitado, fica na metade direita. A câmera mede onde a folha começa e centra o herói no espaço livre.
+    - o Novo jogo com o herói lá embaixo ou carregado de volta mostrava a sala, ou o cartão escuro da viagem, em vez da vila, e o herói novo não aparecia. Agora, durante a criação, o palco desenha um mundo de prévia: a vila do começo, com o herói novo na fogueira (`portador-creating` em `main.tsx`). O jogo atual segue por baixo até o "Começar"; cancelando, a cena volta a ele.
   - **Publicado no GitHub Pages:** o workflow compila com `--base=/vigilia_portador_game/` (a arte vem do `BASE_URL`), roda os testes e publica a cada push no `main`.
 
 ### 15. Decisões em aberto

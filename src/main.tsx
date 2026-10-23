@@ -1,12 +1,14 @@
 import { render } from 'preact';
+import { startAudio } from './audio/index.ts';
+import { PrefsStore } from './game/prefs.ts';
 import { Session } from './game/session.ts';
 import { clearSave } from './game/storage.ts';
 import { itemName } from './sim/index.ts';
 import type { HeadId, SimEvent } from './sim/index.ts';
 import { Stage, pickQuality } from './render/stage.ts';
 import { App } from './ui/App.tsx';
-import type { Toast } from './ui/App.tsx';
 import { lootText } from './ui/format.ts';
+import { toast } from './ui/toast.ts';
 import './ui/style.css';
 
 const session = Session.boot();
@@ -14,11 +16,8 @@ const canvas = document.getElementById('scene') as HTMLCanvasElement;
 const overlay = document.getElementById('floaters')!;
 const loading = document.getElementById('loading')!;
 const stage = new Stage(canvas, overlay, pickQuality());
-
-let toastId = 0;
-function toast(text: string, tone: string): void {
-  dispatchEvent(new CustomEvent<Toast>('portador-toast', { detail: { id: ++toastId, text, tone } }));
-}
+const prefs = new PrefsStore();
+const audio = startAudio(prefs, (text) => toast(text, 'neutro'));
 
 function toasts(events: SimEvent[]): void {
   for (const e of events) {
@@ -63,6 +62,7 @@ function frame(ms: number, dt: number): void {
   const events = session.frame(ms);
   if (events.length) toasts(events);
   stage.frame(session.world, events, session.frac, dt, session.paused ? 1 : session.speed);
+  audio.frame(session.world, events, stage.townShown);
 }
 
 let saving = true;
@@ -70,7 +70,7 @@ const save = () => saving && session.save();
 addEventListener('pagehide', save);
 document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && save());
 
-render(<App session={session} />, document.getElementById('ui')!);
+render(<App session={session} prefs={prefs} />, document.getElementById('ui')!);
 
 stage
   .init((done, total) => (loading.textContent = `Carregando a Cripta… ${Math.round((done / total) * 100)}%`))
@@ -100,6 +100,7 @@ if (import.meta.env.DEV) {
     portador: {
       session,
       stage,
+      audio,
       itemName,
       advance: (n: number) => session.advance(n),
       /** Começa do zero (sem salvar o mundo atual ao sair). */

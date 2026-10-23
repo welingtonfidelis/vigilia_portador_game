@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import type { PrefsStore } from '../game/prefs.ts';
 import type { Session } from '../game/session.ts';
 import { travelView } from '../game/travel.ts';
 import { BALANCE, ELITE_NAMES, ENEMIES, heroStats, isBoss, roomsOnFloor, xpToNext } from '../sim/index.ts';
 import type { World } from '../sim/index.ts';
 import { duration, nf, short } from './format.ts';
 import { ChroniclePanel } from './panels/ChroniclePanel.tsx';
+import { Options } from './panels/OptionsPanel.tsx';
 import { EquipPanel } from './panels/EquipPanel.tsx';
 import { Credits, NewGame } from './panels/NewGame.tsx';
 import { ReportModal, AwayModal } from './panels/ReportModal.tsx';
 import { RulesPanel } from './panels/RulesPanel.tsx';
 import { SkillsPanel } from './panels/SkillsPanel.tsx';
 import { VillagePanel } from './panels/VillagePanel.tsx';
+import { toast, type Toast } from './toast.ts';
 
 export type PanelId = 'equip' | 'skills' | 'rules' | 'vila' | 'cronica';
 
@@ -21,12 +24,6 @@ const PANELS: { id: PanelId; label: string; key: string; icon: string }[] = [
   { id: 'vila', label: 'Vila', key: 'V', icon: '⌂' },
   { id: 'cronica', label: 'Crônica', key: 'C', icon: '✎' },
 ];
-
-export interface Toast {
-  id: number;
-  text: string;
-  tone: string;
-}
 
 /** Redesenha a interface no máximo ~8 vezes por segundo. */
 function useWorld(session: Session): World {
@@ -160,7 +157,7 @@ function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World;
   );
 }
 
-export function App({ session }: { session: Session }) {
+export function App({ session, prefs }: { session: Session; prefs: PrefsStore }) {
   const w = useWorld(session);
   const [panel, setPanel] = useState<PanelId | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -169,6 +166,14 @@ export function App({ session }: { session: Session }) {
   const [newGame, setNewGame] = useState<'inicio' | 'trocar' | null>(session.isNew ? 'inicio' : null);
   const [menu, setMenu] = useState(false);
   const [credits, setCredits] = useState(false);
+  const [options, setOptions] = useState(false);
+  const [, setPrefsN] = useState(0);
+  useEffect(() => prefs.subscribe(() => setPrefsN((n) => n + 1)), [prefs]);
+  const toggleMute = () => {
+    const muted = !prefs.value.muted;
+    prefs.set({ muted });
+    toast(muted ? 'Som desligado (M liga de novo).' : 'Som ligado.');
+  };
   const [watching, setWatching] = useState(false);
   useEffect(() => {
     dispatchEvent(new CustomEvent('portador-watch', { detail: watching }));
@@ -211,6 +216,11 @@ export function App({ session }: { session: Session }) {
     };
   }, [panel, newGame]);
 
+  // Abrir uma tela faz um sopro.
+  useEffect(() => {
+    if (panel) dispatchEvent(new CustomEvent('portador-sfx', { detail: 'open' }));
+  }, [panel]);
+
   // A tela de equipamento ou de habilidades aberta segura o herói na vila.
   useEffect(() => {
     const hold = panel === 'equip' || panel === 'skills';
@@ -226,6 +236,8 @@ export function App({ session }: { session: Session }) {
         session.paused = !session.paused;
         session.emit();
         e.preventDefault();
+      } else if (k === 'm') {
+        toggleMute();
       } else if (k === '1' || k === '2' || k === '3') {
         session.speed = ({ '1': 1, '2': 2, '3': 4 } as const)[k];
         session.paused = false;
@@ -237,7 +249,7 @@ export function App({ session }: { session: Session }) {
     };
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
-  }, [session]);
+  }, [session, prefs]);
 
   // Avisos vindos da simulação.
   useEffect(() => {
@@ -257,6 +269,8 @@ export function App({ session }: { session: Session }) {
       <Hud session={session} w={w} onBell={() => session.run((x) => x.exp && (x.exp.recall = true))} onMenu={() => setMenu((m) => !m)} view={view} />
       {menu && (
         <div class="menu">
+          <button onClick={() => { setMenu(false); setOptions(true); }}>Opções</button>
+          <button onClick={toggleMute}>{prefs.value.muted ? 'Ligar o som' : 'Desligar o som'} <span class="muted small">(M)</span></button>
           <button onClick={() => { setMenu(false); setPanel(null); setNewGame('trocar'); }}>Novo jogo</button>
           <button onClick={() => { setMenu(false); setCredits(true); }}>Créditos</button>
         </div>
@@ -271,6 +285,7 @@ export function App({ session }: { session: Session }) {
       </nav>
       {newGame && <NewGame session={session} replacing={newGame === 'trocar'} onClose={() => setNewGame(null)} />}
       {credits && <Credits onClose={() => setCredits(false)} />}
+      {options && <Options prefs={prefs} onClose={() => setOptions(false)} />}
       {panel && !newGame && (
         <section class="sheet" key={panel}>
           <header>

@@ -102,6 +102,10 @@ export class Stage {
   /** O jogador escolheu olhar a vila com o herói lá embaixo (botão Vila/Herói do HUD). */
   watchTown = false;
   private showingTown = false;
+  /** A vila está na tela (o som ouve a cena que se vê). */
+  get townShown(): boolean {
+    return this.showingTown;
+  }
   /** Câmera da vila: segue o herói até o jogador arrastar; zoom pela roda ou pinça. */
   private townCam = { target: new THREE.Vector3().copy(HOME), zoom: HOME_VIEW.zoom, free: false };
   private lastPhase = '';

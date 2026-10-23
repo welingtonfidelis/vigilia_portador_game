@@ -19,7 +19,18 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 ## 1. Estado, como jogar e arquitetura
 
-**Estado atual: M3 (os Atos II e III) concluído** (seção 14.4), com a M3.4, o polimento dos três atos. Ele vem sobre a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+**Estado atual: M4 (o polimento) em andamento** (seção 14.5). A M4.1, o som, está pronta. Ela vem sobre os Atos II e III do M3 (14.4), a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+
+**M4.1 (o som), em 2026-10-22:**
+
+- **Tudo sintetizado** em Web Audio, nos moldes do Vigília: nenhum arquivo de áudio (`src/audio/`).
+- **Música** que muda com a cena: a vila de dia, de noite, na festa e no luto depois de uma morte; uma por ato (Cripta, Minas e Fungos); e a tensão do chefe.
+- **Ambiente:**
+  - na vila, os passarinhos, os grilos, a fogueira e a fonte, mais a vida dos moradores (a bigorna, o machado, o violão, as crianças, a festa e os bichos), cada um do lado em que fica;
+  - lá embaixo, as gotas e as correntes da Cripta, a água e as escoras das Minas, e as borbulhas dos Fungos.
+- **Efeitos** de luta (golpe, acerto, crítico, couraça, bloqueio, veneno, poção, cada habilidade e as mortes) e avisos (chefe, nível, lendária, restos, obra pronta e morador novo). Olhando a vila com o herói lá embaixo, a luta fica muda e só os avisos passam.
+- **Opções** no menu: o som ligado ou não e o volume geral, da música, do ambiente e dos efeitos, salvos no aparelho. **M** liga e desliga.
+- 109 testes.
 
 **M3.4 (o polimento), em 2026-10-22:**
 
@@ -165,6 +176,7 @@ npm run dev -- --host       # idem, acessível pelo celular na mesma rede
 - **Regras (R):** a lista de regras de combate (o que ele faz e quando) e as regras da descida (andar alvo, até onde ir, quando voltar).
 - **Sino:** chama o herói de volta. Ele atende assim que termina a luta da sala em que está.
 - **Tempo:** Espaço pausa; 1, 2 e 3 escolhem 1×, 2× e 4×.
+- **Som:** liga no primeiro toque na tela. **M** liga e desliga; os volumes ficam em ☰ → Opções.
 - **Save:** automático no `localStorage`. Ao reabrir, o tempo fora roda pela mesma simulação (até 8 h).
 
 ### Ferramentas
@@ -183,6 +195,7 @@ Node 22+ roda os `.ts` das ferramentas direto (type stripping). Para outra faixa
 - `portador.frames(n)` roda n quadros na mão. Serve com o painel do navegador oculto, quando o `requestAnimationFrame` para.
 - `portador.advance(ticks)` avança a simulação.
 - `portador.reset()` começa do zero, sem salvar o mundo atual.
+- `portador.audio` é o som: `mood()` dá a cena e o clima, e `music().currentMode` dá a música que toca.
 - `?perf` ou `?perf=rótulo` na URL liga o medidor de desempenho; `?q=low` liga o modo econômico (sem sombras, `devicePixelRatio` 1).
 
 ### Arquitetura
@@ -203,6 +216,12 @@ src/sim/    regras: puro, determinístico, estado 100% JSON, sem DOM nem Three
   bot.ts         jogador automático (o "jogador médio" do balanceador)
   commands.ts    ações do jogador (vestir, aprender, regras, sino, obras, forja)
 src/game/   sessão: acumulador de tick fixo, velocidade, eventos para a tela, save local (storage.ts)
+  prefs.ts       preferências do aparelho (volumes e mudo), fora do save do mundo
+src/audio/  som sintetizado (M4.1): só ouve o estado e os eventos, como o 3D
+  engine.ts      mesa: canais de música, ambiente e efeitos, reverb, compressor; liga no gesto
+  director.ts    puro: eventos e mudanças do estado → efeitos; clima da cena → música e ambiente
+  music.ts       trilha generativa por clima; ambience.ts: laços e sons soltos por cena
+  sfx.ts         receitas dos efeitos; instruments.ts: osciladores, ruído, sino, tambor, violão
 src/render/ Three.js: só lê o estado e os eventos
   assets.ts      carrega o glTF, compartilha materiais por textura, recolore o atlas por tier e faz a lendária pulsar
   visuals.ts     tabela base de item → partes do aventureiro ou peça rígida e osso
@@ -799,7 +818,7 @@ As metas do Ato II e o resultado da M3.1 estão em 14.4.
 | **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
 | **M2: a vila viva** (pronto, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
 | **M3: Atos II e III** (concluído, 14.4) | As Minas Inundadas (couraça e perfuração) e o Jardim de Fungos (veneno), com inimigos, chefes, habilidades, armas do Fantasy Weapons Bits e materiais novos |
-| M4: polimento | Som, interface de celular, acessibilidade e eventos |
+| **M4: polimento** (em andamento: M4.1 pronta, 14.5) | Som, interface de celular, acessibilidade, eventos da vila e o modo Auto/Manual |
 | M5: Atos IV a VI e as profundezas | Conteúdo e Eras |
 
 #### 2.14 O que o M0 entrega
@@ -1612,6 +1631,106 @@ O balanceamento dos três atos juntos já tinha fechado na M3.3: as 34 metas pas
 
 **Pronto quando, conferido:** as quatro fatias rodam no navegador. O HUD e as telas foram vistos em tamanho de celular no navegador embutido, mas ainda não num celular de verdade. O balanceador passa nas metas dos três atos, e há capturas de cada ato em `docs/img/`.
 
+#### 14.5 Especificação do M4: o polimento
+
+> Pedido do usuário (2026-10-22): seguir depois do M3. O roadmap tinha só "som, interface de celular, acessibilidade e eventos". O pedido antigo do modo manual da vila (15.5) entra aqui.
+
+**Decisões do usuário (2026-10-22):**
+
+- **Som sintetizado**, como o do Vigília: tudo em Web Audio, sem baixar nada.
+- **Eventos com escolhas, sem pausar:** cada um espera um dia de jogo e vai embora.
+- **O modo Manual só segura o herói:** o tempo segue (impostos, obras, forja e cura), e o herói espera na fogueira a ordem "Descer".
+
+**Princípios:**
+
+1. **A vila foi feita para ser ouvida** (14.3). O som liga os ganchos que o M2 deixou: cada ação de morador e cada marco já gera um evento de tela.
+2. **Nada do núcleo muda por causa do som.** O som só lê o estado e os eventos, como o 3D. Sem som, o jogo é o mesmo, e o balanceador não é afetado.
+3. **Idle primeiro.** Nada pausa o jogo sozinho. Um evento que pede escolha espera o jogador, e o jogo continua.
+
+**1. Som** (`src/audio/`, nos moldes do Vigília, que é todo sintetizado em Web Audio):
+
+- **Mesa:** canais de música, ambiente e efeitos, com reverb e compressor, mais um geral. Liga no primeiro toque (regra dos navegadores). **M** silencia, e o menu tem um volume por canal, que fica salvo.
+- **Diretor:** traduz os eventos de cada tick em efeitos, com prioridade e intervalo mínimo, para 4× não virar ruído. Também lê o clima para escolher a música. É puro e testado no Node.
+- **Música:**
+  - na vila: de dia, de noite e na festa;
+  - na masmorra: uma por ato (Cripta, Minas e Fungos);
+  - uma tensão própria nas lutas com chefe.
+- **Ambiente:**
+  - vila: passarinhos de dia, grilos à noite, a fonte e a forja;
+  - Cripta: vento e gotas;
+  - Minas: água pingando e o rangido das escoras;
+  - Fungos: borbulhas e esporos.
+- **Efeitos:**
+  - luta: golpe, acerto, crítico, bloqueio, couraça, veneno, poção, Purificar, habilidades, morte de inimigo e do herói;
+  - vila: martelo, violão, crianças, o sino da festa, bichos e obra pronta;
+  - avisos: chefe, nível, lendária e restos.
+- **Fonte:** tudo sintetizado no código (decisão do usuário). Nenhum arquivo de áudio.
+
+**2. Interface de celular:**
+
+- alvos de toque de pelo menos 44 px no dock, no HUD e nas listas;
+- arrastar a folha para baixo fecha;
+- deitado (paisagem), o HUD vira duas colunas, e a folha ocupa só a metade direita;
+- vibração curta (só no Android) na morte do herói e na vitória sobre um chefe, que dá para desligar;
+- as telas de regras e da forja conferidas em 375 px.
+
+**3. Acessibilidade** (no menu, salvo no aparelho):
+
+- tamanho do texto (normal, grande, maior);
+- "reduzir movimento", que corta os números flutuantes, o balanço da câmera e as partículas;
+- cores de elite e de raridade que também se distinguem por forma ou ícone, não só pela cor;
+- legenda dos sons importantes nos avisos (para jogar sem som);
+- atalhos de teclado listados no menu.
+
+**4. Eventos da vila** (com escolhas, decisão do usuário):
+
+- **O que são:** de tempos em tempos (com o dia do jogo e os marcos), chega alguém à vila: um mercador errante, uma caravana, um festival, uma visita.
+- **Como funcionam:** cada evento oferece duas ou três escolhas com custo. Exemplos: comprar uma peça rara, trocar materiais, pagar uma festa que dá experiência.
+- **Ritmo:** o evento espera a decisão e, se ninguém escolher em um dia de jogo, vai embora. Nada pausa.
+- **Determinismo:** no núcleo, com sorteio próprio e save v5.
+
+**5. Modo Auto/Manual da vila** (15.5):
+
+- Um botão no HUD alterna os modos.
+- No **Auto**, como hoje, o herói desce sozinho quando a vida enche.
+- No **Manual**, ele descansa e espera a ordem "Descer".
+- A regra "Descer de novo" do núcleo já faz isso; falta deixá-la visível. O Manual não pausa o tempo (decisão do usuário).
+
+**Testes do M4:**
+
+- o diretor de som (evento → efeito, prioridade, intervalo e clima → música);
+- os eventos da vila (sorteio, escolhas, custo, expiração e migração);
+- o modo Manual (o herói não desce sozinho);
+- o tamanho do texto e o reduzir movimento salvos.
+
+**Fatias:**
+
+| Fatia | Conteúdo |
+|---|---|
+| M4.1 | O som: mesa, diretor, música, ambiente e efeitos, volume e mudo |
+| M4.2 | Celular e acessibilidade, mais o modo Auto/Manual |
+| M4.3 | Os eventos da vila |
+
+**Pronto quando:**
+
+- o som toca no navegador e no celular sem travar (a 4× também);
+- as opções ficam salvas;
+- os eventos passam nos testes e no balanceador (o ouro parado não cresce);
+- há capturas novas em `docs/img/`.
+
+**Como ficou a M4.1 (2026-10-22): o som**
+
+- **A mesa** (`engine.ts`) é a do Vigília, com o mesmo cuidado com o Safari do iPhone: o som liga no primeiro gesto, e um contexto que volta mudo do segundo plano é recriado no toque seguinte. Os volumes padrão são geral 80%, música 45%, ambiente 60% e efeitos 85%.
+- **O diretor** (`director.ts`, puro):
+  - lê os eventos do quadro e o mundo: o inimigo do acerto diz se é couraça, o do golpe final diz se é chefe, e o andar diz se o morto é osso ou fungo;
+  - o que não tem evento sai da mudança do estado de um quadro para o outro: nível, dose nova de veneno, obra pronta e morador novo;
+  - a cena é a que a tela mostra (`stage.townShown`). Com a vila na tela, a luta lá embaixo fica muda e só os avisos passam;
+  - o planejador põe o mais importante primeiro e dá a cada efeito um intervalo mínimo. Os golpes têm um teto de 10 por segundo, e os avisos de um lote saem espaçados. A 4×, no navegador, ficaram uns 4 efeitos por segundo.
+- **O clima** vem do mesmo relógio da vila no 3D: é noite quando a luz do dia cai abaixo de 30%. A vida que se ouve sai da rotina dos moradores (`doing` e `petDoing`), e a fonte toca só na vila do estágio 3.
+- **A música** tem oito climas. A vila fica em Sol; a Cripta, em Ré menor, com um tambor distante; as Minas, em Lá menor harmônico, com uma picareta lá longe; os Fungos, em Dó sustenido menor, com sinos de vidro; o chefe tem pulso e tambor. O clima novo entra no começo do compasso.
+- **Testes** (`m4-som.test.ts`, 17): um contexto de áudio falso reclama do que o navegador reclamaria (rampa exponencial até zero, valor que não é número) e conta os nós. Todos os efeitos, os oito climas e as quatro cenas rodam nele, abaixo de 150 nós por segundo. Também são testados o diretor, o planejador, o clima, a vida da vila, a mesa e as preferências.
+- **No navegador:** o contexto liga no toque, os três canais têm sinal medido, cada evento de luta vira o efeito certo, a música troca de "cripta" para "dia" ao olhar a vila, e o mudo e as opções ficam salvos (vistos também em 375 px). Falta ouvir num celular de verdade.
+
 ### 15. Decisões em aberto
 
 1. **Regra de morte** (2.10): validar os números e a ideia de que a gente resgatada sempre volta.
@@ -1625,6 +1744,7 @@ O balanceamento dos três atos juntos já tinha fechado na M3.3: as 34 metas pas
 5. **Vila manual ou automática** (pedido do usuário, para mais à frente): hoje o tempo na vila é automático. O herói descansa até a vida encher e desce sozinho, e o usuário achou isso bom para o modo automático. Mais tarde ele quer poder escolher entre o modo automático e o manual, em que o herói espera a ordem de descer.
    - O núcleo já tem isso: é a regra da descida "Descer de novo depois de descansar". Desligada, o herói fica na vila até o botão "Descer agora".
    - Falta virar um modo visível, por exemplo um botão Auto/Manual no HUD. Também falta decidir se o modo manual pausa o tempo ou só segura o herói.
+   - **Decidido em 2026-10-22:** entra no M4 (14.5) como botão Auto/Manual no HUD, e o Manual só segura o herói.
    - Hoje as telas de equipamento e de habilidades abertas também seguram o herói; a de regras não.
 6. **Medição no celular:** o envio automático do medidor não chegou do aparelho (2.14). Falta saber o modelo e repetir a medição num celular mais fraco, como o Moto G60.
 
@@ -1854,6 +1974,11 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - a festa a cada ato vencido e a crônica na porta de cada ato;
     - os custos da vila com o nome do material;
     - 34 metas nas duas faixas.
+  - **M4 especificado (14.5).** O usuário decidiu: o som sintetizado como o do Vigília, os eventos da vila com escolhas e sem pausar, e o modo Manual que só segura o herói.
+  - **M4.1 pronta (o som):**
+    - mesa, diretor, música de oito climas, ambiente das quatro cenas com a vida da vila e efeitos de luta e de aviso;
+    - opções de volume e mudo (M), salvas no aparelho;
+    - 109 testes.
   - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
     - a vila é uma cena separada;
     - os moradores são aventureiros com roupa simples de cor variável;

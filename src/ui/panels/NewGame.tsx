@@ -78,7 +78,7 @@ export function Credits({ onClose }: { onClose: () => void }) {
         <h2>Vigília: O Portador da Chama</h2>
         <p>Arte 3D: <b>KayKit</b>, de Kay Lousberg (www.kaylousberg.com), sob CC0 1.0: personagens, esqueletos, animações, masmorra, armas e objetos.</p>
         <p>A vila: <b>Kenney</b> (www.kenney.nl), CC0 1.0. Os monstros do Jardim de Fungos: <b>Quaternius</b> (quaternius.com), CC0 1.0.</p>
-        <p>Feito com TypeScript, Three.js e Preact. A estrutura nasceu do Vigília.</p>
+        <p>O som é todo sintetizado no próprio jogo, em Web Audio. Feito com TypeScript, Three.js e Preact. A estrutura e o som nasceram do Vigília.</p>
         <button onClick={onClose}>Fechar</button>
       </div>
     </div>

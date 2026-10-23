@@ -201,6 +201,44 @@ export class CuePlanner {
   }
 }
 
+// ── Para quem joga sem som (M4.2): legendas e vibração.
+
+/** Os sons importantes que não têm aviso próprio na tela viram uma legenda, se o jogador quiser. */
+export const CAPTIONS: Partial<Record<SfxName, string>> = {
+  bossRoom: '♪ Tambores: o chefe está na sala.',
+  windup: '♪ Rosnado: vem um golpe especial.',
+  venom: '♪ Bolhas: mais uma dose de veneno.',
+  rise: '♪ Um morto se ergue.',
+  potion: '♪ Gole de poção.',
+  bossDown: '♪ Fanfarra: o chefe caiu!',
+  remains: '♪ Sino baixo: ficaram restos lá embaixo.',
+};
+/** A mesma legenda não volta antes disso (ms). */
+export const CAPTION_GAP_MS = 4000;
+
+export class CaptionPlanner {
+  private last = new Map<SfxName, number>();
+
+  pick(planned: readonly Planned[], nowMs: number): string[] {
+    const out: string[] = [];
+    for (const p of planned) {
+      const text = CAPTIONS[p.sfx];
+      if (!text) continue;
+      const last = this.last.get(p.sfx);
+      if (last !== undefined && nowMs - last < CAPTION_GAP_MS) continue;
+      this.last.set(p.sfx, nowMs);
+      out.push(text);
+    }
+    return out;
+  }
+}
+
+/** Vibração curta (ms ligado, desligado, ligado…) na morte do herói e no chefe vencido. */
+export const VIBRATION: Partial<Record<SfxName, number[]>> = {
+  death: [90, 60, 180],
+  bossDown: [40, 40, 40, 40, 140],
+};
+
 // ── O clima: música e ambiente.
 
 export type MusicMode = 'dia' | 'noite' | 'festa' | 'luto' | 'cripta' | 'minas' | 'fungos' | 'chefe';

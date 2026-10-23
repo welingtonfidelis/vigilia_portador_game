@@ -4,6 +4,7 @@ RPG idle em 3D no navegador. Um herói desce sozinho à Cripta, luta contra grup
 
 ![Luta no anel de contato](docs/img/luta-elite.jpg)
 
+- **Jogar no navegador** (computador ou celular): [https://welingtonfidelis.github.io/vigilia_portador_game/](https://welingtonfidelis.github.io/vigilia_portador_game/)
 - **Documentação única** (GDD, estado, arquitetura, arte e balanceamento): [`docs/VIGILIA-PORTADOR.md`](docs/VIGILIA-PORTADOR.md)
 - **Licenças da arte:** [`LICENSES.md`](LICENSES.md)
 

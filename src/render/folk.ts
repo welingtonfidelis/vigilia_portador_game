@@ -17,7 +17,7 @@ import type { HeadId, World } from '../sim/index.ts';
 import { Animator } from './animator.ts';
 import { load } from './assets.ts';
 import { paletteMaterial } from './palette.ts';
-import { DONOR_FILES, HEAD_VISUALS, PREFIX } from './visuals.ts';
+import { DONOR_FILES, GRIP_TURN, HEAD_VISUALS, PREFIX } from './visuals.ts';
 
 const BODY_PARTS = ['Body', 'ArmLeft', 'ArmRight', 'LegLeft', 'LegRight'];
 
@@ -188,6 +188,7 @@ class Villager {
     o.scale.setScalar(def.scale);
     if (def.pos) o.position.set(...def.pos);
     if (def.rot) o.rotation.set(...def.rot);
+    o.rotation.y += GRIP_TURN[def.file] ?? 0;
     o.traverse((m) => ((m as THREE.Mesh).castShadow = false));
     bone.add(o);
     this.props.set(name, o);

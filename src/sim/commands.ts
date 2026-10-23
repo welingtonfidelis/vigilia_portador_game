@@ -105,9 +105,17 @@ export function descend(w: World, ev: SimEvent[]): string | null {
   return startDescent(w, ev) ? null : 'não deu para descer';
 }
 
+/**
+ * Modo da vila (M4.2): no Auto, o herói desce sozinho quando a vida enche; no Manual, ele espera a
+ * ordem "Descer". É a regra "Descer de novo depois de descansar", com um nome à vista.
+ */
+export function setAuto(w: World, auto: boolean): void {
+  w.rules.descent = { ...w.rules.descent, repeat: auto };
+}
+
 /** Segura o herói na vila (a tela de equipamento aberta, por exemplo). */
 export function setHold(w: World, hold: boolean): void {
   w.hold = hold;
 }
 
-export const commands = { equip, unequip, sell, learn, setBar, setRules, ringBell, descend, setHold, build, forge, reforge, upgrade };
+export const commands = { equip, unequip, sell, learn, setBar, setRules, ringBell, descend, setAuto, setHold, build, forge, reforge, upgrade };

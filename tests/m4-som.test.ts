@@ -313,6 +313,31 @@ describe('clima: música e ambiente', () => {
     }
   });
 
+  it('trocar de cena troca a música na hora e some com a anterior; na mesma cena, espera o compasso', () => {
+    const ctx = fakeContext();
+    const music = new MusicPlayer(asCtx(ctx), OUT);
+    music.setMode('cripta');
+    for (let s = 0; s < 7; s += 0.05) {
+      ctx.currentTime = s;
+      music.schedule();
+    }
+    expect(music.currentMode).toBe('cripta');
+    const fades = ctx.log.gains.length;
+    // Herói de volta à vila: a música da Cripta sai já (o ganho da voz dela vai a zero).
+    music.setMode('dia');
+    expect(music.currentMode).toBe('dia');
+    expect(ctx.log.gains.slice(fades)).toEqual([0]);
+    // Na vila, a noite espera o começo do compasso.
+    music.setMode('noite');
+    expect(music.currentMode).toBe('dia');
+    for (let s = 7; s < 14; s += 0.05) {
+      ctx.currentTime = s;
+      music.schedule();
+    }
+    expect(music.currentMode).toBe('noite');
+    expect(music.cuts).toBe(2);
+  });
+
   it('o ambiente de cada cena toca sem erro, com toda a vida da vila ligada', () => {
     const all = { forja: true, lenha: true, violao: true, criancas: true, festa: true, fonte: true, cachorro: true, gato: true, pintinho: true };
     for (const scene of ['vila', 'cripta', 'minas', 'fungos'] as Scene[]) {

@@ -59,6 +59,11 @@ export const STYLES: Record<MusicMode, Style> = {
 
 const STEPS_PER_BAR = 8;
 
+/** A família do clima: dentro dela a troca espera o compasso; entre famílias (vila e cada canto lá embaixo), é na hora. */
+const FAMILY: Record<MusicMode, string> = { dia: 'vila', noite: 'vila', festa: 'vila', luto: 'vila', cripta: 'cripta', minas: 'minas', fungos: 'fungos', chefe: 'chefe' };
+/** Quanto a música da cena que sai leva para sumir (constante de tempo, s). */
+const CUT_FADE = 0.35;
+
 export class MusicPlayer {
   private mode: MusicMode = 'dia';
   private pending: MusicMode | null = null;
@@ -68,18 +73,50 @@ export class MusicPlayer {
   private chord = G;
   private melodyIdx = 4;
   private readonly ctx: BaseAudioContext;
-  private readonly out: AudioNode;
+  private readonly bus: AudioNode;
+  /** A voz da cena atual: as notas ligam aqui, e trocar de cena some com ela (os acordes longos também). */
+  private out: GainNode;
   /** Quantas vezes a música teve de pular para o próximo compasso por ficar para trás. */
   resyncs = 0;
+  /** Quantas vezes a cena trocou na hora (com o fade da anterior). */
+  cuts = 0;
 
   constructor(ctx: BaseAudioContext, out: AudioNode) {
     this.ctx = ctx;
-    this.out = out;
+    this.bus = out;
+    this.out = this.voice();
   }
 
-  /** O novo clima entra no próximo compasso, para não cortar a frase no meio. */
+  private voice(): GainNode {
+    const g = this.ctx.createGain();
+    g.gain.value = 1;
+    g.connect(this.bus);
+    return g;
+  }
+
+  /**
+   * Na mesma cena, o clima novo entra no próximo compasso, para não cortar a frase. Trocando de
+   * cena (a vila e lá embaixo), a música que sai some em meio segundo e a nova começa já: antes, a
+   * masmorra ainda soava uns 15 s na vila, entre o compasso e a cauda do acorde.
+   */
   setMode(mode: MusicMode): void {
+    if (FAMILY[mode] !== FAMILY[this.pending ?? this.mode]) return this.cut(mode);
     this.pending = mode === this.mode ? null : mode;
+  }
+
+  private cut(mode: MusicMode): void {
+    const now = this.ctx.currentTime;
+    const old = this.out;
+    old.gain.setTargetAtTime(0, now, CUT_FADE);
+    setTimeout(() => old.disconnect(), 3000);
+    this.out = this.voice();
+    this.mode = mode;
+    this.pending = null;
+    this.chordIdx = 0;
+    this.melodyIdx = 4;
+    this.step = Math.ceil(this.step / STEPS_PER_BAR) * STEPS_PER_BAR;
+    this.nextTime = now + 0.05;
+    this.cuts++;
   }
 
   get currentMode(): MusicMode {

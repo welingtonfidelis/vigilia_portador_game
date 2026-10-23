@@ -17,7 +17,8 @@
   --safe-t: env(safe-area-inset-top, 0px);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text);
-  font-size: 15px;
+  /* O tamanho do texto das opções (M4.2) multiplica tudo, porque a interface mede em rem. */
+  font-size: calc(15px * var(--text-scale, 1));
 }
 
 * { box-sizing: border-box; }
@@ -69,12 +70,16 @@ input[type='number'] { width: 4.2em; }
 .wound { color: var(--bad); letter-spacing: 0; font-size: 0.82rem; }
 .venom { color: #a6e05a; letter-spacing: 0; font-size: 0.82rem; }
 .hud-where { flex: 1; text-align: center; text-shadow: 0 1px 3px #000; min-width: 0; }
+.hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 4px 0 2px; pointer-events: auto; }
+.hero-actions button { font-size: 0.8rem; padding: 0.15em 0.6em; }
+.hero-actions button.primary { padding: 0.15em 0.9em; }
 .remains { color: #e6c27a; display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
 .hud-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .res { display: flex; gap: 10px; font-size: 0.9rem; text-shadow: 0 1px 2px #000; }
 .res span { white-space: nowrap; }
 .speed { display: flex; gap: 4px; }
 .speed button { padding: 0.15em 0.55em; }
+.speed .spd-cycle { display: none; min-width: 3.2em; }
 
 /* Dock e folhas */
 .dock {
@@ -83,12 +88,13 @@ input[type='number'] { width: 4.2em; }
 }
 .dock button { display: flex; flex-direction: column; align-items: center; min-width: 74px; padding: 0.3em 0.5em; }
 .dock .icon { font-size: 1.15rem; line-height: 1.1; }
-.dock .label { font-size: 0.75rem; }
+.dock .label, .dock .label-short { font-size: 0.75rem; }
+.dock .label-short { display: none; }
 .sheet {
   position: absolute; top: 96px; right: 12px; bottom: calc(80px + var(--safe-b)); width: min(560px, calc(100vw - 24px));
   background: var(--panel); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
-.sheet header { display: flex; justify-content: space-between; align-items: center; padding: 6px 14px; border-bottom: 1px solid var(--line); }
+.sheet header { display: flex; justify-content: space-between; align-items: center; padding: 6px 14px; border-bottom: 1px solid var(--line); touch-action: none; cursor: grab; }
 .sheet header h2 { margin: 0.2em 0; }
 .sheet .close { font-size: 1.3rem; line-height: 1; padding: 0.1em 0.5em; }
 .sheet-body { overflow-y: auto; padding: 4px 14px 14px; -webkit-overflow-scrolling: touch; }
@@ -115,6 +121,10 @@ input[type='number'] { width: 4.2em; }
 .r-epica .item-name, li.r-epica { color: var(--r-epica); }
 .r-lendaria { border-left-color: var(--r-lendaria); box-shadow: 0 0 12px rgba(255, 179, 71, 0.18); }
 .r-lendaria .item-name, li.r-lendaria { color: var(--r-lendaria); }
+/* A raridade também pela forma (M4.2), para quem não distingue as cores. */
+.r-rara .item-name::before, li.r-rara::before { content: '◆ '; }
+.r-epica .item-name::before, li.r-epica::before { content: '✦ '; }
+.r-lendaria .item-name::before, li.r-lendaria::before { content: '★ '; }
 .tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
 .tabs button { padding: 0.15em 0.5em; font-size: 0.8rem; }
 .skill.known { border-left-color: var(--ok); }
@@ -142,6 +152,9 @@ input[type='number'] { width: 4.2em; }
 .toast.t-lenda { border-color: var(--r-lendaria); color: var(--r-lendaria); }
 @keyframes fade { 0% { opacity: 0; transform: translateY(6px); } 6% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; } }
 
+/* Reduzir movimento (M4.2): nada desliza nem pisca na interface. */
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after { animation: none !important; transition: none !important; }
+
 /* Modal */
 .modal-back { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.55); display: grid; place-items: center; padding: 16px; }
 .modal { background: var(--panel); border: 1px solid var(--gold); border-radius: 12px; padding: 14px 18px; max-width: 520px; width: 100%; max-height: 85vh; overflow-y: auto; font-size: 0.92rem; }
@@ -149,6 +162,13 @@ input[type='number'] { width: 4.2em; }
 .options .slider { display: grid; grid-template-columns: 6.5em 1fr 3em; align-items: center; gap: 10px; margin: 6px 0; }
 .options input[type='range'] { width: 100%; accent-color: var(--gold); }
 .options input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--gold); }
+.options .check { align-items: flex-start; }
+.options .check input { flex: none; margin-top: 2px; }
+.options .text-size { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0 10px; }
+.shortcuts { margin: 4px 0 12px; display: grid; gap: 4px; font-size: 0.85rem; }
+.shortcuts div { display: grid; grid-template-columns: 11em 1fr; gap: 8px; }
+.shortcuts dt { color: var(--gold); font-family: ui-monospace, monospace; font-size: 0.8rem; }
+.shortcuts dd { margin: 0; }
 .rolls { padding-left: 18px; }
 
 /* Números de dano */
@@ -162,7 +182,7 @@ input[type='number'] { width: 4.2em; }
 .perf { position: fixed; right: 8px; bottom: calc(80px + var(--safe-b)); background: rgba(0, 0, 0, 0.7); color: #9f9; font: 12px ui-monospace, monospace; padding: 3px 6px; border-radius: 4px; z-index: 60; }
 
 @media (max-width: 720px) {
-  :root { font-size: 14px; }
+  :root { font-size: calc(14px * var(--text-scale, 1)); }
   .hud { flex-wrap: wrap; padding: calc(6px + var(--safe-t)) 8px 6px; gap: 4px 6px; }
   .hud-hero { flex: 1 1 100%; max-width: none; display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; }
   .hud-name { font-size: 0.95rem; white-space: nowrap; }
@@ -175,27 +195,57 @@ input[type='number'] { width: 4.2em; }
   .res { gap: 8px; font-size: 0.8rem; }
   .speed button { padding: 0.1em 0.45em; font-size: 0.85rem; }
   .dock { left: 8px; right: 8px; transform: none; justify-content: space-between; }
-  .dock button { min-width: 0; flex: 1; }
+  .dock button { min-width: 0; flex: 1; padding: 0.3em 0.2em; }
+  .dock .label { display: none; }
+  .dock .label-short { display: inline; }
   .sheet { top: auto; left: 0; right: 0; width: auto; height: 68vh; bottom: calc(66px + var(--safe-b)); border-radius: 14px 14px 0 0; }
+  /* A alça da folha: arrastar para baixo fecha. */
+  .sheet header { position: relative; padding-top: 12px; }
+  .sheet header::before { content: ''; position: absolute; top: 5px; left: 50%; width: 40px; height: 4px; margin-left: -20px; border-radius: 2px; background: #5a5040; }
+  .speed .spd { display: none; }
+  .speed .spd-cycle { display: inline-block; }
   .grid { grid-template-columns: 1fr; }
   .toasts { bottom: calc(72px + var(--safe-b)); }
+}
+
+/* Toque (M4.2): alvos de pelo menos 44 px no dock, no HUD e nas listas. */
+@media (pointer: coarse) {
+  .dock button { min-height: 48px; }
+  .speed button, .hero-actions button, .sheet .close { min-height: 44px; min-width: 44px; }
+  .sheet-body button, .modal button { min-height: 44px; }
+  .sheet-body select, .sheet-body input[type='number'] { min-height: 40px; }
+  .options input[type='checkbox'] { width: 24px; height: 24px; }
+}
+
+/* Celular deitado (M4.2): o HUD numa faixa só, o dock sem rótulos à esquerda e a folha na metade direita. */
+@media (orientation: landscape) and (max-height: 520px) {
+  :root { font-size: calc(13px * var(--text-scale, 1)); }
+  .hud { flex-wrap: nowrap; padding: calc(4px + var(--safe-t)) 10px 4px; gap: 8px; }
+  .hud-hero { flex: 0 1 230px; min-width: 170px; display: block; }
+  .hud-where { order: 0; flex: 1 1 auto; flex-basis: auto; font-size: 0.8rem; }
+  .hud-right { order: 0; flex: 0 1 auto; flex-direction: column; align-items: flex-end; }
+  .res { flex-wrap: wrap; justify-content: flex-end; gap: 6px; font-size: 0.8rem; }
+  .dock { left: 8px; right: auto; transform: none; bottom: calc(6px + var(--safe-b)); justify-content: flex-start; padding: 4px; }
+  .dock button { flex: none; min-width: 48px; }
+  .dock .label, .dock .label-short { display: none; }
+  /* Abaixo da faixa do HUD, para a pausa, a velocidade e o som ficarem à mão. */
+  .sheet { top: calc(74px + var(--safe-t)); bottom: 6px; left: auto; right: 6px; width: 50vw; height: auto; border-radius: 12px; }
+  .sheet header { padding-top: 6px; }
+  .sheet header::before { display: none; }
+  .toasts { bottom: calc(62px + var(--safe-b)); max-width: 44vw; }
 }
 
 /* Regras compactas: cada seletor com largura máxima, para a linha quebrar em duas, não em quatro. */
 .rule-list li select { max-width: 13em; }
 .rule-list li select:nth-of-type(2) { max-width: 9em; }
 
-/* Menu e novo jogo */
-.menu { position: absolute; top: calc(78px + var(--safe-t)); right: 12px; display: flex; flex-direction: column; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px; z-index: 5; }
+/* Novo jogo */
 .faces { display: flex; flex-wrap: wrap; gap: 6px; }
 .faces button { min-width: 6.5em; }
 input.name { font-size: 1.05rem; width: min(18em, 100%); padding: 0.35em 0.5em; }
 button.primary { background: #6a4c1c; border-color: var(--gold); font-weight: 600; padding: 0.45em 1.2em; }
 .newgame { top: calc(96px + var(--safe-t)); }
 .affix-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-@media (max-width: 720px) {
-  .menu { top: calc(96px + var(--safe-t)); }
-}
 
 /* Viagem entre a vila e a Cripta: a tela escurece por baixo do HUD */
 .travel { position: absolute; inset: 0; display: grid; place-items: center; background: #0a0c11; opacity: 0; transition: opacity 0.45s ease; pointer-events: none; }

@@ -8,7 +8,7 @@ import { BASES, tierBand } from '../sim/index.ts';
 import type { HeadId, Item, Slot } from '../sim/index.ts';
 import { Animator } from './animator.ts';
 import { bandMaterial, legendaryMaterial, load, releaseLegendary } from './assets.ts';
-import { BARE_LEGS, BARE_TORSO, BASE_VISUALS, DONOR_FILES, HEAD_VISUALS, HELM_FIT, PREFIX, itemVisual } from './visuals.ts';
+import { BARE_LEGS, BARE_TORSO, BASE_VISUALS, DONOR_FILES, HEAD_VISUALS, GRIP_TURN, HELM_FIT, PREFIX, itemVisual } from './visuals.ts';
 import type { HelmFit, RigidVisual, SkinnedVisual } from './visuals.ts';
 
 /** Geometria do elmo com o ajuste por cabeça (escala em volta do osso da cabeça, na pose de bind). */
@@ -127,6 +127,8 @@ export class HeroRig {
       obj = g.scene.clone();
     }
     if (v.scale) obj.scale.setScalar(v.scale);
+    const turn = GRIP_TURN[v.file];
+    if (turn) obj.rotation.y += turn;
     if (fit) {
       obj.scale.multiplyScalar(fit.scale);
       obj.position.y += fit.y;

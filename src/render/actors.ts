@@ -7,6 +7,7 @@ import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js
 import type { EliteAffix, EnemyKind } from '../sim/index.ts';
 import { Animator } from './animator.ts';
 import { load } from './assets.ts';
+import { GRIP_TURN } from './visuals.ts';
 
 interface EnemyLook {
   file: string;
@@ -220,7 +221,9 @@ export class EnemyActor {
     for (const [side, file] of [['handslot.r', this.look.right], ['handslot.l', this.look.left]] as const) {
       if (!file) continue;
       const w = await load(file);
-      bones.get(THREE.PropertyBinding.sanitizeNodeName(side))?.add(w.scene.clone());
+      const piece = w.scene.clone();
+      piece.rotation.y += GRIP_TURN[file] ?? 0;
+      bones.get(THREE.PropertyBinding.sanitizeNodeName(side))?.add(piece);
     }
     if (this.elite) {
       const color = ELITE_COLOR[this.elite];

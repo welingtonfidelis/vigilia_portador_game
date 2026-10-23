@@ -75,10 +75,12 @@ export class AmbiencePlayer {
   }
 
   setMood(mood: Mood): void {
+    // Trocando de cena, os laços da que sai somem rápido; na mesma cena, devagar.
+    const fade = this.mood && this.mood.scene !== mood.scene ? 0.3 : 1.2;
     this.mood = mood;
     const now = this.ctx.currentTime;
     const levels = loopLevels(mood);
-    for (const k of Object.keys(levels) as (keyof Loops)[]) this.loops[k].gain.setTargetAtTime(levels[k], now, 1.2);
+    for (const k of Object.keys(levels) as (keyof Loops)[]) this.loops[k].gain.setTargetAtTime(levels[k], now, fade);
   }
 
   /** Para tudo (mudo): os laços descem em meio segundo. */

@@ -19,7 +19,24 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
 
 ## 1. Estado, como jogar e arquitetura
 
-**Estado atual: M4 (o polimento) em andamento** (seção 14.5). A M4.1, o som, está pronta. Ela vem sobre os Atos II e III do M3 (14.4), a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+**Estado atual: projeto pausado em 2026-10-22, a pedido do usuário, no meio do M4** (seção 14.5). Estão prontas a M4.1 (o som) e a M4.2 (o celular, a acessibilidade, o modo Auto/Manual da vila e o menu único). O próximo passo, quando o projeto voltar, é a M4.3, os eventos da vila (especificados em 14.5, item 4). Depois vem o M5. O jogo está publicado no GitHub Pages: https://welingtonfidelis.github.io/vigilia_portador_game/ (cada push no `main` publica de novo, por `.github/workflows/pages.yml`). Tudo isso vem sobre os Atos II e III do M3 (14.4), a vila viva do M2 (14.3), o Ato I do M1 (14.2) e o protótipo do M0 (2.14).
+
+**M4.2 (celular, acessibilidade e o modo da vila), em 2026-10-22:**
+
+- **Vila: Auto ou Manual,** um botão no HUD. No Manual, o herói descansa e espera o "Descer ▸"; o tempo segue.
+- **Celular:**
+  - alvos de toque de pelo menos 44 px;
+  - em pé, um botão só de velocidade (1×, 2× e 4×), e a folha fecha arrastando o cabeçalho para baixo;
+  - deitado, o HUD fica numa faixa só, o dock fica só com ícones e a folha ocupa a metade direita;
+  - vibração curta na morte do herói e no chefe vencido (Android).
+- **Acessibilidade** (Menu ⚙): tamanho do texto, reduzir movimento, legendas dos sons, a raridade também pela forma (◆ rara, ✦ épica, ★ lendária) e a lista de atalhos.
+- **Menu único,** como no Vigília, a pedido do usuário:
+  - a barra de baixo tem as seis telas (Equipamento, Habilidades, Regras, Vila, Crônica e Menu);
+  - em cima ficam só os recursos, o som e o tempo;
+  - as ações do herói (modo da vila, Descer, sino, olhar a vila ou o herói e recentrar) ficam numa linha, debaixo de onde ele está.
+- **O som da masmorra seguia na vila,** visto pelo usuário: agora a música troca na hora ao mudar de cena.
+- **Machado invertido:** as armas de um gume só agora ficam com o gume para baixo no golpe (3.2).
+- 117 testes.
 
 **M4.1 (o som), em 2026-10-22:**
 
@@ -176,7 +193,10 @@ npm run dev -- --host       # idem, acessível pelo celular na mesma rede
 - **Regras (R):** a lista de regras de combate (o que ele faz e quando) e as regras da descida (andar alvo, até onde ir, quando voltar).
 - **Sino:** chama o herói de volta. Ele atende assim que termina a luta da sala em que está.
 - **Tempo:** Espaço pausa; 1, 2 e 3 escolhem 1×, 2× e 4×.
-- **Som:** liga no primeiro toque na tela. **M** liga e desliga; os volumes ficam em ☰ → Opções.
+- **Som:** liga no primeiro toque na tela. **M** (ou o 🔊 no alto) liga e desliga; os volumes ficam no Menu ⚙.
+- **Vila: Auto ou Manual** (botão no HUD): no Auto, o herói desce sozinho quando a vida enche; no Manual, ele espera o botão "Descer ▸".
+- **Menu** (⚙, a última tela da barra de baixo, tecla O): som, tamanho do texto, reduzir movimento, legendas dos sons, vibração, a lista de atalhos, Novo jogo e Créditos.
+- **Ações do herói** (linha debaixo de onde ele está): o modo da vila, Descer, o sino (🔔 Chamar), olhar a vila ou o herói e o ◎, que recentra a vila.
 - **Save:** automático no `localStorage`. Ao reabrir, o tempo fora roda pela mesma simulação (até 8 h).
 
 ### Ferramentas
@@ -216,7 +236,7 @@ src/sim/    regras: puro, determinístico, estado 100% JSON, sem DOM nem Three
   bot.ts         jogador automático (o "jogador médio" do balanceador)
   commands.ts    ações do jogador (vestir, aprender, regras, sino, obras, forja)
 src/game/   sessão: acumulador de tick fixo, velocidade, eventos para a tela, save local (storage.ts)
-  prefs.ts       preferências do aparelho (volumes e mudo), fora do save do mundo
+  prefs.ts       preferências do aparelho (som e acessibilidade), fora do save do mundo
 src/audio/  som sintetizado (M4.1): só ouve o estado e os eventos, como o 3D
   engine.ts      mesa: canais de música, ambiente e efeitos, reverb, compressor; liga no gesto
   director.ts    puro: eventos e mudanças do estado → efeitos; clima da cena → música e ambiente
@@ -231,6 +251,7 @@ src/render/ Three.js: só lê o estado e os eventos
   dungeon.ts     sala montada com as peças do KayKit Dungeon, juntadas numa malha por material
   stage.ts       cena, câmera, luzes, posições a partir do estado, números de dano
   perf.ts        medidor de desempenho (?perf), que envia o resumo ao servidor de desenvolvimento
+  motion.ts      o "reduzir movimento" (M4.2), lido pelo palco, pela vila e pelos esporos
 src/ui/     Preact: HUD, equipamento, habilidades, regras, vila e relatório da volta
 tools/      import-art.ts + art-manifest.ts (importador da arte com validação) e balance.ts (balanceador)
 tests/      vitest
@@ -818,7 +839,7 @@ As metas do Ato II e o resultado da M3.1 estão em 14.4.
 | **M1: Ato I completo** (concluído, 14.2) | Novo jogo com nome e rosto, forja completa, o Senhor da Cripta em duas fases no andar 10, relatório da ausência, cabelo sob o elmo, save v2 e metas novas no balanceador |
 | **M2: a vila viva** (pronto, 14.3) | Cena própria da vila, com obras visíveis, moradores com rotina, crianças, música e festas. A vida cresce com o jogo; os bichos ficam para a última fatia |
 | **M3: Atos II e III** (concluído, 14.4) | As Minas Inundadas (couraça e perfuração) e o Jardim de Fungos (veneno), com inimigos, chefes, habilidades, armas do Fantasy Weapons Bits e materiais novos |
-| **M4: polimento** (em andamento: M4.1 pronta, 14.5) | Som, interface de celular, acessibilidade, eventos da vila e o modo Auto/Manual |
+| **M4: polimento** (pausado: M4.1 e M4.2 prontas, falta a M4.3; 14.5) | Som, interface de celular, acessibilidade, eventos da vila e o modo Auto/Manual |
 | M5: Atos IV a VI e as profundezas | Conteúdo e Eras |
 
 #### 2.14 O que o M0 entrega
@@ -1731,6 +1752,47 @@ O balanceamento dos três atos juntos já tinha fechado na M3.3: as 34 metas pas
 - **Testes** (`m4-som.test.ts`, 17): um contexto de áudio falso reclama do que o navegador reclamaria (rampa exponencial até zero, valor que não é número) e conta os nós. Todos os efeitos, os oito climas e as quatro cenas rodam nele, abaixo de 150 nós por segundo. Também são testados o diretor, o planejador, o clima, a vida da vila, a mesa e as preferências.
 - **No navegador:** o contexto liga no toque, os três canais têm sinal medido, cada evento de luta vira o efeito certo, a música troca de "cripta" para "dia" ao olhar a vila, e o mudo e as opções ficam salvos (vistos também em 375 px). Falta ouvir num celular de verdade.
 
+**Como ficou a M4.2 (2026-10-22): celular, acessibilidade e o modo da vila**
+
+| | |
+|---|---|
+| ![O machado de uma mão no golpe, já com o gume para baixo](img/m4-machado-corte.jpg) | |
+
+- **O modo da vila** é a regra "Descer de novo depois de descansar" com um nome à vista. O comando `setAuto` liga e desliga só ela.
+  - O botão "Vila: Auto/Manual" fica no centro do HUD, debaixo de onde o herói está.
+  - No Manual, a linha diz "Na vila, esperando a ordem de descer", e aparece o "Descer ▸".
+  - O tempo não para: impostos, obras, forja e cura seguem (decisão do usuário).
+- **Celular:**
+  - com toque (`pointer: coarse`), os botões do dock têm 48 px, e os do HUD, das folhas, dos modais e do menu, 44 px;
+  - em pé (até 720 px de largura), os três botões de velocidade viram um que passa por 1×, 2× e 4×;
+  - a folha de baixo ganhou uma alça, e arrastar o cabeçalho mais de 70 px fecha;
+  - deitado (até 520 px de altura), o HUD vira uma faixa só, o dock fica só com ícones à esquerda, e a folha ocupa a metade direita, abaixo do HUD. A câmera abre espaço pelo lado em que a folha está;
+  - `navigator.vibrate` na morte e no chefe vencido; no iPhone e no computador não faz nada.
+- **Acessibilidade** (preferências do aparelho, `prefs.ts`):
+  - **tamanho do texto:** normal, grande (×1,12) e maior (×1,25). A interface mede tudo em rem, então um fator na raiz basta;
+  - **reduzir movimento:** sem números flutuantes, bolhas de veneno, esporos, fumaça, brasas e passarinhos. A câmera vai direto ao lugar (`ease` em `motion.ts`), e a interface fica sem animações. Quem pediu menos movimento ao sistema começa com ele ligado;
+  - **legendas dos sons:** os sons importantes que não têm aviso viram uma linha com ♪, no máximo uma a cada 4 s por som. São eles a sala do chefe, o golpe especial, a dose de veneno, o morto que se ergue, a poção, o chefe vencido e os restos;
+  - **a raridade pela forma:** ◆, ✦ e ★ antes do nome, também nas listas da forja e no relatório da volta. O elite já aparece pelo nome no HUD;
+  - **atalhos:** a lista fica nas Opções.
+- **Machado invertido:** pedido do usuário no meio da fatia (3.2).
+- **Testes:** 116. Entraram `m4-acessibilidade.test.ts` (o modo da vila, as preferências, a câmera, as legendas e a vibração) e `armas.test.ts`.
+- **No navegador:**
+  - o "Vila: Manual" segura o herói, e o "Descer ▸" o manda descer;
+  - as opções e o tamanho do texto funcionam;
+  - com o movimento reduzido, nenhum número novo aparece na luta;
+  - em 375 × 812, Regras e Vila (forja) cabem, e arrastar a folha fecha;
+  - em 812 × 375, a folha fica ao lado.
+
+  Falta conferir num celular de verdade, principalmente a vibração e o toque.
+- **Depois, a pedido do usuário:**
+  - **O som da masmorra seguia na vila.** A música só trocava no começo do compasso (até 5 s na Cripta), e o acorde longo ainda soava uns 11 s. Agora cada cena tem a sua voz: ao trocar de cena (vila, Cripta, Minas, Fungos ou chefe), a voz que sai some em meio segundo e a nova começa na hora. Os laços do ambiente também somem mais rápido. Dentro da mesma cena (dia e noite, por exemplo), a troca segue esperando o compasso. No navegador, a troca levou menos de meio segundo nos dois sentidos.
+  - **Menu único,** como no Vigília:
+    - o ☰ do HUD e a janela de Opções viraram a tela **Menu**, a sexta da barra de baixo (`MenuPanel.tsx`), com o som, a acessibilidade, os atalhos, o Novo jogo e os Créditos;
+    - em cima à direita ficam só os recursos, o 🔊 e o tempo;
+    - o sino, o olhar a vila ou o herói e o ◎ entraram na linha das ações do herói, ao lado do modo da vila;
+    - no celular em pé, a barra usa rótulos curtos ("Equipar", "Habilid.").
+  - **Publicado no GitHub Pages:** o workflow compila com `--base=/vigilia_portador_game/` (a arte vem do `BASE_URL`), roda os testes e publica a cada push no `main`.
+
 ### 15. Decisões em aberto
 
 1. **Regra de morte** (2.10): validar os números e a ideia de que a gente resgatada sempre volta.
@@ -1744,7 +1806,7 @@ O balanceamento dos três atos juntos já tinha fechado na M3.3: as 34 metas pas
 5. **Vila manual ou automática** (pedido do usuário, para mais à frente): hoje o tempo na vila é automático. O herói descansa até a vida encher e desce sozinho, e o usuário achou isso bom para o modo automático. Mais tarde ele quer poder escolher entre o modo automático e o manual, em que o herói espera a ordem de descer.
    - O núcleo já tem isso: é a regra da descida "Descer de novo depois de descansar". Desligada, o herói fica na vila até o botão "Descer agora".
    - Falta virar um modo visível, por exemplo um botão Auto/Manual no HUD. Também falta decidir se o modo manual pausa o tempo ou só segura o herói.
-   - **Decidido em 2026-10-22:** entra no M4 (14.5) como botão Auto/Manual no HUD, e o Manual só segura o herói.
+   - **Decidido em 2026-10-22:** entra no M4 (14.5) como botão Auto/Manual no HUD, e o Manual só segura o herói. **Feito na M4.2.**
    - Hoje as telas de equipamento e de habilidades abertas também seguram o herói; a de regras não.
 6. **Medição no celular:** o envio automático do medidor não chegou do aparelho (2.14). Falta saber o modelo e repetir a medição num celular mais fraco, como o Moto G60.
 
@@ -1781,6 +1843,8 @@ Os arquivos foram lidos só como dados, por scripts próprios (Python com `-I`),
 
 - **Esqueleto único.** O `Rig_Medium` tem 23 ossos: `root, hips, spine, chest, head, upperarm/lowerarm/wrist/hand/handslot (.l/.r), upperleg/lowerleg/foot/toes (.l/.r)`. Os 6 aventureiros, os 4 esqueletos e os arquivos de animação têm **os mesmos nomes**, a **mesma pose de repouso** e as **mesmas inverse bind matrices** (diferença máxima abaixo de 0,001). Só a ordem dos ossos muda nos esqueletos, e o Three liga a animação pelo nome. O manequim do pack de animação não tem `handslot`, mas isso não importa.
 - **Encaixes.** Os ossos `handslot.r` e `handslot.l` ficam na palma, girados para a arma. A cabeça é o osso `head`. As armas do Adventurers, do Skeletons e do Fantasy Weapons têm a pega na origem e a lâmina ao longo de +Y (por exemplo, `sword_1handed` vai de y −0,37 a 1,41). Por isso entram no `handslot` sem ajuste.
+
+  A exceção são as armas de **um gume só**: o machado de uma mão do Adventurers, o `axe_C`, a alabarda e o machado do lenhador. Elas vêm com o gume em −X, que na mão fica para trás e, no golpe de corte, aponta para cima. O usuário viu o "Machado robusto de ferro" com a lâmina invertida. Agora `GRIP_TURN` (`visuals.ts`) dá meia volta no cabo dessas peças, no herói, nos inimigos e nos moradores. Um teste (`armas.test.ts`) mede o x de cada arma no glTF e confere a lista.
 - **Personagens em partes.** Cada aventureiro é um conjunto de 6 a 9 malhas com skin no mesmo esqueleto:
   - `_Head`, `_Body`, `_ArmLeft`, `_ArmRight`, `_LegLeft` e `_LegRight`;
   - mais as peças próprias de cada um: `Knight_Helmet`, `Knight_HelmetVisor`, `Mage_Hat`, `Barbarian_BearHat`, `RogueHooded_Mask`, `Ranger_Quiver` e as capas.
@@ -1979,6 +2043,14 @@ Todos os packs são **CC0 1.0** e o crédito não é obrigatório. Mesmo assim, 
     - mesa, diretor, música de oito climas, ambiente das quatro cenas com a vida da vila e efeitos de luta e de aviso;
     - opções de volume e mudo (M), salvas no aparelho;
     - 109 testes.
+  - **Machado invertido,** a pedido do usuário: as armas de um gume só ganharam meia volta no cabo (3.2), com um teste novo.
+  - **Pausa em 2026-10-22,** a pedido do usuário, depois da M4.2, com o jogo publicado no GitHub Pages. Volta pela M4.3 (os eventos da vila).
+  - **M4.2 pronta:**
+    - o botão Vila: Auto/Manual e o "Descer ▸";
+    - o celular em pé e deitado, com alvos de 44 px e a folha que fecha arrastando;
+    - a vibração;
+    - o tamanho do texto, o reduzir movimento, as legendas dos sons, a raridade pela forma e a lista de atalhos;
+    - 116 testes.
   - **M2 especificado (14.3)** com o pedido de uma cidade viva. O usuário decidiu:
     - a vila é uma cena separada;
     - os moradores são aventureiros com roupa simples de cor variável;

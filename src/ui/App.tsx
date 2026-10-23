@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import type { PrefsStore } from '../game/prefs.ts';
 import type { Session } from '../game/session.ts';
 import { travelView } from '../game/travel.ts';
-import { BALANCE, ELITE_NAMES, ENEMIES, heroStats, isBoss, roomsOnFloor, xpToNext } from '../sim/index.ts';
+import { BALANCE, ELITE_NAMES, ENEMIES, commands, heroStats, isBoss, roomsOnFloor, xpToNext } from '../sim/index.ts';
 import type { World } from '../sim/index.ts';
 import { duration, nf, short } from './format.ts';
 import { ChroniclePanel } from './panels/ChroniclePanel.tsx';
-import { Options } from './panels/OptionsPanel.tsx';
+import { MenuPanel } from './panels/MenuPanel.tsx';
 import { EquipPanel } from './panels/EquipPanel.tsx';
 import { Credits, NewGame } from './panels/NewGame.tsx';
 import { ReportModal, AwayModal } from './panels/ReportModal.tsx';
@@ -15,14 +15,19 @@ import { SkillsPanel } from './panels/SkillsPanel.tsx';
 import { VillagePanel } from './panels/VillagePanel.tsx';
 import { toast, type Toast } from './toast.ts';
 
-export type PanelId = 'equip' | 'skills' | 'rules' | 'vila' | 'cronica';
+export type PanelId = 'equip' | 'skills' | 'rules' | 'vila' | 'cronica' | 'menu';
 
-const PANELS: { id: PanelId; label: string; key: string; icon: string }[] = [
-  { id: 'equip', label: 'Equipamento', key: 'E', icon: '⚔' },
-  { id: 'skills', label: 'Habilidades', key: 'H', icon: '✦' },
-  { id: 'rules', label: 'Regras', key: 'R', icon: '☰' },
-  { id: 'vila', label: 'Vila', key: 'V', icon: '⌂' },
-  { id: 'cronica', label: 'Crônica', key: 'C', icon: '✎' },
+/**
+ * A barra de baixo é o único menu, como no Vigília: as cinco telas do jogo e o Menu (som, opções,
+ * atalhos, novo jogo e créditos). `short` é o rótulo no celular em pé.
+ */
+const PANELS: { id: PanelId; label: string; short: string; key: string; icon: string }[] = [
+  { id: 'equip', label: 'Equipamento', short: 'Equipar', key: 'E', icon: '⚔' },
+  { id: 'skills', label: 'Habilidades', short: 'Habilid.', key: 'H', icon: '✦' },
+  { id: 'rules', label: 'Regras', short: 'Regras', key: 'R', icon: '☰' },
+  { id: 'vila', label: 'Vila', short: 'Vila', key: 'V', icon: '⌂' },
+  { id: 'cronica', label: 'Crônica', short: 'Crônica', key: 'C', icon: '✎' },
+  { id: 'menu', label: 'Menu', short: 'Menu', key: 'O', icon: '⚙' },
 ];
 
 /** Redesenha a interface no máximo ~8 vezes por segundo. */
@@ -44,7 +49,11 @@ function useWorld(session: Session): World {
 
 function where(w: World): string {
   const r = w.room;
-  if (w.phase === 'vila') return w.hold ? 'Na vila (esperando você)' : 'Na vila, descansando';
+  if (w.phase === 'vila') {
+    if (w.hold) return 'Na vila (esperando você)';
+    if (w.rules.descent.repeat) return 'Na vila, descansando';
+    return w.hero.hp >= heroStats(w).maxHp - 0.5 ? 'Na vila, esperando a ordem de descer' : 'Na vila, descansando (modo Manual)';
+  }
   if (w.phase === 'descendo') return `Descendo ao andar ${w.exp?.floor} · ${duration(w.phaseEnd - w.tick)}`;
   if (w.phase === 'voltando') return `${w.carried ? 'Carregado de volta' : 'Voltando'} à vila · ${duration(w.phaseEnd - w.tick)}`;
   if (!r) return '';
@@ -84,7 +93,45 @@ interface ViewCtl {
   recenter: () => void;
 }
 
-function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World; onBell: () => void; onMenu: () => void; view: ViewCtl }) {
+/**
+ * As ações do herói, juntas numa linha debaixo de onde ele está: o modo da vila (M4.2: no Auto ele
+ * desce sozinho quando a vida enche; no Manual, espera o "Descer"; o tempo segue nos dois), o sino,
+ * a troca entre olhar a vila e o herói e o recentrar da vila.
+ */
+function HeroActions({ session, w, view }: { session: Session; w: World; view: ViewCtl }) {
+  const auto = w.rules.descent.repeat;
+  const out = w.phase !== 'vila' && w.phase !== 'descendo';
+  const toggle = () => {
+    session.run((x) => commands.setAuto(x, !auto));
+    toast(auto ? 'Modo Manual: o herói espera na vila até você mandar descer.' : 'Modo Auto: o herói desce sozinho quando a vida enche.');
+  };
+  const descend = () => {
+    const err = session.run((x) => commands.descend(x, []));
+    if (err) toast(`Não deu: ${err}.`, 'ruim');
+    else dispatchEvent(new CustomEvent('portador-sfx', { detail: 'depart' }));
+  };
+  return (
+    <div class="hero-actions">
+      <button class={auto ? 'on' : ''} onClick={toggle} title={auto ? 'Auto: o herói desce sozinho quando a vida enche. Toque para o Manual.' : 'Manual: o herói espera a sua ordem. Toque para o Auto.'}>
+        Vila: {auto ? 'Auto' : 'Manual'}
+      </button>
+      {w.phase === 'vila' && !auto && <button class="primary" onClick={descend} title="Manda o herói descer agora">Descer ▸</button>}
+      {out && (
+        <button disabled={!w.exp || w.phase !== 'sala' || !!w.exp.recall} onClick={() => session.run((x) => commands.ringBell(x))} title="Sino: o herói volta no fim da luta">
+          🔔 {w.exp?.recall ? 'Chamado' : 'Chamar'}
+        </button>
+      )}
+      {out && (
+        <button class={view.watching ? 'on' : ''} onClick={view.toggle} title={view.watching ? 'Voltar a ver o herói' : 'Olhar a vila enquanto o herói desce'}>
+          {view.watching ? '⚔ Ver o herói' : '⌂ Ver a vila'}
+        </button>
+      )}
+      {view.townShown && <button onClick={view.recenter} title="Voltar à vista da vila (0) · arraste, roda, setas ou WASD movem; + e - dão zoom" aria-label="Voltar à vista da vila">◎</button>}
+    </div>
+  );
+}
+
+function Hud({ session, w, view, muted, onMute }: { session: Session; w: World; view: ViewCtl; muted: boolean; onMute: () => void }) {
   const h = w.hero;
   const s = heroStats(w);
   const hpPct = Math.max(0, Math.min(1, h.hp / s.maxHp));
@@ -113,6 +160,7 @@ function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World;
       </div>
       <div class="hud-where">
         <div>{where(w)}</div>
+        <HeroActions session={session} w={w} view={view} />
         {w.phase === 'sala' && alive.length > 0 && (
           <div class="muted small">
             {boss ? `${ENEMIES[boss.kind].name}${boss.kind === 'senhor' ? ` (fase ${boss.phase})` : ''}: ${nf((boss.hp / boss.maxHp) * 100)}% · ` : ''}
@@ -139,18 +187,24 @@ function Hud({ session, w, onBell, onMenu, view }: { session: Session; w: World;
           <span title="Moradores">☺ {v.people}</span>
         </div>
         <div class="speed">
-          <button class={session.paused ? 'on' : ''} onClick={() => { session.paused = !session.paused; session.emit(); }} title="Pausa (Espaço)">❚❚</button>
+          <button class={muted ? '' : 'on'} onClick={onMute} title={muted ? 'Ligar o som (M)' : 'Desligar o som (M)'} aria-label={muted ? 'Ligar o som' : 'Desligar o som'}>{muted ? '🔇' : '🔊'}</button>
+          <button class={session.paused ? 'on' : ''} onClick={() => { session.paused = !session.paused; session.emit(); }} title="Pausa (Espaço)" aria-label="Pausa">❚❚</button>
           {([1, 2, 4] as const).map((x) => (
-            <button key={x} class={!session.paused && session.speed === x ? 'on' : ''} onClick={() => { session.speed = x; session.paused = false; session.emit(); }}>{x}×</button>
+            <button key={x} class={`spd ${!session.paused && session.speed === x ? 'on' : ''}`} onClick={() => { session.speed = x; session.paused = false; session.emit(); }}>{x}×</button>
           ))}
-          <button class="bell" disabled={!w.exp || w.phase !== 'sala' || !!w.exp.recall} onClick={onBell} title="Sino: volta no fim da luta">🔔</button>
-          {w.phase !== 'vila' && w.phase !== 'descendo' && (
-            <button class={view.watching ? 'on' : ''} onClick={view.toggle} title={view.watching ? 'Voltar a ver o herói' : 'Olhar a vila enquanto o herói desce'}>
-              {view.watching ? '⚔ Herói' : '⌂ Vila'}
-            </button>
-          )}
-          {view.townShown && <button onClick={view.recenter} title="Voltar à vista da vila (0) · arraste, roda, setas ou WASD movem; + e - dão zoom" aria-label="Voltar à vista da vila">◎</button>}
-          <button onClick={onMenu} title="Menu" aria-label="Menu">☰</button>
+          {/* No celular, um botão só que passa por 1×, 2× e 4× (alvos de toque maiores). */}
+          <button
+            class={`spd-cycle ${session.paused ? '' : 'on'}`}
+            onClick={() => {
+              if (!session.paused) session.speed = ({ 1: 2, 2: 4, 4: 1 } as const)[session.speed];
+              session.paused = false;
+              session.emit();
+            }}
+            title="Velocidade: toque para trocar"
+            aria-label={`Velocidade ${session.speed}×`}
+          >
+            {session.speed}×
+          </button>
         </div>
       </div>
     </div>
@@ -164,9 +218,7 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
   const [seenReport, setSeenReport] = useState<number>(w.report?.tick ?? -1);
   const [away, setAway] = useState(session.away);
   const [newGame, setNewGame] = useState<'inicio' | 'trocar' | null>(session.isNew ? 'inicio' : null);
-  const [menu, setMenu] = useState(false);
   const [credits, setCredits] = useState(false);
-  const [options, setOptions] = useState(false);
   const [, setPrefsN] = useState(0);
   useEffect(() => prefs.subscribe(() => setPrefsN((n) => n + 1)), [prefs]);
   const toggleMute = () => {
@@ -175,6 +227,8 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
     toast(muted ? 'Som desligado (M liga de novo).' : 'Som ligado.');
   };
   const [watching, setWatching] = useState(false);
+  const sheetRef = useRef<HTMLElement>(null);
+  const drag = useRef<{ y: number; dy: number } | null>(null);
   useEffect(() => {
     dispatchEvent(new CustomEvent('portador-watch', { detail: watching }));
   }, [watching]);
@@ -203,9 +257,11 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
     const measure = () => {
       const el = document.querySelector('.sheet');
       const r = el?.getBoundingClientRect();
-      const narrow = innerWidth <= 720;
+      // A folha de baixo (celular em pé) empurra a cena para cima; a do lado (tela larga ou celular
+      // deitado), para a esquerda.
+      const bottom = !!r && r.top > innerHeight * 0.25;
       const closeUp = panel === 'equip';
-      const detail = !r ? { x: 0, y: 0, closeUp } : narrow ? { x: 0, y: r.height, closeUp } : { x: r.width + 12, y: 0, closeUp };
+      const detail = !r ? { x: 0, y: 0, closeUp } : bottom ? { x: 0, y: r.height, closeUp } : { x: r.width + 12, y: 0, closeUp };
       dispatchEvent(new CustomEvent('portador-inset', { detail }));
     };
     const t = setTimeout(measure, 30);
@@ -266,33 +322,49 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
   return (
     <>
       <TravelCard session={session} w={w} watching={watching} />
-      <Hud session={session} w={w} onBell={() => session.run((x) => x.exp && (x.exp.recall = true))} onMenu={() => setMenu((m) => !m)} view={view} />
-      {menu && (
-        <div class="menu">
-          <button onClick={() => { setMenu(false); setOptions(true); }}>Opções</button>
-          <button onClick={toggleMute}>{prefs.value.muted ? 'Ligar o som' : 'Desligar o som'} <span class="muted small">(M)</span></button>
-          <button onClick={() => { setMenu(false); setPanel(null); setNewGame('trocar'); }}>Novo jogo</button>
-          <button onClick={() => { setMenu(false); setCredits(true); }}>Créditos</button>
-        </div>
-      )}
+      <Hud session={session} w={w} view={view} muted={prefs.value.muted} onMute={toggleMute} />
       <nav class="dock">
         {PANELS.map((p) => (
           <button key={p.id} class={panel === p.id ? 'on' : ''} onClick={() => setPanel(panel === p.id ? null : p.id)} title={`${p.label} (${p.key})`}>
             <span class="icon">{p.icon}</span>
             <span class="label">{p.label}</span>
+            <span class="label-short">{p.short}</span>
           </button>
         ))}
       </nav>
       {newGame && <NewGame session={session} replacing={newGame === 'trocar'} onClose={() => setNewGame(null)} />}
       {credits && <Credits onClose={() => setCredits(false)} />}
-      {options && <Options prefs={prefs} onClose={() => setOptions(false)} />}
       {panel && !newGame && (
-        <section class="sheet" key={panel}>
-          <header>
+        <section class="sheet" key={panel} ref={sheetRef}>
+          {/* Arrastar o cabeçalho para baixo fecha a folha (M4.2). */}
+          <header
+            onPointerDown={(e) => {
+              if ((e.target as Element).closest('button')) return;
+              drag.current = { y: e.clientY, dy: 0 };
+              e.currentTarget.setPointerCapture(e.pointerId);
+            }}
+            onPointerMove={(e) => {
+              const d = drag.current;
+              if (!d || !sheetRef.current) return;
+              d.dy = Math.max(0, e.clientY - d.y);
+              sheetRef.current.style.transform = `translateY(${d.dy}px)`;
+            }}
+            onPointerUp={() => {
+              const d = drag.current;
+              drag.current = null;
+              if (sheetRef.current) sheetRef.current.style.transform = '';
+              if (d && d.dy > 70) setPanel(null);
+            }}
+            onPointerCancel={() => {
+              drag.current = null;
+              if (sheetRef.current) sheetRef.current.style.transform = '';
+            }}
+          >
             <h2>{PANELS.find((p) => p.id === panel)!.label}</h2>
             <button class="close" onClick={() => setPanel(null)} aria-label="Fechar">×</button>
           </header>
           <div class="sheet-body">
+            {panel === 'menu' && <MenuPanel prefs={prefs} onNewGame={() => { setPanel(null); setNewGame('trocar'); }} onCredits={() => setCredits(true)} />}
             {panel === 'equip' && <EquipPanel session={session} w={w} />}
             {panel === 'skills' && <SkillsPanel session={session} w={w} />}
             {panel === 'rules' && <RulesPanel session={session} w={w} />}

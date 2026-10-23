@@ -23,6 +23,7 @@ import { mineCart, rails } from './minecart.ts';
 import { mushroom } from './mushrooms.ts';
 import { paletteMaterial } from './palette.ts';
 import type { PaletteSpec } from './palette.ts';
+import { MOTION } from './motion.ts';
 
 const K = CELL;
 
@@ -1120,10 +1121,14 @@ export class Town {
     (this.smoke.material.uniforms.uDark!.value as THREE.Color).setRGB(0.23 * lit, 0.2 * lit, 0.19 * lit);
     this.smoke.material.uniforms.uScale!.value = pxScale;
     this.embers.material.uniforms.uScale!.value = pxScale;
-    this.smoke.update(dt, 0.35);
-    this.embers.update(dt, 0.2);
+    // Com o movimento reduzido, sem fumaça nem brasas.
+    this.smoke.points.visible = this.embers.points.visible = !MOTION.reduced;
+    if (!MOTION.reduced) {
+      this.smoke.update(dt, 0.35);
+      this.embers.update(dt, 0.2);
+    }
     this.folk.update(w, hour, dt, speed, far, this.stageOf(w));
-    this.birds.update(time, day);
+    this.birds.update(time, MOTION.reduced ? 0 : day);
     return day;
   }
 

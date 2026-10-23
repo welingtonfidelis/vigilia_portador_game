@@ -86,6 +86,19 @@ const TIER_MESHES: Record<string, [number, string][]> = {
   escudo_espinhos: [[6, 'weapons/shield_C.gltf']],
 };
 
+/**
+ * Armas de um gume só que vêm com o gume em −X: no osso da mão, ele fica para trás, e no golpe de
+ * corte ele aponta para cima. Meia volta no cabo põe o gume para a frente (e para baixo no corte).
+ * Medido no glTF e no meio do Melee_1H_Attack_Chop.
+ */
+export const GRIP_TURN: Record<string, number> = {
+  'adventurers/axe_1handed.gltf': Math.PI,
+  'weapons/axe_C.gltf': Math.PI,
+  'weapons/halberd.gltf': Math.PI,
+  // O machado do lenhador, no Chopping.
+  'tools/axe.gltf': Math.PI,
+};
+
 /** O visual de uma peça: o da base, com a malha do tier quando houver. */
 export function itemVisual(base: string, tier: number): Visual | null {
   const v = BASE_VISUALS[base] ?? null;

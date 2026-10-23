@@ -1,10 +1,11 @@
 import { render } from 'preact';
 import { startAudio } from './audio/index.ts';
-import { PrefsStore } from './game/prefs.ts';
+import { PrefsStore, TEXT_SCALE } from './game/prefs.ts';
 import { Session } from './game/session.ts';
 import { clearSave } from './game/storage.ts';
 import { itemName } from './sim/index.ts';
 import type { HeadId, SimEvent } from './sim/index.ts';
+import { MOTION } from './render/motion.ts';
 import { Stage, pickQuality } from './render/stage.ts';
 import { App } from './ui/App.tsx';
 import { lootText } from './ui/format.ts';
@@ -18,6 +19,16 @@ const loading = document.getElementById('loading')!;
 const stage = new Stage(canvas, overlay, pickQuality());
 const prefs = new PrefsStore();
 const audio = startAudio(prefs, (text) => toast(text, 'neutro'));
+
+/** O tamanho do texto e o reduzir movimento valem para a página inteira e para o 3D. */
+function applyPrefs(): void {
+  const p = prefs.value;
+  document.documentElement.style.setProperty('--text-scale', String(TEXT_SCALE[p.textSize]));
+  document.body.classList.toggle('reduce-motion', p.reduceMotion);
+  MOTION.reduced = p.reduceMotion;
+}
+applyPrefs();
+prefs.subscribe(applyPrefs);
 
 function toasts(events: SimEvent[]): void {
   for (const e of events) {

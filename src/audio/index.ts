@@ -6,7 +6,7 @@
 import type { PrefsStore } from '../game/prefs.ts';
 import type { SimEvent, World } from '../sim/index.ts';
 import { AmbiencePlayer } from './ambience.ts';
-import { changeCues, CuePlanner, cuesFor, cuesInScene, moodOf, sceneOf, snapshot } from './director.ts';
+import { CaptionPlanner, changeCues, CuePlanner, cuesFor, cuesInScene, moodOf, sceneOf, snapshot, VIBRATION } from './director.ts';
 import type { Mood, Snapshot } from './director.ts';
 import { AudioEngine, type Levels } from './engine.ts';
 import { MusicPlayer } from './music.ts';
@@ -28,6 +28,7 @@ const MOOD_MS = 500;
 export function startAudio(prefs: PrefsStore, toast: (text: string) => void): AudioHandle {
   const engine = new AudioEngine();
   const planner = new CuePlanner();
+  const captions = new CaptionPlanner();
   let music: MusicPlayer | null = null;
   let ambience: AmbiencePlayer | null = null;
   let world: World | null = null;
@@ -71,8 +72,16 @@ export function startAudio(prefs: PrefsStore, toast: (text: string) => void): Au
     const snap = snapshot(w);
     const cues = [...cuesFor(events, w), ...changeCues(last, snap)];
     last = snap;
-    if (!cues.length || !engine.running || prefs.value.muted) return;
-    for (const p of planner.plan(cuesInScene(cues, sceneOf(w, shown)), performance.now())) play(p.sfx, p.delay);
+    if (!cues.length) return;
+    // O planejador roda mesmo no mudo: as legendas e a vibração seguem a mesma escolha.
+    const now = performance.now();
+    const planned = planner.plan(cuesInScene(cues, sceneOf(w, shown)), now);
+    for (const p of planned) {
+      play(p.sfx, p.delay);
+      const pattern = VIBRATION[p.sfx];
+      if (pattern && prefs.value.vibrate) vibrate(pattern);
+    }
+    if (prefs.value.captions) for (const text of captions.pick(planned, now)) toast(text);
   };
 
   // Botões fazem um tique; a interface pede outros efeitos pelo evento 'portador-sfx' (abrir uma tela).
@@ -116,6 +125,15 @@ export function startAudio(prefs: PrefsStore, toast: (text: string) => void): Au
   });
 
   return { engine, frame, play, music: () => music, mood: () => mood };
+}
+
+/** Vibra onde o aparelho deixa (Android); no iPhone e no computador, não faz nada. */
+function vibrate(pattern: number[]): void {
+  try {
+    navigator.vibrate?.(pattern);
+  } catch {
+    // sem vibração
+  }
 }
 
 /**

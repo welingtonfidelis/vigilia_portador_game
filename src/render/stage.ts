@@ -15,6 +15,7 @@ import { PerfMeter } from './perf.ts';
 import { VenomFx } from './venom.ts';
 import { TOWN_FILES, Town } from './town.ts';
 import { visualFiles } from './visuals.ts';
+import { MOTION, ease } from './motion.ts';
 
 /** Vagas do anel, girado para a direita da porta: assim o herói aparece de três quartos para a câmera. */
 const RING_ANGLES = [-0.6, 0.55, 1.7];
@@ -523,8 +524,9 @@ export class Stage {
   }
 
   private float(text: string, pos: THREE.Vector3, cls: string): void {
-    // Olhando a vila, os números da luta lá embaixo não aparecem (cairiam em cima das casas).
-    if (this.showingTown) return;
+    // Olhando a vila, os números da luta lá embaixo não aparecem (cairiam em cima das casas); com o
+    // movimento reduzido, nunca.
+    if (this.showingTown || MOTION.reduced) return;
     if (this.floaters.length > 24) this.floaters.shift()?.el.remove();
     const el = document.createElement('div');
     el.className = `floater ${cls}`;
@@ -738,14 +740,14 @@ export class Stage {
     // Tochas tremem; lendária pulsa; a vila acende e apaga com a hora.
     if (this.room && !showTown) for (const [i, l] of this.room.torches.entries()) l.intensity = (i < 3 ? 14 : 9) * (0.85 + 0.15 * Math.sin(this.time * 9 + i * 2.1) * Math.sin(this.time * 5.3 + i));
     pulseLegendary(this.time);
-    this.venom.update(this.time, showTown ? 0 : w.hero.poison.filter((t) => t > w.tick).length);
+    this.venom.update(this.time, showTown || MOTION.reduced ? 0 : w.hero.poison.filter((t) => t > w.tick).length);
     if (showTown) {
       const pxScale = this.canvas.clientHeight / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2));
       this.lightTown(this.town.update(w, this.time, dt, (this.scene.fog as THREE.Fog).color, pxScale, speed, this.camDist > 60));
     } else this.lightCrypt();
     // Câmera: na masmorra persegue o herói; na vila, segue o herói (ou a praça) até o jogador arrastar.
     const portrait = this.camera.aspect < 0.85;
-    this.zoom += ((closeUp ? 0.58 : 1) - this.zoom) * (1 - Math.exp(-dt * 4));
+    this.zoom += ((closeUp ? 0.58 : 1) - this.zoom) * ease(dt, 4);
     const dist = (portrait ? 1.55 : 1.15) * this.zoom;
     let goal = this.heroPos.clone().add(new THREE.Vector3(0, closeUp ? 1.25 : 1.1, 0));
     const diorama = showTown && !closeUp;
@@ -758,13 +760,13 @@ export class Stage {
     }
     // A distância anda suave entre a masmorra, a vista da ilha e o zoom do jogador.
     const want = diorama ? (portrait ? TOWN_DIST.portrait : TOWN_DIST.landscape) * this.townCam.zoom : 15.1 * dist;
-    this.camDist += (want - this.camDist) * (1 - Math.exp(-dt * (this.townCam.free ? 12 : 4)));
+    this.camDist += (want - this.camDist) * ease(dt, this.townCam.free ? 12 : 4);
     const fov = diorama ? TOWN_FOV : ROOM_FOV;
     if (Math.abs(this.camera.fov - fov) > 0.01) {
-      this.camera.fov += (fov - this.camera.fov) * (1 - Math.exp(-dt * 4));
+      this.camera.fov += (fov - this.camera.fov) * ease(dt, 4);
       this.camera.updateProjectionMatrix();
     }
-    this.focus.lerp(goal, 1 - Math.exp(-dt * (this.townCam.free ? 10 : 3)));
+    this.focus.lerp(goal, ease(dt, this.townCam.free ? 10 : 3));
     const dir = diorama ? TOWN_DIR : new THREE.Vector3(6.5, closeUp ? 5.2 : 8.2, 10.5).normalize();
     this.camera.position.copy(this.focus).addScaledVector(dir, this.camDist);
     this.camera.lookAt(this.focus);

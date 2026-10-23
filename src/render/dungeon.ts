@@ -19,6 +19,7 @@ import { blackIronPile, mineCart, rails } from './minecart.ts';
 import { glowColor, mushroom } from './mushrooms.ts';
 import { paletteMaterial } from './palette.ts';
 import type { PaletteSpec } from './palette.ts';
+import { MOTION } from './motion.ts';
 
 export const DUNGEON_PIECES = [
   'floor_tile_large', 'floor_tile_large_rocks', 'floor_dirt_large', 'wall', 'wall_doorway', 'wall_cracked', 'wall_arched',
@@ -327,6 +328,8 @@ function spores(seed: number): THREE.Points {
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false;
   pts.onBeforeRender = () => {
+    // Com o movimento reduzido, os esporos ficam parados no ar.
+    if (MOTION.reduced) return;
     const t = performance.now() / 1000;
     const pos = geo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < n; i++) {

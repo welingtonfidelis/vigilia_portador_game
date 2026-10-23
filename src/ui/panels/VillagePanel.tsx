@@ -110,7 +110,7 @@ export function VillagePanel({ session, w }: { session: Session; w: World }) {
         {owned.length === 0 && <p class="muted small">Nada abaixo do teto da forja.</p>}
         {owned.map((item) => (
           <div key={item!.id} class={`row ${RARITY_CLASS[item!.rarity]}`}>
-            <span>{itemTitle(item!)}</span>
+            <span class="item-name">{itemTitle(item!)}</span>
             <span class="small muted">{costText(forgeCost(item!.tier + 1, 'comum'))}</span>
             <button disabled={!!v.forge} onClick={() => act((x) => commands.upgrade(x, item!.id))}>Aprimorar</button>
           </div>
@@ -121,7 +121,7 @@ export function VillagePanel({ session, w }: { session: Session; w: World }) {
         {rerollable.length === 0 && <p class="muted small">Nenhuma peça com afixo (as lendárias não se reforjam).</p>}
         {rerollable.map((item) => (
           <div key={item!.id} class={`row ${RARITY_CLASS[item!.rarity]}`}>
-            <span>{itemTitle(item!)}</span>
+            <span class="item-name">{itemTitle(item!)}</span>
             <span class="small muted">{costText(reforgeCost(item!.tier))}</span>
             <span class="affix-row">
               {item!.affixes.map((a, i) => (

@@ -1796,7 +1796,8 @@ O balanceamento dos três atos juntos já tinha fechado na M3.3: as 34 metas pas
     - a primeira tela é a história ("A última chama da vila", em `Story`, no `NewGame.tsx`), como a boas-vindas do Vigília, com a câmera na vila inteira;
     - depois vem a escolha do rosto e do nome;
     - no "Começar", o herói recebe a ordem de descer na hora. A câmera fica na vila enquanto ele sai da fogueira e entra na capela, e um aviso ensina o "⚔ Ver o herói";
-    - o Novo jogo do Menu passa pelo mesmo caminho.
+    - o Novo jogo do Menu passa pelo mesmo caminho;
+    - no celular, a folha cobria o herói. Agora, enquanto ele é criado, o HUD, a barra de baixo e os avisos saem da tela. Em pé, a folha fica compacta e colada embaixo; deitado, fica na metade direita. A câmera mede onde a folha começa e centra o herói no espaço livre.
   - **Publicado no GitHub Pages:** o workflow compila com `--base=/vigilia_portador_game/` (a arte vem do `BASE_URL`), roda os testes e publica a cada push no `main`.
 
 ### 15. Decisões em aberto

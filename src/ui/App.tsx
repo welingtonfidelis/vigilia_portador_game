@@ -221,6 +221,10 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
   const [credits, setCredits] = useState(false);
   // Antes de escolher o herói, a história.
   const [story, setStory] = useState(session.isNew);
+  // Criando o herói, o HUD, a barra de baixo e os avisos saem da frente dele.
+  useEffect(() => {
+    document.body.classList.toggle('creating', !!newGame);
+  }, [newGame]);
   const [, setPrefsN] = useState(0);
   useEffect(() => prefs.subscribe(() => setPrefsN((n) => n + 1)), [prefs]);
   const toggleMute = () => {

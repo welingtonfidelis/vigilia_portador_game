@@ -248,7 +248,21 @@ input[type='number'] { width: 4.2em; }
 .faces button { min-width: 6.5em; }
 input.name { font-size: 1.05rem; width: min(18em, 100%); padding: 0.35em 0.5em; }
 button.primary { background: #6a4c1c; border-color: var(--gold); font-weight: 600; padding: 0.45em 1.2em; }
-.newgame { top: calc(96px + var(--safe-t)); }
+/* Criando o herói: o HUD, a barra de baixo e os avisos saem, para o rosto escolhido ficar à vista. */
+.creating .hud, .creating .dock, .creating .toasts { display: none; }
+.sheet.newgame { top: calc(16px + var(--safe-t)); bottom: auto; max-height: calc(100vh - 32px); }
+.sheet.newgame header::before { display: none; }
+@media (max-width: 720px) {
+  /* Em pé: compacta, colada embaixo; o herói aparece por cima dela. */
+  .sheet.newgame { top: auto; bottom: 0; height: auto; max-height: 60vh; padding-bottom: var(--safe-b); }
+  .sheet.newgame .faces button { min-width: 0; flex: 1 1 28%; }
+  .sheet.newgame h3 { margin: 0.4em 0 0.25em; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  /* Deitado: a metade direita da tela, de cima a baixo. */
+  .sheet.newgame { top: calc(6px + var(--safe-t)); bottom: 6px; height: auto; max-height: none; }
+  .sheet.newgame .sheet-body { padding-bottom: 8px; }
+}
 .affix-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 
 /* Viagem entre a vila e a Cripta: a tela escurece por baixo do HUD */

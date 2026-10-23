@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { Session } from '../../game/session.ts';
 import { HEADS, commands } from '../../sim/index.ts';
 import type { HeadId } from '../../sim/index.ts';
@@ -44,14 +44,27 @@ export function NewGame({ session, replacing, onClose, onStart }: { session: Ses
   const defaultName = (id: HeadId) => HEADS.find((h) => h.id === id)?.name ?? 'Herói';
   const [name, setName] = useState(defaultName(session.world.hero.head));
   const [touched, setTouched] = useState(false);
+  const sheet = useRef<HTMLElement>(null);
 
+  useEffect(() => preview(head), [head]);
+  // A câmera chega perto do herói e o centra no espaço que a folha deixa livre: acima dela no
+  // celular em pé, à esquerda na tela larga e no celular deitado. Mede a folha de verdade.
   useEffect(() => {
-    preview(head);
-    dispatchEvent(new CustomEvent('portador-inset', { detail: { x: innerWidth > 720 ? 572 : 0, y: innerWidth > 720 ? 0 : innerHeight * 0.55, closeUp: true } }));
-  }, [head]);
-  useEffect(() => () => {
-    preview(null);
-    dispatchEvent(new CustomEvent('portador-inset', { detail: { x: 0, y: 0, closeUp: false } }));
+    const measure = () => {
+      const r = sheet.current?.getBoundingClientRect();
+      if (!r) return;
+      const bottom = r.top > innerHeight * 0.25;
+      const detail = bottom ? { x: 0, y: innerHeight - r.top, closeUp: true } : { x: innerWidth - r.left, y: 0, closeUp: true };
+      dispatchEvent(new CustomEvent('portador-inset', { detail }));
+    };
+    const t = setTimeout(measure, 30);
+    addEventListener('resize', measure);
+    return () => {
+      clearTimeout(t);
+      removeEventListener('resize', measure);
+      preview(null);
+      dispatchEvent(new CustomEvent('portador-inset', { detail: { x: 0, y: 0, closeUp: false } }));
+    };
   }, []);
 
   const pick = (id: HeadId) => {
@@ -68,7 +81,7 @@ export function NewGame({ session, replacing, onClose, onStart }: { session: Ses
     onClose();
   };
   return (
-    <section class="sheet newgame">
+    <section class="sheet newgame" ref={sheet}>
       <header>
         <h2>Novo jogo</h2>
         {replacing && <button class="close" onClick={onClose} aria-label="Fechar">×</button>}

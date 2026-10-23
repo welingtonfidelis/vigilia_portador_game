@@ -35,8 +35,9 @@ Este arquivo reúne o GDD, o estado do projeto e a direção de arte. O README d
   - em cima ficam só os recursos, o som e o tempo;
   - as ações do herói (modo da vila, Descer, sino, olhar a vila ou o herói e recentrar) ficam numa linha, debaixo de onde ele está.
 - **O som da masmorra seguia na vila,** visto pelo usuário: agora a música troca na hora ao mudar de cena.
+- **O jogo novo começa na vila,** com um texto da história antes de escolher o herói. Ele desce assim que é criado.
 - **Machado invertido:** as armas de um gume só agora ficam com o gume para baixo no golpe (3.2).
-- 117 testes.
+- 118 testes.
 
 **M4.1 (o som), em 2026-10-22:**
 
@@ -1791,6 +1792,11 @@ O balanceamento dos três atos juntos já tinha fechado na M3.3: as 34 metas pas
     - em cima à direita ficam só os recursos, o 🔊 e o tempo;
     - o sino, o olhar a vila ou o herói e o ◎ entraram na linha das ações do herói, ao lado do modo da vila;
     - no celular em pé, a barra usa rótulos curtos ("Equipar", "Habilid.").
+  - **O jogo novo começa na vila,** a pedido do usuário:
+    - a primeira tela é a história ("A última chama da vila", em `Story`, no `NewGame.tsx`), como a boas-vindas do Vigília, com a câmera na vila inteira;
+    - depois vem a escolha do rosto e do nome;
+    - no "Começar", o herói recebe a ordem de descer na hora. A câmera fica na vila enquanto ele sai da fogueira e entra na capela, e um aviso ensina o "⚔ Ver o herói";
+    - o Novo jogo do Menu passa pelo mesmo caminho.
   - **Publicado no GitHub Pages:** o workflow compila com `--base=/vigilia_portador_game/` (a arte vem do `BASE_URL`), roda os testes e publica a cada push no `main`.
 
 ### 15. Decisões em aberto

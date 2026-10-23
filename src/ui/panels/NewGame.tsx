@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Session } from '../../game/session.ts';
-import { HEADS } from '../../sim/index.ts';
+import { HEADS, commands } from '../../sim/index.ts';
 import type { HeadId } from '../../sim/index.ts';
 
 /** Pede ao 3D para mostrar outro rosto enquanto o jogador escolhe (null volta ao do herói). */
@@ -9,10 +9,37 @@ function preview(head: HeadId | null): void {
 }
 
 /**
+ * A história, antes de escolher o herói (como a boas-vindas do Vigília). A câmera fica na vila
+ * inteira, para o jogador ver de onde tudo começa.
+ */
+export function Story({ replacing, onNext, onCancel }: { replacing: boolean; onNext: () => void; onCancel: () => void }) {
+  return (
+    <div class="modal-back story-back">
+      <div class="modal story">
+        <h2>A última chama da vila</h2>
+        <p class="muted">Você não luta. Você prepara quem desce.</p>
+        <p>A vila caiu numa noite sem lua. O que dormia na Cripta, debaixo da capela, subiu pela escada e levou quase tudo: as casas, a forja, a gente. Sobrou uma fogueira acesa no alto do morro, e alguém para cuidar dela.</p>
+        <p>Esse alguém é o <b>Portador da Chama</b>. Ele desce à Cripta com o fogo da vigília, luta sozinho contra os mortos e sempre volta: vitorioso, ferido ou carregado. O que ele traz lá de baixo (ouro, ossos, ferro e gente resgatada) reconstrói a vila, casa por casa.</p>
+        <p>Você não controla a luta. Escolhe o que ele veste, o que aprende, as regras que segue e até onde desce. No andar 5 espera um Capitão; no 10, o Senhor da Cripta. Mais fundo, dizem, as minas inundaram e um jardim apodrece no escuro.</p>
+        <p>Quando ele cair, parte do que levava fica no chão. Ainda dá para voltar e buscar.</p>
+        <ul class="small muted">
+          <li>Equipamento, Habilidades, Regras, Vila e Crônica ficam na barra de baixo; o Menu ⚙ tem o som e as opções.</li>
+          <li>Espaço pausa; 1, 2 e 3 mudam a velocidade.</li>
+        </ul>
+        <p>
+          <button class="primary" onClick={onNext}>Escolher o herói</button>
+          {replacing && <> <button class="ghost" onClick={onCancel}>Cancelar</button></>}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Novo jogo: nome e rosto. O herói 3D troca de rosto na hora, atrás da folha. Sem save, abre
  * sozinha e o tempo fica parado até "Começar".
  */
-export function NewGame({ session, replacing, onClose }: { session: Session; replacing: boolean; onClose: () => void }) {
+export function NewGame({ session, replacing, onClose, onStart }: { session: Session; replacing: boolean; onClose: () => void; onStart: (name: string) => void }) {
   const [head, setHead] = useState<HeadId>(session.world.hero.head);
   const defaultName = (id: HeadId) => HEADS.find((h) => h.id === id)?.name ?? 'Herói';
   const [name, setName] = useState(defaultName(session.world.hero.head));
@@ -31,10 +58,13 @@ export function NewGame({ session, replacing, onClose }: { session: Session; rep
     setHead(id);
     if (!touched) setName(defaultName(id));
   };
+  // O jogo novo começa na vila, e o herói desce à Cripta na hora em que é criado.
   const start = () => {
-    session.replace(Session.fresh(head, name));
+    session.replace(Session.fresh(head, name.trim()));
+    session.run((w) => commands.descend(w, []));
     session.paused = false;
     session.emit();
+    onStart(name.trim());
     onClose();
   };
   return (

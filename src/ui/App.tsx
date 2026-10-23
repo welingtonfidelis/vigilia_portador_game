@@ -8,7 +8,7 @@ import { duration, nf, short } from './format.ts';
 import { ChroniclePanel } from './panels/ChroniclePanel.tsx';
 import { MenuPanel } from './panels/MenuPanel.tsx';
 import { EquipPanel } from './panels/EquipPanel.tsx';
-import { Credits, NewGame } from './panels/NewGame.tsx';
+import { Credits, NewGame, Story } from './panels/NewGame.tsx';
 import { ReportModal, AwayModal } from './panels/ReportModal.tsx';
 import { RulesPanel } from './panels/RulesPanel.tsx';
 import { SkillsPanel } from './panels/SkillsPanel.tsx';
@@ -219,6 +219,8 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
   const [away, setAway] = useState(session.away);
   const [newGame, setNewGame] = useState<'inicio' | 'trocar' | null>(session.isNew ? 'inicio' : null);
   const [credits, setCredits] = useState(false);
+  // Antes de escolher o herói, a história.
+  const [story, setStory] = useState(session.isNew);
   const [, setPrefsN] = useState(0);
   useEffect(() => prefs.subscribe(() => setPrefsN((n) => n + 1)), [prefs]);
   const toggleMute = () => {
@@ -332,7 +334,20 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
           </button>
         ))}
       </nav>
-      {newGame && <NewGame session={session} replacing={newGame === 'trocar'} onClose={() => setNewGame(null)} />}
+      {newGame && story && <Story replacing={newGame === 'trocar'} onNext={() => setStory(false)} onCancel={() => { setStory(false); setNewGame(null); }} />}
+      {newGame && !story && (
+        <NewGame
+          session={session}
+          replacing={newGame === 'trocar'}
+          onClose={() => setNewGame(null)}
+          onStart={(name) => {
+            // A câmera fica na vila: o herói sai da fogueira e entra na capela da Cripta.
+            setWatching(true);
+            dispatchEvent(new CustomEvent('portador-sfx', { detail: 'depart' }));
+            toast(`${name} desce à Cripta pela primeira vez. Toque em ⚔ Ver o herói para acompanhar.`, 'bom');
+          }}
+        />
+      )}
       {credits && <Credits onClose={() => setCredits(false)} />}
       {panel && !newGame && (
         <section class="sheet" key={panel} ref={sheetRef}>
@@ -364,7 +379,7 @@ export function App({ session, prefs }: { session: Session; prefs: PrefsStore })
             <button class="close" onClick={() => setPanel(null)} aria-label="Fechar">×</button>
           </header>
           <div class="sheet-body">
-            {panel === 'menu' && <MenuPanel prefs={prefs} onNewGame={() => { setPanel(null); setNewGame('trocar'); }} onCredits={() => setCredits(true)} />}
+            {panel === 'menu' && <MenuPanel prefs={prefs} onNewGame={() => { setPanel(null); setStory(true); setNewGame('trocar'); }} onCredits={() => setCredits(true)} />}
             {panel === 'equip' && <EquipPanel session={session} w={w} />}
             {panel === 'skills' && <SkillsPanel session={session} w={w} />}
             {panel === 'rules' && <RulesPanel session={session} w={w} />}

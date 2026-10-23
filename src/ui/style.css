@@ -170,6 +170,10 @@ input[type='number'] { width: 4.2em; }
 .shortcuts dt { color: var(--gold); font-family: ui-monospace, monospace; font-size: 0.8rem; }
 .shortcuts dd { margin: 0; }
 .rolls { padding-left: 18px; }
+/* A história do jogo novo: a vila aparece por trás, sem escurecer tanto. */
+.story-back { background: rgba(0, 0, 0, 0.35); }
+.story { max-width: 560px; line-height: 1.45; }
+.story ul { padding-left: 18px; margin: 10px 0; }
 
 /* Números de dano */
 .nametag { position: absolute; left: 0; top: 0; padding: 3px 9px; border-radius: 6px; background: rgba(10, 12, 17, 0.82); color: #f1e6cf; font-size: 0.9rem; white-space: nowrap; pointer-events: none; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); will-change: transform; }

@@ -48,6 +48,17 @@ describe('modo da vila: Auto e Manual', () => {
   });
 });
 
+describe('jogo novo', () => {
+  it('começa na vila, e a ordem de descer do "Começar" leva o herói à Cripta na hora', () => {
+    const w = createWorld(21, 'Ranger', 'Lia');
+    expect(w.phase).toBe('vila');
+    expect(w.hero.hp).toBe(heroStats(w).maxHp);
+    expect(commands.descend(w, [])).toBeNull();
+    expect(w.phase).toBe('descendo');
+    expect(w.exp?.floor).toBe(1);
+  });
+});
+
 describe('preferências de acessibilidade', () => {
   it('tamanho do texto, movimento, legendas e vibração, campo a campo', () => {
     expect(parsePrefs(JSON.stringify({ textSize: 'maior', reduceMotion: true, captions: true, vibrate: false }))).toEqual({

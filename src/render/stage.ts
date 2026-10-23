@@ -627,6 +627,11 @@ export class Stage {
         this.focus.copy(this.heroPos).add(new THREE.Vector3(0, 1.1, 0));
         this.seated = false;
       }
+      // Um jogo novo criado com o herói lá embaixo já começa descendo: ele sai da fogueira.
+      if (w.phase === 'descendo' && this.lastPhase !== 'vila') {
+        this.heroPos.copy(SEAT_POS);
+        this.focus.copy(this.heroPos).add(new THREE.Vector3(0, 1.1, 0));
+      }
       if (w.phase === 'descendo' && this.seated) {
         // Levanta da fogueira antes de ir para a Cripta.
         this.hero.animator.play({ name: 'Sit_Floor_StandUp', duration: 0.9 / Math.max(1, speed) });
